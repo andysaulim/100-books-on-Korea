@@ -45,8 +45,8 @@ window.BOOKS = [
     "category": "Alliances & Regional Order",
     "publisher": "Cambridge University Press",
     "source": "cambridge.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781107002470",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781107002470-L.jpg?default=false"
   },
   {
     "id": "kim-jong-un-and-the-bomb",
@@ -56,8 +56,8 @@ window.BOOKS = [
     "category": "North Korea: Nuclear & Security",
     "publisher": "Hurst",
     "source": "hurstpublishers.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781787383074",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781787383074-L.jpg?default=false"
   },
   {
     "id": "the-great-successor",
@@ -78,8 +78,8 @@ window.BOOKS = [
     "category": "Diaspora & Migration",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780804795326",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780804795326-L.jpg?default=false"
   },
   {
     "id": "operation-broken-reed-truman-s-secret-north-korean-spy-missi",
@@ -100,8 +100,8 @@ window.BOOKS = [
     "category": "North Korea: Regime & Leadership",
     "publisher": "Barnes & Noble",
     "source": "barnesandnoble.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781933633916",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781933633916-L.jpg?default=false"
   },
   {
     "id": "i-want-to-die-but-i-want-to-eat-tteokbokki",
@@ -122,8 +122,8 @@ window.BOOKS = [
     "category": "North Korea: Society & Economy",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780385523912",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780385523912-L.jpg?default=false"
   },
   {
     "id": "guns-guerillas-and-the-great-leader-north-korea-and-the-thir",
@@ -133,8 +133,8 @@ window.BOOKS = [
     "category": "North Korea: Regime & Leadership",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781503627635",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781503627635-L.jpg?default=false"
   },
   {
     "id": "escape-from-camp-14",
@@ -155,8 +155,8 @@ window.BOOKS = [
     "category": "North Korea: Regime & Leadership",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780143108023",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780143108023-L.jpg?default=false"
   },
   {
     "id": "critically-capitalist-the-spirit-of-asset-capitalism-in-sout",
@@ -166,8 +166,8 @@ window.BOOKS = [
     "category": "South Korea: Society & Economy",
     "publisher": "University of Michigan Press",
     "source": "press.umich.edu",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780472057269",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780472057269-L.jpg?default=false"
   },
   {
     "id": "the-japan-south-korea-identity-clash-east-asian-security-and",
@@ -210,8 +210,8 @@ window.BOOKS = [
     "category": "Korean War",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780812978964",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780812978964-L.jpg?default=false"
   },
   {
     "id": "suffering-and-smiling-daily-life-in-north-korea",
@@ -243,8 +243,8 @@ window.BOOKS = [
     "category": "North Korea: Society & Economy",
     "publisher": "Cambridge University Press",
     "source": "cambridge.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781107183797",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781107183797-L.jpg?default=false"
   },
   {
     "id": "ghost-flames-life-and-death-in-a-hidden-war-korea-1950-1953",
@@ -254,8 +254,8 @@ window.BOOKS = [
     "category": "Korean War",
     "publisher": "Amazon",
     "source": "amazon.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781541768178",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781541768178-L.jpg?default=false"
   },
   {
     "id": "whale",
@@ -265,8 +265,8 @@ window.BOOKS = [
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781953861146",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781953861146-L.jpg?default=false"
   },
   {
     "id": "kim-jiyoung-born-1982",
@@ -287,8 +287,8 @@ window.BOOKS = [
     "category": "Culture & the Korean Wave",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781503601680",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781503601680-L.jpg?default=false"
   },
   {
     "id": "korea-s-online-gaming-empire",
@@ -309,8 +309,8 @@ window.BOOKS = [
     "category": "North Korea: Society & Economy",
     "publisher": "Tuttle",
     "source": "tuttlepublishing.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780804852265",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780804852265-L.jpg?default=false"
   },
   {
     "id": "contentious-activism-and-inter-korean-relations",
@@ -364,8 +364,8 @@ window.BOOKS = [
     "category": "Culture & the Korean Wave",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780593184189",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780593184189-L.jpg?default=false"
   },
   {
     "id": "korea-a-history",
@@ -375,8 +375,8 @@ window.BOOKS = [
     "category": "History & Empire",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781503629844",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781503629844-L.jpg?default=false"
   },
   {
     "id": "the-birth-of-korean-cool",
@@ -397,8 +397,8 @@ window.BOOKS = [
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780593129487",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780593129487-L.jpg?default=false"
   },
   {
     "id": "the-lazarus-heist",
@@ -419,8 +419,8 @@ window.BOOKS = [
     "category": "South Korea: Politics & Democracy",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781538177815",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781538177815-L.jpg?default=false"
   },
   {
     "id": "privilege-and-anxiety-the-korean-middle-class-in-the-global-",
@@ -441,8 +441,8 @@ window.BOOKS = [
     "category": "Korean War",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781101971215",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781101971215-L.jpg?default=false"
   },
   {
     "id": "the-vegetarian",
@@ -452,8 +452,8 @@ window.BOOKS = [
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781101906118",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781101906118-L.jpg?default=false"
   },
   {
     "id": "flowers-of-fire",
@@ -463,8 +463,8 @@ window.BOOKS = [
     "category": "South Korea: Society & Economy",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781637742419",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781637742419-L.jpg?default=false"
   },
   {
     "id": "welcome-to-the-hyunam-dong-bookshop",
@@ -485,8 +485,8 @@ window.BOOKS = [
     "category": "South Korea: Politics & Democracy",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781788737142",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781788737142-L.jpg?default=false"
   },
   {
     "id": "the-girl-with-seven-names-escape-from-north-korea",
@@ -496,8 +496,8 @@ window.BOOKS = [
     "category": "Escape & Human Rights",
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780007554843",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780007554843-L.jpg?default=false"
   },
   {
     "id": "contested-embrace-transborder-membership-politics-in-twentie",
@@ -507,8 +507,8 @@ window.BOOKS = [
     "category": "Diaspora & Migration",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780804797627",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780804797627-L.jpg?default=false"
   },
   {
     "id": "a-corpse-in-the-koryo",
@@ -540,8 +540,8 @@ window.BOOKS = [
     "category": "Fiction & Memoir",
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781328573919",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781328573919-L.jpg?default=false"
   },
   {
     "id": "china-s-hegemony-four-hundred-years-of-east-asian-domination",
@@ -573,8 +573,8 @@ window.BOOKS = [
     "category": "Escape & Human Rights",
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780008541408",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780008541408-L.jpg?default=false"
   },
   {
     "id": "seeds-of-mobilization-the-authoritarian-roots-of-south-korea",
@@ -584,8 +584,8 @@ window.BOOKS = [
     "category": "South Korea: Politics & Democracy",
     "publisher": "University of Michigan Press",
     "source": "press.umich.edu",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780472056606",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780472056606-L.jpg?default=false"
   },
   {
     "id": "under-the-same-sky-from-starvation-in-north-korea-to-salvati",
@@ -617,8 +617,8 @@ window.BOOKS = [
     "category": "North Korea: Regime & Leadership",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781984819727",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781984819727-L.jpg?default=false"
   },
   {
     "id": "a-most-enterprising-country-north-korea-in-the-global-econom",
@@ -650,8 +650,8 @@ window.BOOKS = [
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780307739513",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780307739513-L.jpg?default=false"
   },
   {
     "id": "a-river-in-darkness-one-man-s-escape-from-north-korea",
@@ -661,8 +661,8 @@ window.BOOKS = [
     "category": "Escape & Human Rights",
     "publisher": "Barnes & Noble",
     "source": "barnesandnoble.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781542047197",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781542047197-L.jpg?default=false"
   },
   {
     "id": "the-korean-war",
@@ -694,8 +694,8 @@ window.BOOKS = [
     "category": "South Korea: Society & Economy",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781503631878",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781503631878-L.jpg?default=false"
   },
   {
     "id": "crying-in-h-mart",
@@ -705,8 +705,8 @@ window.BOOKS = [
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780525657743",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780525657743-L.jpg?default=false"
   },
   {
     "id": "pachinko",
@@ -771,8 +771,8 @@ window.BOOKS = [
     "category": "Escape & Human Rights",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781931368629",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781931368629-L.jpg?default=false"
   },
   {
     "id": "the-invitation-only-zone-the-true-story-of-north-korea-s-abd",
@@ -793,8 +793,8 @@ window.BOOKS = [
     "category": "Escape & Human Rights",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781934287446",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781934287446-L.jpg?default=false"
   },
   {
     "id": "marching-through-suffering-loss-and-survival-in-north-korea",
@@ -848,8 +848,8 @@ window.BOOKS = [
     "category": "Diaspora & Migration",
     "publisher": "Cambridge University Press",
     "source": "cambridge.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781009197281",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781009197281-L.jpg?default=false"
   },
   {
     "id": "the-other-great-game-the-opening-of-korea-and-the-birth-of-m",
@@ -870,8 +870,8 @@ window.BOOKS = [
     "category": "North Korea: Nuclear & Security",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781503634459",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781503634459-L.jpg?default=false"
   },
   {
     "id": "k-culture-k-pop-cuisine-on-screen-and-more-celebrating-the-k",
@@ -881,8 +881,8 @@ window.BOOKS = [
     "category": "Culture & the Korean Wave",
     "publisher": "Barnes & Noble",
     "source": "barnesandnoble.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781837830879",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781837830879-L.jpg?default=false"
   },
   {
     "id": "boundless-winds-of-empire-rhetoric-and-ritual-in-early-choso",
@@ -925,8 +925,8 @@ window.BOOKS = [
     "category": "North Korea: Nuclear & Security",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781503600362",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781503600362-L.jpg?default=false"
   },
   {
     "id": "witness-to-transformation-refugee-insights-into-north-korea",
@@ -958,8 +958,8 @@ window.BOOKS = [
     "category": "North Korea: Society & Economy",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9781503640870",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781503640870-L.jpg?default=false"
   },
   {
     "id": "without-you-there-is-no-us",
@@ -969,8 +969,8 @@ window.BOOKS = [
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780307720665",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780307720665-L.jpg?default=false"
   },
   {
     "id": "the-sister-north-korea-s-kim-yo-jong-the-most-dangerous-woma",
@@ -1035,8 +1035,8 @@ window.BOOKS = [
     "category": "Alliances & Regional Order",
     "publisher": "Stanford University Press",
     "source": "sup.org",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780804731928",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780804731928-L.jpg?default=false"
   },
   {
     "id": "the-black-box-demystifying-the-study-of-korean-unification-a",
@@ -1057,8 +1057,8 @@ window.BOOKS = [
     "category": "North Korea: Regime & Leadership",
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
-    "isbn": null,
-    "cover": null
+    "isbn": "9780062906366",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780062906366-L.jpg?default=false"
   },
   {
     "id": "nuclear-north-korea",
