@@ -1,10 +1,10 @@
 /* ---------------------------------------------------------------
-   Top 100 Books on Korea — shelf behaviour
+   100 Books on Korea — shelf behaviour
    Data comes from books.js (window.BOOKS).
 
-   Filtering lives in the sticky bar above the shelf so the grid keeps
-   the full page width. A book opens as a draggable floating window,
-   minchi.co/books style, so several can sit open at once.
+   Filtering lives in four plain-text columns above the shelf, so the
+   grid keeps the full page width. A book opens as a draggable floating
+   window, minchi.co/books style, so several can sit open at once.
    --------------------------------------------------------------- */
 
 (function () {
