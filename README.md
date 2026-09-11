@@ -1,18 +1,19 @@
-# Top 100 Books on Korea
+# 100 Books on Korea
 
 A browsable shelf of the hundred books on Korea Andy Lim recommends, built as a
 static page for a subpath of [andysaulim.com](https://andysaulim.com).
 
 ## Status
 
-Complete. The shelf gets the full page width and the covers are sized to be read
-at a glance; filtering lives in a sticky bar above the grid rather than a side
-rail, so nothing competes with the covers for room. A book opens as a draggable
-floating window carrying a short description, `minchi.co/books` style, so several
-can sit open at once. Set in Source Serif 4, the same face that page uses.
+Complete. A centred display title over a full-width wall of covers, with
+filtering in four plain-text columns beneath it — the `minchi.co/books`
+structure. A book opens as a draggable floating window carrying its cover, a
+short description and a link to the publisher, so several can sit open at once.
 
-The palette is this site's own — a warm off-white ground so the covers carry the
-colour, hairline rules in the same warm grey, and one restrained rust accent.
+Type is Fraunces for the display title and Source Serif 4 for everything else.
+The palette is the house green with the Korean flag's red as the accent,
+deepened from `#cd2e3a` to `#b32530` so it clears WCAG AA on the green ground —
+every text style on the page is checked against its painted background.
 
 **All 100 books carry an ISBN, a cover, and a one-paragraph description.** Covers
 resolve through a chain of sources rather than a single one, because Open Library

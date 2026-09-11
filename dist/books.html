@@ -9,7 +9,7 @@
 
 <!-- build:meta — `python3 build.py --base <url>` rewrites these to absolute URLs -->
 <link rel="canonical" href="./">
-<meta property="og:title" content="Top 100 Books on Korea">
+<meta property="og:title" content="100 Books on Korea">
 <meta property="og:description" content="The hundred books on Korea I recommend most — the war and its long aftermath, two states built from the same country, the alliance, the culture, and the people. Browse the shelf by theme or publisher.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="./">
@@ -25,37 +25,39 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&display=swap" rel="stylesheet">
 <style>
 /* ---------------------------------------------------------------
-   Top 100 Books on Korea
+   100 Books on Korea
 
-   The shelf gets the full page width and the covers are sized to be
-   read at a glance; filtering lives in a sticky bar above it rather
-   than a side rail, so nothing competes with the grid for room.
-   Books open as draggable floating windows, minchi.co/books style,
-   so several can sit open at once.
+   A centred display title over a full-width wall of covers, with
+   filtering in four plain-text columns beneath it — the minchi.co
+   /books structure, in this site's own colours. A book opens as a
+   draggable floating window, so several can sit open at once.
+
+   Green is the house colour; the accent is the Korean flag's red,
+   deepened from #cd2e3a to clear WCAG AA on the green ground.
    --------------------------------------------------------------- */
 
 :root {
-  /* A warm off-white ground so the covers carry the colour, hairline
-     rules in the same warm grey, and one restrained accent. */
-  --paper:   #faf7f0;
-  --paper-80:rgb(250 247 240 / .92);
-  --ink:     #191813;
-  --muted:   #726b5d;   /* 4.9:1 on the paper — #7d7668 was 4.2 */
-  --rule:    #e4ded0;
-  --card:    #ffffff;
-  --accent:  #9c3d21;
-  --quiet:   #565043;
+  --paper:   #e9efe2;
+  --paper-t: rgb(233 239 226 / .93);
+  --ink:     #17201a;
+  --deep:    #2c5440;   /* display green */
+  --quiet:   #47503f;   /* body copy */
+  --muted:   #5f6a55;   /* labels, counts — 4.87:1 on the paper */
+  --rule:    #cdd8c2;
+  --card:    #fbfdf8;
+  --accent:  #b32530;   /* 5.55:1 on the paper */
 
-  --serif: "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --serif:   "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
 
   --gutter: clamp(1rem, 4vw, 3.25rem);
-  --tile:   clamp(140px, 15vw, 196px);   /* cover width the shelf aims for */
+  --tile:   clamp(140px, 15vw, 196px);
 
-  --shadow-tile: 0 1px 2px rgb(38 32 22 / .16), 0 8px 18px -10px rgb(38 32 22 / .26);
-  --shadow-pop:  0 12px 34px -12px rgb(38 32 22 / .34);
+  --shadow-tile: 0 1px 2px rgb(23 32 26 / .17), 0 8px 18px -10px rgb(23 32 26 / .3);
+  --shadow-pop:  0 14px 38px -12px rgb(23 32 26 / .36);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -76,10 +78,7 @@ img { max-width: 100%; }
 [hidden] { display: none !important; }
 a { color: inherit; }
 
-button, select, input {
-  font: inherit;
-  color: inherit;
-}
+button, select, input { font: inherit; color: inherit; }
 button { background: none; border: 0; cursor: pointer; }
 
 :where(a, button, input, select):focus-visible {
@@ -103,6 +102,8 @@ button { background: none; border: 0; cursor: pointer; }
   color: var(--paper);
 }
 .skip-link:focus { left: 0; }
+/* Two of them, so the second does not sit on top of the first. */
+.skip-link + .skip-link:focus { left: 11rem; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -118,7 +119,7 @@ button { background: none; border: 0; cursor: pointer; }
   flex-wrap: wrap;
   align-items: baseline;
   gap: .4rem 1.4rem;
-  padding: clamp(1.25rem, 3vw, 2rem) var(--gutter) 0;
+  padding: clamp(1.1rem, 2.5vw, 1.7rem) var(--gutter) 0;
 }
 
 .brand {
@@ -134,7 +135,7 @@ button { background: none; border: 0; cursor: pointer; }
   gap: 1rem;
   font-size: .88rem;
 }
-.site-nav a { text-decoration: none; opacity: .68; }
+.site-nav a { text-decoration: none; opacity: .66; }
 .site-nav a:hover { opacity: 1; }
 .site-nav a.active {
   opacity: 1;
@@ -142,28 +143,62 @@ button { background: none; border: 0; cursor: pointer; }
   text-underline-offset: 3px;
 }
 
-/* --- Title block -------------------------------------------------- */
+/* --- Hero --------------------------------------------------------- */
 
 .main { padding: 0 var(--gutter); }
 
-.shelf-head {
-  max-width: 58ch;
-  margin-block: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 1.9rem);
+.hero {
+  max-width: 46rem;
+  margin-inline: auto;
+  padding-block: clamp(2.5rem, 7vw, 5rem) clamp(2rem, 5vw, 3.25rem);
+  text-align: center;
 }
-.shelf-head h1 {
+
+.hero-eyebrow {
+  margin: 0 0 clamp(.9rem, 2vw, 1.3rem);
+  font-size: .76rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero-title {
   margin: 0;
-  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  font-family: var(--display);
+  font-optical-sizing: auto;
   font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -.018em;
+  font-size: clamp(2.9rem, 10vw, 7rem);
+  line-height: .94;
+  letter-spacing: -.025em;
+  color: var(--deep);
   text-wrap: balance;
+  font-variation-settings: "SOFT" 24, "WONK" 1;
 }
-.shelf-head p {
-  margin: .6rem 0 0;
-  font-size: .95rem;
+/* Two lines on a phone, one on anything wider. */
+.hero-break { display: block; height: 0; }
+@media (min-width: 560px) {
+  .hero-break { display: inline; height: auto; }
+}
+
+.hero-sub {
+  max-width: 34rem;
+  margin: clamp(1.1rem, 2.5vw, 1.6rem) auto 0;
+  font-size: clamp(.95rem, 1.4vw, 1.1rem);
   line-height: 1.55;
   color: var(--quiet);
   text-wrap: pretty;
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: .4rem 1.1rem;
+  margin: clamp(1.1rem, 2.5vw, 1.5rem) 0 0;
+  font-size: .82rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .linkish {
@@ -172,51 +207,77 @@ button { background: none; border: 0; cursor: pointer; }
   color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 3px;
-  white-space: nowrap;
 }
 .linkish:hover { color: var(--ink); }
 
-/* --- Sticky filter bar -------------------------------------------- */
+/* --- Filter columns ------------------------------------------------ */
 
-.toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  margin-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
-  padding-block: .7rem .6rem;
-  background: var(--paper-80);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--rule);
-}
-/* Bleed the bar's background to the page edges while its contents stay
-   on the same measure as the shelf. */
-.toolbar::before {
-  content: "";
-  position: absolute;
-  inset: 0 calc(var(--gutter) * -1);
-  z-index: -1;
-  background: inherit;
-  border-bottom: 1px solid var(--rule);
+.filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.4rem clamp(1rem, 3vw, 2.5rem);
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.5rem);
+  padding-top: clamp(1.25rem, 3vw, 1.9rem);
+  border-top: 1px solid var(--rule);
 }
 
-.toolbar-row {
+.col-label {
+  margin: 0 0 .5rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: .78rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+.col-label label { cursor: pointer; }
+
+.opts { margin: 0; padding: 0; list-style: none; }
+.opts button {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: .55rem 1.1rem;
+  align-items: baseline;
+  gap: .35rem;
+  width: 100%;
+  padding: .1rem 0;
+  font-size: .86rem;
+  line-height: 1.45;
+  text-align: left;
+  color: var(--quiet);
+}
+.opts button:hover { color: var(--ink); }
+.opts button[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+}
+.opts .n {
+  margin-left: auto;
+  font-size: .72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Themes and publishers run long; cap them so the four columns stay
+   roughly level and the covers start high on the page. */
+.scroller {
+  max-height: 11rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
 }
 
 .searchwrap {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1 1 14rem;
-  max-width: 22rem;
 }
 .searchwrap input {
   width: 100%;
-  padding: .2rem 1.4rem .35rem 0;
-  font-size: .92rem;
+  padding: .1rem 1.3rem .3rem 0;
+  font-size: .88rem;
   background: none;
   border: 0;
   border-bottom: 1px solid var(--rule);
@@ -227,40 +288,15 @@ button { background: none; border: 0; cursor: pointer; }
   position: absolute;
   right: 0;
   padding: 0 .2rem;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1;
   color: var(--muted);
 }
 .search-clear:hover { color: var(--ink); }
 
-.sel {
-  display: inline-flex;
-  align-items: baseline;
-  gap: .4rem;
-  font-size: .82rem;
-  color: var(--muted);
-}
-.sel select {
-  max-width: 13rem;
-  padding: .1rem 0 .2rem;
-  font-size: .88rem;
-  color: var(--ink);
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--rule);
-  cursor: pointer;
-}
-
-.count {
-  margin: 0 0 0 auto;
-  font-size: .8rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
 .filters-reset {
-  padding: .12rem .55rem;
+  margin-top: .9rem;
+  padding: .15rem .6rem;
   font-size: .78rem;
   color: var(--muted);
   border: 1px solid var(--rule);
@@ -268,35 +304,7 @@ button { background: none; border: 0; cursor: pointer; }
 }
 .filters-reset:hover { color: var(--ink); border-color: var(--ink); }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .3rem .45rem;
-  margin-top: .6rem;
-}
-.chips button {
-  padding: .12rem .55rem;
-  font-size: .8rem;
-  line-height: 1.5;
-  color: var(--quiet);
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  white-space: nowrap;
-}
-.chips button:hover { color: var(--ink); border-color: var(--muted); }
-.chips button[aria-pressed="true"] {
-  color: var(--paper);
-  background: var(--ink);
-  border-color: var(--ink);
-}
-.chips .n {
-  margin-left: .3rem;
-  font-size: .72rem;
-  opacity: .6;
-  font-variant-numeric: tabular-nums;
-}
-
-/* --- The shelf ---------------------------------------------------- */
+/* --- The shelf ------------------------------------------------------ */
 
 .shelf {
   list-style: none;
@@ -322,7 +330,7 @@ button { background: none; border: 0; cursor: pointer; }
 .tile:hover,
 .tile:focus-visible {
   transform: translateY(-4px);
-  box-shadow: 0 2px 6px rgb(38 32 22 / .2), 0 20px 34px -14px rgb(38 32 22 / .34);
+  box-shadow: 0 2px 6px rgb(23 32 26 / .22), 0 20px 34px -14px rgb(23 32 26 / .36);
 }
 .tile.is-open { outline: 2px solid var(--accent); outline-offset: 3px; }
 
@@ -333,8 +341,7 @@ button { background: none; border: 0; cursor: pointer; }
   object-fit: cover;
 }
 
-/* Typographic stand-in, used when no source has art for this book. At
-   this tile size it is meant to read as a plain cover, not a gap. */
+/* Typographic stand-in, used when no source has art for this book. */
 .tile .fallback {
   display: flex;
   flex-direction: column;
@@ -406,7 +413,7 @@ button { background: none; border: 0; cursor: pointer; }
 }
 .footer p { margin: 0 0 .3rem; }
 
-/* --- Floating book windows ---------------------------------------- */
+/* --- Floating book windows ------------------------------------------ */
 
 .book-windows {
   position: fixed;
@@ -417,7 +424,7 @@ button { background: none; border: 0; cursor: pointer; }
 
 .bookwin {
   position: absolute;
-  width: 23rem;
+  width: 26rem;
   max-width: calc(100vw - 2rem);
   background: var(--card);
   border: 1px solid var(--rule);
@@ -429,7 +436,7 @@ button { background: none; border: 0; cursor: pointer; }
   display: flex;
   align-items: center;
   gap: .5rem;
-  padding: .35rem .4rem .35rem .8rem;
+  padding: .35rem .4rem .35rem .85rem;
   border-bottom: 1px solid var(--rule);
   cursor: grab;
   touch-action: none;
@@ -447,33 +454,75 @@ button { background: none; border: 0; cursor: pointer; }
 .bookwin-close {
   margin-left: auto;
   padding: .1rem .4rem;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   line-height: 1;
   color: var(--muted);
 }
 .bookwin-close:hover { color: var(--ink); }
 
-.bookwin-body { padding: .95rem 1.05rem 1.1rem; }
-.bookwin-title {
-  margin: 0;
-  font-size: 1.15rem;
+.bookwin-body { padding: 1.05rem 1.15rem 1.2rem; }
+
+/* Cover alongside the title block, as on the reference page. */
+.bookwin-head { display: flex; gap: 1rem; }
+.bookwin-thumb {
+  flex: 0 0 auto;
+  width: 5.1rem;
+  aspect-ratio: 2 / 3;
+  border-radius: 1px;
+  overflow: hidden;
+  background: var(--thumb-bg, var(--rule));
+  box-shadow: 0 1px 2px rgb(23 32 26 / .2), 0 8px 16px -8px rgb(23 32 26 / .3);
+}
+.bookwin-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bookwin-thumb .stub {
+  display: block;
+  padding: .45rem .4rem;
+  font-size: .55rem;
   font-weight: 600;
-  line-height: 1.22;
+  line-height: 1.2;
+  color: #fff;
+  overflow: hidden;
+}
+
+.bookwin-titles { min-width: 0; }
+.bookwin-author {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--muted);
+}
+.bookwin-title {
+  margin: .15rem 0 0;
+  font-family: var(--display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: 1.3rem;
+  line-height: 1.15;
+  letter-spacing: -.012em;
+  color: var(--deep);
   text-wrap: pretty;
 }
-.bookwin-author { margin: .35rem 0 0; font-size: .9rem; }
-.bookwin-pub { margin: .3rem 0 0; font-size: .76rem; color: var(--muted); }
+.bookwin-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .2rem .7rem;
+  margin: .5rem 0 0;
+  font-size: .76rem;
+  color: var(--muted);
+}
+.bookwin-facts .dot { color: var(--rule); }
+
 .bookwin-text {
-  margin: .8rem 0 0;
-  padding-top: .8rem;
+  margin: .95rem 0 0;
+  padding-top: .95rem;
   border-top: 1px solid var(--rule);
-  font-size: .88rem;
+  font-size: .89rem;
   line-height: 1.6;
   color: var(--quiet);
   text-wrap: pretty;
 }
-.bookwin-text + .bookwin-text { border-top: 0; padding-top: 0; margin-top: .6rem; }
-.bookwin-link { margin: .9rem 0 0; }
+.bookwin-text + .bookwin-text { border-top: 0; padding-top: 0; margin-top: .65rem; }
+
+.bookwin-link { margin: 1rem 0 0; }
 .bookwin-link a {
   font-size: .82rem;
   color: var(--accent);
@@ -481,7 +530,7 @@ button { background: none; border: 0; cursor: pointer; }
   border-bottom: 1px solid currentColor;
 }
 
-/* --- Back to top --------------------------------------------------- */
+/* --- Back to top ----------------------------------------------------- */
 
 .scroll-top {
   position: fixed;
@@ -502,11 +551,16 @@ button { background: none; border: 0; cursor: pointer; }
 }
 .scroll-top.is-visible { opacity: 1; }
 
-/* --- Narrow screens ------------------------------------------------ */
+/* --- Narrow screens --------------------------------------------------- */
 
-@media (max-width: 680px) {
-  .count { margin-left: 0; }
-  .sel select { max-width: 9.5rem; }
+@media (max-width: 860px) {
+  .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scroller { max-height: 9rem; }
+}
+
+@media (max-width: 560px) {
+  .filters { grid-template-columns: 1fr; gap: 1.1rem; }
+  .scroller { max-height: 7.5rem; }
 
   /* Dragging a window with one thumb is no use; centre them instead. */
   .bookwin {
@@ -514,7 +568,7 @@ button { background: none; border: 0; cursor: pointer; }
     top: auto !important;
     bottom: 1rem;
     transform: translateX(-50%);
-    width: min(23rem, calc(100vw - 1.5rem));
+    width: min(24rem, calc(100vw - 1.5rem));
   }
   .bookwin-bar { cursor: default; }
 }
@@ -523,6 +577,7 @@ button { background: none; border: 0; cursor: pointer; }
 <body>
 
 <a class="skip-link" href="#main">Skip to content</a>
+<a class="skip-link" href="#shelf">Skip to the books</a>
 
 <header class="site-head">
   <a class="brand" href="/">Andy Lim</a>
@@ -535,36 +590,42 @@ button { background: none; border: 0; cursor: pointer; }
 
 <main class="main" id="main">
 
-  <header class="shelf-head">
-    <h1>Top 100 Books on Korea</h1>
-    <p>The hundred I recommend — the war and its long aftermath, two states built
-       from the same country, the alliance, the culture, and the people.
-       <button type="button" class="linkish" data-about>About this shelf</button></p>
+  <header class="hero">
+    <p class="hero-eyebrow">Recommended by Andy Lim</p>
+    <h1 class="hero-title">100 Books<span class="hero-break"> </span>on Korea</h1>
+    <p class="hero-sub">The war and its long aftermath, two states built from the same
+       country, the alliance, the culture, and the people.</p>
+    <p class="hero-meta">
+      <span id="shelf-count" role="status">100 books</span>
+      <button type="button" class="linkish" data-about>About this shelf</button>
+    </p>
   </header>
 
-  <div class="toolbar">
-    <div class="toolbar-row">
-      <div class="searchwrap">
-        <input id="search" type="search" placeholder="Search title or author…" autocomplete="off" spellcheck="false" aria-label="Search the shelf">
-        <button type="button" class="search-clear" data-clear hidden aria-label="Clear search">&times;</button>
-      </div>
-
-      <label class="sel">
-        <span>Sort</span>
-        <select id="sort-select"></select>
-      </label>
-
-      <label class="sel">
-        <span>Publisher</span>
-        <select id="publisher-select"></select>
-      </label>
-
-      <p class="count" id="shelf-count" role="status"></p>
-      <button type="button" class="filters-reset" id="filters-reset" hidden>Reset</button>
+  <nav class="filters" aria-label="Filter and sort">
+    <div class="col">
+      <p class="col-label" id="lbl-sort">Sort</p>
+      <ul class="opts" role="group" aria-labelledby="lbl-sort" data-group="sort"></ul>
     </div>
 
-    <nav class="chips" id="theme-list" aria-label="Filter by theme"></nav>
-  </div>
+    <div class="col">
+      <p class="col-label" id="lbl-theme">Themes</p>
+      <ul class="opts scroller" role="group" aria-labelledby="lbl-theme" data-group="category"></ul>
+    </div>
+
+    <div class="col">
+      <p class="col-label" id="lbl-pub">Publishers</p>
+      <ul class="opts scroller" role="group" aria-labelledby="lbl-pub" data-group="publisher"></ul>
+    </div>
+
+    <div class="col">
+      <p class="col-label"><label for="search">Search</label></p>
+      <div class="searchwrap">
+        <input id="search" type="search" placeholder="Title, author…" autocomplete="off" spellcheck="false">
+        <button type="button" class="search-clear" data-clear hidden aria-label="Clear search">&times;</button>
+      </div>
+      <button type="button" class="filters-reset" id="filters-reset" hidden>Reset filters</button>
+    </div>
+  </nav>
 
   <ul id="shelf" class="shelf"></ul>
 
@@ -1851,9 +1912,7 @@ window.BOOKS = [
     count:     $('#shelf-count'),
     search:    $('#search'),
     clear:     $('[data-clear]'),
-    sort:      $('#sort-select'),
-    publisher: $('#publisher-select'),
-    themes:    $('#theme-list'),
+    filters:   $('.filters'),
     reset:     $('#filters-reset'),
     windows:   $('#book-windows'),
     scrollTop: $('#scroll-top')
@@ -2225,11 +2284,56 @@ window.BOOKS = [
     return p;
   }
 
+  /* Reuse whatever the tile already resolved rather than fetching the
+     cover a second time; fall back to a miniature of the stand-in. */
+  function thumbNode(b, anchor) {
+    var box = document.createElement('div');
+    box.className = 'bookwin-thumb';
+    box.style.setProperty('--thumb-bg', hue(b.category));
+
+    var tileImg = anchor && anchor.querySelector('img');
+    if (tileImg && tileImg.currentSrc) {
+      var img = document.createElement('img');
+      img.src = tileImg.currentSrc;
+      img.alt = '';
+      box.appendChild(img);
+    } else {
+      var stub = document.createElement('span');
+      stub.className = 'stub';
+      stub.textContent = b.title;
+      box.appendChild(stub);
+    }
+    return box;
+  }
+
   function openBook(b, anchor) {
     makeWindow('book:' + b.id, b.category, function (body) {
-      body.appendChild(para('bookwin-title', b.title));
-      body.appendChild(para('bookwin-author', b.author));
-      body.appendChild(para('bookwin-pub', b.publisher || b.source || ''));
+      var head = document.createElement('div');
+      head.className = 'bookwin-head';
+      head.appendChild(thumbNode(b, anchor));
+
+      var titles = document.createElement('div');
+      titles.className = 'bookwin-titles';
+      titles.appendChild(para('bookwin-author', b.author));
+      titles.appendChild(para('bookwin-title', b.title));
+
+      var facts = document.createElement('p');
+      facts.className = 'bookwin-facts';
+      [b.category, b.publisher || b.source].filter(Boolean).forEach(function (t, i) {
+        if (i) {
+          var dot = document.createElement('span');
+          dot.className = 'dot';
+          dot.textContent = '\u00b7';
+          facts.appendChild(dot);
+        }
+        var span = document.createElement('span');
+        span.textContent = t;
+        facts.appendChild(span);
+      });
+      titles.appendChild(facts);
+      head.appendChild(titles);
+      body.appendChild(head);
+
       if (b.blurb) body.appendChild(para('bookwin-text', b.blurb));
 
       var link = document.createElement('p');
@@ -2247,7 +2351,7 @@ window.BOOKS = [
 
   function openAbout() {
     makeWindow('about', 'About', function (body) {
-      body.appendChild(para('bookwin-title', 'Top 100 Books on Korea'));
+      body.appendChild(para('bookwin-title', '100 Books on Korea'));
       ABOUT.forEach(function (line) { body.appendChild(para('bookwin-text', line)); });
     }, null);
   }
@@ -2264,7 +2368,7 @@ window.BOOKS = [
     b.addEventListener('click', openAbout);
   });
 
-  /* --- filter controls ------------------------------------------- */
+  /* --- filter columns -------------------------------------------- */
 
   function tally(key) {
     var counts = {};
@@ -2275,73 +2379,68 @@ window.BOOKS = [
     return counts;
   }
 
-  function fillSelect(sel, rows) {
+  function buildOptions(group, rows) {
+    var ul = els.filters.querySelector('[data-group="' + group + '"]');
     var frag = document.createDocumentFragment();
+
     rows.forEach(function (row) {
-      var opt = document.createElement('option');
-      opt.value = row.id;
-      opt.textContent = row.n == null ? row.label : row.label + ' (' + row.n + ')';
-      frag.appendChild(opt);
+      var li = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.value = row.id;
+      btn.setAttribute('aria-pressed', String(state[group] === row.id));
+      btn.appendChild(document.createTextNode(row.label));
+
+      if (row.n != null) {
+        var n = document.createElement('span');
+        n.className = 'n';
+        n.textContent = row.n;
+        btn.appendChild(n);
+      }
+
+      li.appendChild(btn);
+      frag.appendChild(li);
     });
-    sel.replaceChildren(frag);
+
+    ul.replaceChildren(frag);
   }
 
   function buildFilters() {
-    fillSelect(els.sort, SORTS);
-    els.sort.value = state.sort;
+    buildOptions('sort', SORTS);
+
+    var cats = tally('category');
+    buildOptions('category', [{ id: 'All', label: 'All', n: books.length }].concat(
+      Object.keys(cats).sort(COMPARE).map(function (c) {
+        return { id: c, label: c, n: cats[c] };
+      })
+    ));
 
     var pubs = tally('publisher');
-    fillSelect(els.publisher, [{ id: 'All', label: 'All publishers', n: books.length }].concat(
+    buildOptions('publisher', [{ id: 'All', label: 'All', n: books.length }].concat(
       Object.keys(pubs).sort(COMPARE).map(function (p) {
         return { id: p, label: p, n: pubs[p] };
       })
     ));
-    els.publisher.value = state.publisher;
-
-    var cats = tally('category');
-    var frag = document.createDocumentFragment();
-    [{ id: 'All', label: 'All', n: books.length }].concat(
-      Object.keys(cats).sort(COMPARE).map(function (c) {
-        return { id: c, label: c, n: cats[c] };
-      })
-    ).forEach(function (row) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.value = row.id;
-      btn.setAttribute('aria-pressed', String(state.category === row.id));
-      btn.appendChild(document.createTextNode(row.label));
-      var n = document.createElement('span');
-      n.className = 'n';
-      n.textContent = row.n;
-      btn.appendChild(n);
-      frag.appendChild(btn);
-    });
-    els.themes.replaceChildren(frag);
   }
 
-  function markThemes() {
-    els.themes.querySelectorAll('button').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.value === state.category));
+  function markGroup(group) {
+    els.filters.querySelectorAll('[data-group="' + group + '"] button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.value === state[group]));
     });
   }
 
-  els.themes.addEventListener('click', function (e) {
+  els.filters.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-value]');
     if (!btn) return;
+    var group = btn.closest('[data-group]').dataset.group;
     var value = btn.dataset.value;
-    /* Re-picking the active theme clears it. */
-    state.category = (state.category === value) ? 'All' : value;
-    markThemes();
-    render();
-  });
 
-  els.sort.addEventListener('change', function () {
-    state.sort = els.sort.value;
-    render();
-  });
+    /* Re-picking the active theme or publisher clears it; sort always
+       has exactly one choice. */
+    if (group !== 'sort' && state[group] === value) value = 'All';
+    state[group] = value;
 
-  els.publisher.addEventListener('change', function () {
-    state.publisher = els.publisher.value;
+    markGroup(group);
     render();
   });
 
@@ -2352,8 +2451,8 @@ window.BOOKS = [
     state.category = 'All';
     state.publisher = 'All';
     els.search.value = '';
-    els.publisher.value = 'All';
-    markThemes();
+    markGroup('category');
+    markGroup('publisher');
     render();
   }
 

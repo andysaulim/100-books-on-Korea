@@ -52,9 +52,7 @@
     count:     $('#shelf-count'),
     search:    $('#search'),
     clear:     $('[data-clear]'),
-    sort:      $('#sort-select'),
-    publisher: $('#publisher-select'),
-    themes:    $('#theme-list'),
+    filters:   $('.filters'),
     reset:     $('#filters-reset'),
     windows:   $('#book-windows'),
     scrollTop: $('#scroll-top')
@@ -426,11 +424,56 @@
     return p;
   }
 
+  /* Reuse whatever the tile already resolved rather than fetching the
+     cover a second time; fall back to a miniature of the stand-in. */
+  function thumbNode(b, anchor) {
+    var box = document.createElement('div');
+    box.className = 'bookwin-thumb';
+    box.style.setProperty('--thumb-bg', hue(b.category));
+
+    var tileImg = anchor && anchor.querySelector('img');
+    if (tileImg && tileImg.currentSrc) {
+      var img = document.createElement('img');
+      img.src = tileImg.currentSrc;
+      img.alt = '';
+      box.appendChild(img);
+    } else {
+      var stub = document.createElement('span');
+      stub.className = 'stub';
+      stub.textContent = b.title;
+      box.appendChild(stub);
+    }
+    return box;
+  }
+
   function openBook(b, anchor) {
     makeWindow('book:' + b.id, b.category, function (body) {
-      body.appendChild(para('bookwin-title', b.title));
-      body.appendChild(para('bookwin-author', b.author));
-      body.appendChild(para('bookwin-pub', b.publisher || b.source || ''));
+      var head = document.createElement('div');
+      head.className = 'bookwin-head';
+      head.appendChild(thumbNode(b, anchor));
+
+      var titles = document.createElement('div');
+      titles.className = 'bookwin-titles';
+      titles.appendChild(para('bookwin-author', b.author));
+      titles.appendChild(para('bookwin-title', b.title));
+
+      var facts = document.createElement('p');
+      facts.className = 'bookwin-facts';
+      [b.category, b.publisher || b.source].filter(Boolean).forEach(function (t, i) {
+        if (i) {
+          var dot = document.createElement('span');
+          dot.className = 'dot';
+          dot.textContent = '\u00b7';
+          facts.appendChild(dot);
+        }
+        var span = document.createElement('span');
+        span.textContent = t;
+        facts.appendChild(span);
+      });
+      titles.appendChild(facts);
+      head.appendChild(titles);
+      body.appendChild(head);
+
       if (b.blurb) body.appendChild(para('bookwin-text', b.blurb));
 
       var link = document.createElement('p');
@@ -448,7 +491,7 @@
 
   function openAbout() {
     makeWindow('about', 'About', function (body) {
-      body.appendChild(para('bookwin-title', 'Top 100 Books on Korea'));
+      body.appendChild(para('bookwin-title', '100 Books on Korea'));
       ABOUT.forEach(function (line) { body.appendChild(para('bookwin-text', line)); });
     }, null);
   }
@@ -465,7 +508,7 @@
     b.addEventListener('click', openAbout);
   });
 
-  /* --- filter controls ------------------------------------------- */
+  /* --- filter columns -------------------------------------------- */
 
   function tally(key) {
     var counts = {};
@@ -476,73 +519,68 @@
     return counts;
   }
 
-  function fillSelect(sel, rows) {
+  function buildOptions(group, rows) {
+    var ul = els.filters.querySelector('[data-group="' + group + '"]');
     var frag = document.createDocumentFragment();
+
     rows.forEach(function (row) {
-      var opt = document.createElement('option');
-      opt.value = row.id;
-      opt.textContent = row.n == null ? row.label : row.label + ' (' + row.n + ')';
-      frag.appendChild(opt);
+      var li = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.value = row.id;
+      btn.setAttribute('aria-pressed', String(state[group] === row.id));
+      btn.appendChild(document.createTextNode(row.label));
+
+      if (row.n != null) {
+        var n = document.createElement('span');
+        n.className = 'n';
+        n.textContent = row.n;
+        btn.appendChild(n);
+      }
+
+      li.appendChild(btn);
+      frag.appendChild(li);
     });
-    sel.replaceChildren(frag);
+
+    ul.replaceChildren(frag);
   }
 
   function buildFilters() {
-    fillSelect(els.sort, SORTS);
-    els.sort.value = state.sort;
+    buildOptions('sort', SORTS);
+
+    var cats = tally('category');
+    buildOptions('category', [{ id: 'All', label: 'All', n: books.length }].concat(
+      Object.keys(cats).sort(COMPARE).map(function (c) {
+        return { id: c, label: c, n: cats[c] };
+      })
+    ));
 
     var pubs = tally('publisher');
-    fillSelect(els.publisher, [{ id: 'All', label: 'All publishers', n: books.length }].concat(
+    buildOptions('publisher', [{ id: 'All', label: 'All', n: books.length }].concat(
       Object.keys(pubs).sort(COMPARE).map(function (p) {
         return { id: p, label: p, n: pubs[p] };
       })
     ));
-    els.publisher.value = state.publisher;
-
-    var cats = tally('category');
-    var frag = document.createDocumentFragment();
-    [{ id: 'All', label: 'All', n: books.length }].concat(
-      Object.keys(cats).sort(COMPARE).map(function (c) {
-        return { id: c, label: c, n: cats[c] };
-      })
-    ).forEach(function (row) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.value = row.id;
-      btn.setAttribute('aria-pressed', String(state.category === row.id));
-      btn.appendChild(document.createTextNode(row.label));
-      var n = document.createElement('span');
-      n.className = 'n';
-      n.textContent = row.n;
-      btn.appendChild(n);
-      frag.appendChild(btn);
-    });
-    els.themes.replaceChildren(frag);
   }
 
-  function markThemes() {
-    els.themes.querySelectorAll('button').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.value === state.category));
+  function markGroup(group) {
+    els.filters.querySelectorAll('[data-group="' + group + '"] button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.value === state[group]));
     });
   }
 
-  els.themes.addEventListener('click', function (e) {
+  els.filters.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-value]');
     if (!btn) return;
+    var group = btn.closest('[data-group]').dataset.group;
     var value = btn.dataset.value;
-    /* Re-picking the active theme clears it. */
-    state.category = (state.category === value) ? 'All' : value;
-    markThemes();
-    render();
-  });
 
-  els.sort.addEventListener('change', function () {
-    state.sort = els.sort.value;
-    render();
-  });
+    /* Re-picking the active theme or publisher clears it; sort always
+       has exactly one choice. */
+    if (group !== 'sort' && state[group] === value) value = 'All';
+    state[group] = value;
 
-  els.publisher.addEventListener('change', function () {
-    state.publisher = els.publisher.value;
+    markGroup(group);
     render();
   });
 
@@ -553,8 +591,8 @@
     state.category = 'All';
     state.publisher = 'All';
     els.search.value = '';
-    els.publisher.value = 'All';
-    markThemes();
+    markGroup('category');
+    markGroup('publisher');
     render();
   }
 

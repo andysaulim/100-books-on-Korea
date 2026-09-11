@@ -35,7 +35,7 @@ CANDIDATES = [
 # whatever viewport it gets, on the same paper as the band.
 CARD = """<!doctype html>
 <meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400..600&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Source+Serif+4:opsz,wght@8..60,400..600&display=block" rel="stylesheet">
 <style>
   html, body { margin: 0; }
   body {
@@ -43,19 +43,21 @@ CARD = """<!doctype html>
     display: flex; flex-direction: column; justify-content: center;
     box-sizing: border-box;
     padding: 56px 88px;
-    background: #faf7f0;
-    color: #191813;
+    background: #e9efe2;
+    color: #17201a;
     font-family: "Source Serif 4", Georgia, serif;
   }
   .eyebrow, .foot { margin: 0; }
-  .eyebrow { font-size: 24px; letter-spacing: .14em; text-transform: uppercase; color: #7d7668; }
-  h1 { margin: 26px 0 0; font-size: 84px; font-weight: 600; line-height: 1.04; letter-spacing: -.02em; }
-  .blurb { margin: 26px 0 0; font-size: 29px; line-height: 1.34; color: #565043; max-width: 36ch; }
-  .rule { height: 1px; background: #e4ded0; margin: 34px 0 18px; }
-  .foot { font-size: 24px; color: #7d7668; }
+  .eyebrow { font-size: 24px; letter-spacing: .18em; text-transform: uppercase; color: #5f6a55; }
+  h1 { margin: 26px 0 0; font-family: "Fraunces", Georgia, serif; font-size: 96px; font-weight: 600;
+       line-height: .97; letter-spacing: -.025em; color: #2c5440;
+       font-variation-settings: "SOFT" 24, "WONK" 1; }
+  .blurb { margin: 26px 0 0; font-size: 29px; line-height: 1.34; color: #47503f; max-width: 36ch; }
+  .rule { height: 1px; background: #cdd8c2; margin: 34px 0 18px; }
+  .foot { font-size: 24px; color: #5f6a55; }
 </style>
 <p class="eyebrow">Recommended by Andy Lim</p>
-<h1>Top 100 Books<br>on Korea</h1>
+<h1>100 Books<br>on Korea</h1>
 <p class="blurb">The war and its long aftermath, two states, the alliance, the culture, the people.</p>
 <div class="rule"></div>
 <p class="foot">andysaulim.com</p>
