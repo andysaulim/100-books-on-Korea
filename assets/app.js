@@ -1,6 +1,11 @@
 /* ---------------------------------------------------------------
    100 Books on Korea — shelf behaviour
    Data comes from books.js (window.BOOKS).
+
+   Structure follows minchi.co/books: the filter stack lives in the
+   left rail on wide screens and moves into a modal on narrow ones,
+   and a book opens as a draggable floating window rather than a
+   hover card, so several can stay open at once.
    --------------------------------------------------------------- */
 
 (function () {
@@ -11,20 +16,20 @@
   /* Tint for the typographic stand-in shown when a book has no cover
      image, or when the image fails to load. */
   var HUES = {
-    'Korean War':                        '#7c2d2a',
-    'History & Empire':                  '#8a5a2b',
-    'North Korea: Regime & Leadership':  '#2f3f63',
-    'North Korea: Nuclear & Security':   '#3f4a5c',
-    'North Korea: Society & Economy':    '#3c6060',
-    'Escape & Human Rights':             '#5b3a6b',
-    'South Korea: Politics & Democracy': '#1f5a6b',
-    'South Korea: Society & Economy':    '#2d6148',
-    'Alliances & Regional Order':        '#274b78',
-    'Culture & the Korean Wave':         '#9c4568',
-    'Fiction & Memoir':                  '#8d6a2f',
-    'Diaspora & Migration':              '#4a6a3c'
+    'Korean War':                        '#7a3a33',
+    'History & Empire':                  '#7d5a36',
+    'North Korea: Regime & Leadership':  '#35405c',
+    'North Korea: Nuclear & Security':   '#434c59',
+    'North Korea: Society & Economy':    '#3b5d5b',
+    'Escape & Human Rights':             '#584163',
+    'South Korea: Politics & Democracy': '#2b5a66',
+    'South Korea: Society & Economy':    '#37604c',
+    'Alliances & Regional Order':        '#2f4a6d',
+    'Culture & the Korean Wave':         '#8b4c63',
+    'Fiction & Memoir':                  '#846731',
+    'Diaspora & Migration':              '#4e6542'
   };
-  var FALLBACK_HUE = '#48526b';
+  var FALLBACK_HUE = '#4a5266';
 
   var SORTS = [
     { id: 'author',    label: 'Author A–Z' },
@@ -33,27 +38,41 @@
     { id: 'publisher', label: 'Publisher' }
   ];
 
+  var ABOUT = [
+    'A hundred recommendations: the war and its long aftermath, two states ' +
+    'built from the same country, the alliance, the culture, and the people.',
+    'Ranked by nothing — it is a shelf, not a league table. Themes are my own ' +
+    'shelving, not the publishers’ categories.',
+    'Open any cover for the details and a link to its publisher.'
+  ];
+
+  var $ = function (sel) { return document.querySelector(sel); };
+
   var els = {
-    grid:   document.getElementById('grid'),
-    empty:  document.getElementById('empty'),
-    search: document.getElementById('search'),
-    clear:  document.querySelector('[data-clear]'),
-    count:  document.querySelector('.count'),
-    peek:   document.getElementById('peek')
+    shelf:    $('#shelf'),
+    empty:    $('#empty'),
+    status:   $('#shelf-status'),
+    search:   $('#search'),
+    clear:    $('[data-clear]'),
+    rail:     $('#side-scroll'),
+    aside:    $('.side-nav'),
+    windows:  $('#book-windows'),
+    modal:    $('#filters-modal'),
+    modalBody:$('#filters-modal-body'),
+    toggle:   $('#filters-toggle'),
+    scrollTop:$('#scroll-top'),
+    floatReset:$('#filters-reset-float')
   };
 
-  var peekEls = {
-    theme:  document.getElementById('peek-theme'),
-    title:  document.getElementById('peek-title'),
-    author: document.getElementById('peek-author'),
-    pub:    document.getElementById('peek-pub'),
-    url:    document.getElementById('peek-url')
-  };
+  /* Every Reset button resets; the floating one is shown by scroll
+     position rather than by render(), so it is tracked separately. */
+  var allResets = Array.prototype.slice.call(document.querySelectorAll('.filters-reset'));
+  var resets = allResets.filter(function (b) { return b !== els.floatReset; });
 
   var state = { q: '', category: 'All', publisher: 'All', sort: 'author' };
 
   var COMPARE = new Intl.Collator('en', { sensitivity: 'base' }).compare;
-  var coarse = window.matchMedia('(hover: none)').matches;
+  var narrow = window.matchMedia('(max-width: 900px)');
 
   /* --- helpers ------------------------------------------------- */
 
@@ -78,6 +97,8 @@
     if (!b._hay) b._hay = norm([b.title, b.author, b.publisher, b.category].join('  '));
     return b._hay;
   }
+
+  function filtered() { return state.q || state.category !== 'All' || state.publisher !== 'All'; }
 
   /* --- filter & sort ------------------------------------------- */
 
@@ -131,18 +152,16 @@
   }
 
   function tileNode(b) {
-    var li = document.createElement('li');
-    li.className = 'tile';
-
-    var a = document.createElement('a');
-    a.href = b.url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.setProperty('--fallback-bg', hue(b.category));
-    /* The cover art carries no text for a screen reader, so the link
-       states the book itself. */
-    a.setAttribute('aria-label', b.title + ' by ' + b.author);
-    a._book = b;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tile';
+    btn.style.setProperty('--fallback-bg', hue(b.category));
+    /* The cover art carries no text for a screen reader, so the
+       control names the book itself. */
+    btn.setAttribute('aria-label', b.title + ' by ' + b.author);
+    btn.setAttribute('aria-haspopup', 'dialog');
+    btn.dataset.id = b.id;
+    btn._book = b;
 
     if (b.cover) {
       var img = document.createElement('img');
@@ -154,110 +173,208 @@
          the typographic stand-in when that happens. */
       img.addEventListener('error', function () {
         img.remove();
-        a.appendChild(fallbackNode(b));
+        btn.appendChild(fallbackNode(b));
       }, { once: true });
-      a.appendChild(img);
+      btn.appendChild(img);
     } else {
-      a.appendChild(fallbackNode(b));
+      btn.appendChild(fallbackNode(b));
     }
 
-    li.appendChild(a);
-    return li;
+    return btn;
   }
 
-  /* --- the peek card -------------------------------------------- */
+  /* --- floating windows ----------------------------------------- */
 
-  var peekTimer = null;
-  var peekFor = null;
+  var openWins = {};      /* key -> element */
+  var winZ = 1;
+  var cascade = 0;
 
-  function showPeek(anchor) {
-    var b = anchor._book;
-    if (!b) return;
-    peekFor = anchor;
-
-    peekEls.theme.textContent = b.category;
-    peekEls.title.textContent = b.title;
-    peekEls.author.textContent = b.author;
-    peekEls.pub.textContent = b.publisher || b.source || '';
-    peekEls.url.href = b.url;
-
-    els.peek.hidden = false;
-    /* Measure after it is laid out, then place it. */
-    var r = anchor.getBoundingClientRect();
-    var p = els.peek.getBoundingClientRect();
-    var pad = 10;
-
-    var left = r.right + pad;
-    if (left + p.width > window.innerWidth - pad) left = r.left - p.width - pad;
-    if (left < pad) left = Math.max(pad, (window.innerWidth - p.width) / 2);
-
-    var top = r.top + (r.height - p.height) / 2;
-    top = Math.max(pad, Math.min(top, window.innerHeight - p.height - pad));
-
-    els.peek.style.left = Math.round(left) + 'px';
-    els.peek.style.top = Math.round(top) + 'px';
-    els.peek.classList.add('on');
-    if (coarse) els.peek.classList.add('interactive');
+  function markTiles() {
+    els.shelf.querySelectorAll('.tile').forEach(function (t) {
+      var on = Object.prototype.hasOwnProperty.call(openWins, 'book:' + t.dataset.id);
+      t.classList.toggle('is-open', on);
+      t.setAttribute('aria-expanded', String(on));
+    });
   }
 
-  function hidePeek() {
-    peekFor = null;
-    els.peek.classList.remove('on', 'interactive');
-    els.peek.hidden = true;
+  function raise(win) { win.style.zIndex = ++winZ; }
+
+  function closeWin(key) {
+    var win = openWins[key];
+    if (!win) return;
+    delete openWins[key];
+    win.remove();
+    markTiles();
   }
 
-  function scheduleHide() {
-    clearTimeout(peekTimer);
-    peekTimer = setTimeout(hidePeek, 90);
+  function place(win, anchor) {
+    /* Narrow screens pin windows to the bottom centre in CSS. */
+    if (narrow.matches) return;
+
+    var w = win.offsetWidth;
+    var h = win.offsetHeight;
+    var pad = 12;
+    var left, top;
+
+    if (anchor) {
+      var r = anchor.getBoundingClientRect();
+      left = r.right + pad;
+      if (left + w > window.innerWidth - pad) left = r.left - w - pad;
+      top = r.top + (r.height - h) / 2;
+    } else {
+      left = (window.innerWidth - w) / 2;
+      top = (window.innerHeight - h) / 2;
+    }
+
+    /* Offset each additional window so they do not stack exactly. */
+    left += cascade * 18;
+    top += cascade * 18;
+    cascade = (cascade + 1) % 6;
+
+    left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
+    top = Math.max(pad, Math.min(top, window.innerHeight - h - pad));
+
+    win.style.left = Math.round(left) + 'px';
+    win.style.top = Math.round(top) + 'px';
   }
 
-  els.grid.addEventListener('pointerover', function (e) {
-    if (coarse) return;
-    var a = e.target.closest('.tile a');
-    if (!a || a === peekFor) return;
-    clearTimeout(peekTimer);
-    showPeek(a);
+  function makeWindow(key, kind, buildBody, anchor) {
+    if (openWins[key]) { raise(openWins[key]); return openWins[key]; }
+
+    var win = document.createElement('div');
+    win.className = 'bookwin';
+    win.setAttribute('role', 'dialog');
+    win.setAttribute('aria-label', kind);
+
+    var bar = document.createElement('div');
+    bar.className = 'bookwin-bar';
+
+    var label = document.createElement('span');
+    label.className = 'bookwin-kind';
+    label.textContent = kind;
+
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'bookwin-close';
+    close.setAttribute('aria-label', 'Close');
+    close.textContent = '×';
+    close.addEventListener('click', function () {
+      closeWin(key);
+      if (anchor && document.contains(anchor)) anchor.focus();
+    });
+
+    bar.appendChild(label);
+    bar.appendChild(close);
+
+    var body = document.createElement('div');
+    body.className = 'bookwin-body';
+    buildBody(body);
+
+    win.appendChild(bar);
+    win.appendChild(body);
+    els.windows.appendChild(win);
+
+    openWins[key] = win;
+    raise(win);
+    place(win, anchor);
+    drag(win, bar);
+
+    win.addEventListener('pointerdown', function () { raise(win); });
+    return win;
+  }
+
+  function drag(win, bar) {
+    var dx = 0, dy = 0, id = null;
+
+    bar.addEventListener('pointerdown', function (e) {
+      if (narrow.matches) return;
+      if (e.target.closest('.bookwin-close')) return;
+      id = e.pointerId;
+      var r = win.getBoundingClientRect();
+      dx = e.clientX - r.left;
+      dy = e.clientY - r.top;
+      bar.setPointerCapture(id);
+      e.preventDefault();
+    });
+
+    bar.addEventListener('pointermove', function (e) {
+      if (id === null || e.pointerId !== id) return;
+      var pad = 8;
+      var left = Math.max(pad, Math.min(e.clientX - dx, window.innerWidth - win.offsetWidth - pad));
+      var top = Math.max(pad, Math.min(e.clientY - dy, window.innerHeight - win.offsetHeight - pad));
+      win.style.left = Math.round(left) + 'px';
+      win.style.top = Math.round(top) + 'px';
+    });
+
+    function end(e) {
+      if (id === null || e.pointerId !== id) return;
+      if (bar.hasPointerCapture(id)) bar.releasePointerCapture(id);
+      id = null;
+    }
+    bar.addEventListener('pointerup', end);
+    bar.addEventListener('pointercancel', end);
+  }
+
+  function openBook(b, anchor) {
+    makeWindow('book:' + b.id, b.category, function (body) {
+      var t = document.createElement('p');
+      t.className = 'bookwin-title';
+      t.textContent = b.title;
+
+      var a = document.createElement('p');
+      a.className = 'bookwin-author';
+      a.textContent = b.author;
+
+      var p = document.createElement('p');
+      p.className = 'bookwin-pub';
+      p.textContent = b.publisher || b.source || '';
+
+      var link = document.createElement('p');
+      link.className = 'bookwin-link';
+      var anchorEl = document.createElement('a');
+      anchorEl.href = b.url;
+      anchorEl.target = '_blank';
+      anchorEl.rel = 'noopener noreferrer';
+      anchorEl.textContent = 'View at publisher →';
+      link.appendChild(anchorEl);
+
+      body.appendChild(t);
+      body.appendChild(a);
+      body.appendChild(p);
+      body.appendChild(link);
+    }, anchor);
+    markTiles();
+  }
+
+  function openAbout() {
+    makeWindow('about', 'About', function (body) {
+      var t = document.createElement('p');
+      t.className = 'bookwin-title';
+      t.textContent = 'Top 100 Books on Korea';
+      body.appendChild(t);
+
+      ABOUT.forEach(function (line) {
+        var p = document.createElement('p');
+        p.className = 'bookwin-text';
+        p.textContent = line;
+        body.appendChild(p);
+      });
+    }, null);
+  }
+
+  els.shelf.addEventListener('click', function (e) {
+    var tile = e.target.closest('.tile');
+    if (!tile || !tile._book) return;
+    var key = 'book:' + tile._book.id;
+    if (openWins[key]) closeWin(key);
+    else openBook(tile._book, tile);
   });
 
-  els.grid.addEventListener('pointerout', function (e) {
-    if (coarse) return;
-    var a = e.target.closest('.tile a');
-    if (!a) return;
-    if (e.relatedTarget && a.contains(e.relatedTarget)) return;
-    scheduleHide();
+  document.querySelectorAll('[data-about]').forEach(function (b) {
+    b.addEventListener('click', openAbout);
   });
 
-  els.grid.addEventListener('focusin', function (e) {
-    var a = e.target.closest('.tile a');
-    if (a) showPeek(a);
-  });
-  els.grid.addEventListener('focusout', scheduleHide);
-
-  /* On a touch screen there is no hover, so the first tap opens the
-     card and the link inside it does the navigating. */
-  els.grid.addEventListener('click', function (e) {
-    if (!coarse) return;
-    var a = e.target.closest('.tile a');
-    if (!a) return;
-    if (peekFor === a) return;      // tapped again: let the link through
-    e.preventDefault();
-    showPeek(a);
-  });
-
-  document.addEventListener('click', function (e) {
-    if (!coarse || !peekFor) return;
-    if (e.target.closest('#peek') || e.target.closest('.tile a')) return;
-    hidePeek();
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && peekFor) hidePeek();
-  });
-
-  window.addEventListener('scroll', function () { if (peekFor) hidePeek(); }, { passive: true });
-  window.addEventListener('resize', function () { if (peekFor) hidePeek(); });
-
-  /* --- filter columns ------------------------------------------- */
+  /* --- filter lists --------------------------------------------- */
 
   function tally(key) {
     var counts = {};
@@ -268,14 +385,14 @@
     return counts;
   }
 
-  function buildOptions(group, rows) {
-    var ul = document.querySelector('[data-group="' + group + '"]');
+  function buildList(id, group, rows) {
+    var nav = document.getElementById(id);
     var frag = document.createDocumentFragment();
 
     rows.forEach(function (row) {
-      var li = document.createElement('li');
       var btn = document.createElement('button');
       btn.type = 'button';
+      btn.dataset.group = group;
       btn.dataset.value = row.id;
       btn.setAttribute('aria-pressed', String(state[group] === row.id));
       btn.appendChild(document.createTextNode(row.label));
@@ -287,25 +404,24 @@
         btn.appendChild(n);
       }
 
-      li.appendChild(btn);
-      frag.appendChild(li);
+      frag.appendChild(btn);
     });
 
-    ul.replaceChildren(frag);
+    nav.replaceChildren(frag);
   }
 
   function buildFilters() {
-    buildOptions('sort', SORTS);
+    buildList('sort-list', 'sort', SORTS);
 
     var cats = tally('category');
-    buildOptions('category', [{ id: 'All', label: 'All', n: books.length }].concat(
+    buildList('theme-list', 'category', [{ id: 'All', label: 'All', n: books.length }].concat(
       Object.keys(cats).sort(COMPARE).map(function (c) {
         return { id: c, label: c, n: cats[c] };
       })
     ));
 
     var pubs = tally('publisher');
-    buildOptions('publisher', [{ id: 'All', label: 'All', n: books.length }].concat(
+    buildList('publisher-list', 'publisher', [{ id: 'All', label: 'All', n: books.length }].concat(
       Object.keys(pubs).sort(COMPARE).map(function (p) {
         return { id: p, label: p, n: pubs[p] };
       })
@@ -313,15 +429,15 @@
   }
 
   function markGroup(group) {
-    document.querySelectorAll('[data-group="' + group + '"] button').forEach(function (b) {
+    els.rail.querySelectorAll('button[data-group="' + group + '"]').forEach(function (b) {
       b.setAttribute('aria-pressed', String(b.dataset.value === state[group]));
     });
   }
 
-  document.querySelector('.filters').addEventListener('click', function (e) {
+  els.rail.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-value]');
     if (!btn) return;
-    var group = btn.closest('[data-group]').dataset.group;
+    var group = btn.dataset.group;
     var value = btn.dataset.value;
 
     /* Re-picking the active theme or publisher clears it; sort always
@@ -333,27 +449,138 @@
     render();
   });
 
-  /* --- render --------------------------------------------------- */
+  /* --- filters modal -------------------------------------------- */
+
+  function openModal() {
+    els.modalBody.appendChild(els.rail);       /* move, don't clone */
+    els.modal.classList.add('is-open');
+    els.modal.setAttribute('aria-hidden', 'false');
+    els.toggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    $('#filters-close').focus();
+  }
+
+  function closeModal() {
+    if (!els.modal.classList.contains('is-open')) return;
+    els.aside.appendChild(els.rail);           /* put the rail back */
+    els.modal.classList.remove('is-open');
+    els.modal.setAttribute('aria-hidden', 'true');
+    els.toggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    els.toggle.focus();
+  }
+
+  els.toggle.addEventListener('click', openModal);
+  $('#filters-close').addEventListener('click', closeModal);
+  $('#filters-backdrop').addEventListener('click', closeModal);
+
+  /* A wide viewport has the rail back on screen, so the modal has no
+     reason to stay open. */
+  narrow.addEventListener('change', function (e) { if (!e.matches) closeModal(); });
+
+  /* --- reset ----------------------------------------------------- */
+
+  function resetAll() {
+    state.q = '';
+    state.category = 'All';
+    state.publisher = 'All';
+    els.search.value = '';
+    markGroup('category');
+    markGroup('publisher');
+    render();
+  }
+
+  allResets.forEach(function (b) { b.addEventListener('click', resetAll); });
+  els.empty.querySelector('[data-reset]').addEventListener('click', resetAll);
+
+  /* --- search ---------------------------------------------------- */
+
+  function debounce(fn, ms) {
+    var id;
+    return function () { clearTimeout(id); id = setTimeout(fn, ms); };
+  }
+
+  els.search.addEventListener('input', debounce(function () {
+    state.q = els.search.value.trim();
+    render();
+  }, 120));
+
+  els.search.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && els.search.value) {
+      e.preventDefault();
+      els.search.value = '';
+      state.q = '';
+      render();
+    }
+  });
+
+  els.clear.addEventListener('click', function () {
+    els.search.value = '';
+    state.q = '';
+    render();
+    els.search.focus();
+  });
+
+  /* --- scroll to top --------------------------------------------- */
+
+  var topShown = null;
+  function syncScrollTop() {
+    var show = window.scrollY > window.innerHeight * 0.8;
+    /* The rail carries its own Reset, so the floating one is only worth
+       showing once the rail has scrolled out of reach. */
+    els.floatReset.hidden = !(show && filtered());
+    if (show === topShown) return;
+    topShown = show;
+    els.scrollTop.hidden = !show;
+    els.scrollTop.classList.toggle('is-visible', show);
+  }
+  window.addEventListener('scroll', syncScrollTop, { passive: true });
+  els.scrollTop.addEventListener('click', function () {
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    });
+  });
+
+  /* --- keyboard --------------------------------------------------- */
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (els.modal.classList.contains('is-open')) { closeModal(); return; }
+
+    /* Close the topmost window. */
+    var keys = Object.keys(openWins);
+    if (!keys.length) return;
+    var top = keys.reduce(function (best, k) {
+      return (+openWins[k].style.zIndex > +openWins[best].style.zIndex) ? k : best;
+    }, keys[0]);
+    closeWin(top);
+  });
+
+  /* --- render ----------------------------------------------------- */
 
   function render() {
-    hidePeek();
     var list = visible();
 
     var frag = document.createDocumentFragment();
     list.forEach(function (b) { frag.appendChild(tileNode(b)); });
-    els.grid.replaceChildren(frag);
+    els.shelf.replaceChildren(frag);
+    markTiles();
 
-    els.count.textContent = (list.length === books.length)
+    var msg = (list.length === books.length)
       ? books.length + ' books'
       : list.length + ' of ' + books.length + ' books';
+    els.status.textContent = msg;
 
     els.empty.hidden = list.length > 0;
     els.clear.hidden = !state.q;
+    resets.forEach(function (b) { b.hidden = !filtered(); });
+    syncScrollTop();
 
     syncUrl();
   }
 
-  /* --- URL sync ------------------------------------------------- */
+  /* --- URL sync ---------------------------------------------------- */
 
   function syncUrl() {
     var p = new URLSearchParams();
@@ -381,49 +608,20 @@
     els.search.value = state.q;
   }
 
-  /* --- search --------------------------------------------------- */
+  /* --- boot -------------------------------------------------------- */
 
-  function debounce(fn, ms) {
-    var id;
-    return function () { clearTimeout(id); id = setTimeout(fn, ms); };
-  }
-
-  function resetSearch() {
-    els.search.value = '';
-    state.q = '';
-    render();
-    els.search.focus();
-  }
-
-  els.search.addEventListener('input', debounce(function () {
-    state.q = els.search.value.trim();
-    render();
-  }, 120));
-
-  els.search.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && els.search.value) { e.preventDefault(); resetSearch(); }
+  document.querySelectorAll('.footer-year').forEach(function (el) {
+    el.textContent = new Date().getFullYear();
   });
-
-  els.clear.addEventListener('click', resetSearch);
-
-  els.empty.querySelector('[data-reset]').addEventListener('click', function () {
-    state.q = '';
-    state.category = 'All';
-    state.publisher = 'All';
-    els.search.value = '';
-    markGroup('category');
-    markGroup('publisher');
-    render();
-  });
-
-  /* --- boot ----------------------------------------------------- */
 
   if (!books.length) {
-    els.count.textContent = 'The book list failed to load.';
+    els.status.textContent = 'The book list failed to load.';
+    els.empty.hidden = false;
     return;
   }
 
   readUrl();
   buildFilters();
   render();
+  syncScrollTop();
 })();

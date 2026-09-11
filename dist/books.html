@@ -1,37 +1,63 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
 <title>Books — Andy Lim</title>
-<meta name="description" content="100 books on Korea — the war, the two states, the alliance, the culture, and the people. Browse by theme, publisher, or title.">
+<meta name="description" content="The hundred books on Korea I recommend most — the war and its long aftermath, two states built from the same country, the alliance, the culture, and the people. Browse the shelf by theme or publisher.">
 
+<!-- build:meta — `python3 build.py --base <url>` rewrites these to absolute URLs -->
+<link rel="canonical" href="./">
+<meta property="og:title" content="Top 100 Books on Korea">
+<meta property="og:description" content="The hundred books on Korea I recommend most — the war and its long aftermath, two states built from the same country, the alliance, the culture, and the people. Browse the shelf by theme or publisher.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="100 Books on Korea">
-<meta property="og:description" content="100 books on Korea — the war, the two states, the alliance, the culture, and the people.">
+<meta property="og:url" content="./">
+<meta property="og:image" content="assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Andy Lim">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="assets/og.png">
+<!-- /build:meta -->
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&display=swap" rel="stylesheet">
 <style>
 /* ---------------------------------------------------------------
    100 Books on Korea
+
+   Layout follows minchi.co/books: a fixed left rail carrying the
+   brand, the site nav and the filter stack, with the shelf filling
+   the rest; filters collapse into a modal on narrow screens; books
+   open as draggable floating windows rather than a hover card.
+
+   The palette is this site's own — only the structure and the
+   typeface are borrowed.
    --------------------------------------------------------------- */
 
 :root {
-  --paper:   #f5e9a6;
-  --ink:     #1b1b18;
-  --muted:   #8c8663;
-  --rule:    #cdc084;
-  --card:    #fffdf4;
-  --accent:  #b3321f;
+  /* A warm off-white ground so the covers carry the colour, hairline
+     rules in the same warm grey, and one restrained accent. */
+  --paper:   #faf7f0;
+  --ink:     #191813;
+  --muted:   #7d7668;
+  --rule:    #e4ded0;
+  --card:    #ffffff;
+  --accent:  #9c3d21;
+  --quiet:   #565043;   /* body copy against the paper */
 
-  --serif: "EB Garamond", "Iowan Old Style", Georgia, "Times New Roman", serif;
-  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --serif: "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
 
-  --gutter: clamp(1rem, 3vw, 2.5rem);
-  --tile: 104px;   /* cover width the grid aims for */
+  --rail:   17.5rem;   /* left filter rail */
+  --gutter: clamp(1rem, 2.5vw, 2.25rem);
+  --tile:   104px;     /* cover width the shelf aims for */
+
+  --shadow-tile: 0 1px 2px rgb(38 32 22 / .16), 0 6px 14px -8px rgb(38 32 22 / .22);
+  --shadow-pop:  0 12px 34px -12px rgb(38 32 22 / .3);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -40,153 +66,211 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  padding-inline: var(--gutter);
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--sans);
-  font-size: 15px;
+  font-family: var(--serif);
+  font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
 img { max-width: 100%; }
 [hidden] { display: none !important; }
-
 a { color: inherit; }
 
-:where(a, button, input):focus-visible {
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:where(a, button, input, summary):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .skip-link {
   position: absolute; left: -9999px; top: 0; z-index: 100;
   padding: .6rem 1rem;
-  background: var(--ink); color: var(--paper);
+  background: var(--ink);
+  color: var(--paper);
 }
 .skip-link:focus { left: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: .01ms !important; }
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
 }
 
-/* --- Masthead --------------------------------------------------- */
+/* --- Two-column shell ------------------------------------------- */
 
-.masthead { padding-block: clamp(1.5rem, 4vw, 2.5rem) 0; }
-
-.name {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
-}
-.name a { text-decoration: none; }
-
-.nav {
-  display: flex;
-  gap: 1.1rem;
-  margin-top: .55rem;
-  font-size: .85rem;
-}
-.nav a {
-  color: var(--ink);
-  text-decoration: none;
-  opacity: .72;
-}
-.nav a:hover { opacity: 1; }
-.nav a[aria-current="page"] {
-  opacity: 1;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* --- Intro ------------------------------------------------------ */
-
-.intro {
-  max-width: 46ch;
-  margin-block: clamp(2.25rem, 6vw, 3.5rem) 0;
-}
-.intro h1 {
-  margin: 0;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(1.75rem, 4vw, 2.4rem);
-  line-height: 1.15;
-  letter-spacing: -.015em;
-}
-.intro p {
-  margin: .7rem 0 0;
-  font-size: .9rem;
-  line-height: 1.55;
-  color: #4a4736;
-}
-
-/* --- Filter columns --------------------------------------------- */
-
-.filters {
+.layout {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.5rem clamp(1rem, 3vw, 2.5rem);
-  margin-block: clamp(2rem, 5vw, 3rem) clamp(1.75rem, 4vw, 2.5rem);
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  align-items: start;
+  min-height: 100vh;
 }
 
-.col-label {
-  margin: 0 0 .5rem;
-  padding-bottom: .5rem;
-  border-bottom: 1px solid var(--rule);
-  font-size: .8rem;
-  font-weight: 400;
-  color: var(--muted);
+.side-nav {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: clamp(1.5rem, 3vw, 2.25rem) 0 0 var(--gutter);
+  border-right: 1px solid var(--rule);
 }
-.col-label label { cursor: pointer; }
 
-.opts {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.opts button {
+.side-brand { padding-right: var(--gutter); }
+
+.brand {
   display: block;
-  width: 100%;
-  padding: .1rem 0;
-  font: inherit;
-  font-size: .84rem;
-  line-height: 1.45;
-  text-align: left;
-  color: var(--ink);
-  background: none;
-  border: 0;
-  cursor: pointer;
-  opacity: .78;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: -.01em;
 }
-.opts button:hover { opacity: 1; }
-.opts button[aria-pressed="true"] {
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .9rem;
+  margin-top: .45rem;
+  font-size: .88rem;
+}
+.site-nav a {
+  text-decoration: none;
+  opacity: .68;
+}
+.site-nav a:hover { opacity: 1; }
+.site-nav a.active {
   opacity: 1;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.opts .n {
-  margin-left: .35rem;
-  font-size: .72rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
+
+.brand-bar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-top: 1.1rem;
 }
 
-/* Publishers and Themes can run long; cap them so the grid stays high
-   on the page and the four columns keep roughly the same height. */
-.scroller {
-  max-height: 11.5rem;
+/* The rail is the filter UI on wide screens, so its toggle is only
+   needed once the rail collapses. */
+.filters-toggle { display: none; }
+
+.filters-reset {
+  padding: .12rem .5rem;
+  font-size: .78rem;
+  color: var(--muted);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.filters-reset:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* --- Filter stack ------------------------------------------------ */
+
+.side-scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  padding: 1.35rem var(--gutter) 2.5rem 0;
   scrollbar-width: thin;
   scrollbar-color: var(--rule) transparent;
 }
 
-.searchwrap { position: relative; display: flex; align-items: center; }
+.side-block { border-top: 1px solid var(--rule); }
+.side-block:first-child { border-top: 0; }
+
+.side-head {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .6rem 0 .5rem;
+  list-style: none;
+  cursor: pointer;
+}
+.side-head::-webkit-details-marker { display: none; }
+
+.side-head h2 {
+  margin: 0;
+  font-size: .8rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* Disclosure caret, rotated when the block is open. */
+.side-head::after {
+  content: "";
+  width: .34rem; height: .34rem;
+  margin-left: auto;
+  border-right: 1px solid var(--muted);
+  border-bottom: 1px solid var(--muted);
+  transform: rotate(-45deg) translate(-1px, 1px);
+  transition: transform .16s ease;
+}
+.side-block[open] > .side-head::after {
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.link-list {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: .75rem;
+}
+.link-list button {
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
+  width: 100%;
+  padding: .12rem 0;
+  font-size: .88rem;
+  line-height: 1.45;
+  text-align: left;
+  opacity: .78;
+}
+.link-list button:hover { opacity: 1; }
+.link-list button[aria-pressed="true"] {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link-list .n {
+  margin-left: auto;
+  font-size: .74rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.searchwrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: .9rem;
+}
 .searchwrap input {
   width: 100%;
   padding: .1rem 1.3rem .3rem 0;
   font: inherit;
-  font-size: .84rem;
+  font-size: .88rem;
   color: var(--ink);
   background: none;
   border: 0;
@@ -201,47 +285,75 @@ a { color: inherit; }
   font-size: 1.05rem;
   line-height: 1;
   color: var(--muted);
-  background: none;
-  border: 0;
-  cursor: pointer;
 }
 .search-clear:hover { color: var(--ink); }
 
-.count {
-  margin: .9rem 0 0;
-  font-size: .76rem;
+.side-note {
+  margin: 1.4rem 0 0;
+  padding-top: .9rem;
+  border-top: 1px solid var(--rule);
+  font-size: .8rem;
+}
+.linkish {
+  padding: 0;
+  font-size: inherit;
   color: var(--muted);
-  font-variant-numeric: tabular-nums;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.linkish:hover { color: var(--ink); }
+
+/* --- The shelf --------------------------------------------------- */
+
+.main {
+  min-width: 0;
+  padding: clamp(1.5rem, 3vw, 2.25rem) var(--gutter) 0;
 }
 
-/* --- The wall of covers ----------------------------------------- */
+.shelf-head {
+  max-width: 52ch;
+  margin-bottom: clamp(1.5rem, 3.5vw, 2.4rem);
+}
+.shelf-head h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -.015em;
+  text-wrap: balance;
+}
+.shelf-head p {
+  margin: .55rem 0 0;
+  font-size: .92rem;
+  line-height: 1.55;
+  color: var(--quiet);
+  text-wrap: pretty;
+}
 
-.grid {
+.shelf {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--tile), 1fr));
   gap: clamp(.6rem, 1.4vw, 1.1rem);
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
-.tile { margin: 0; }
-
-.tile a {
+.tile {
   display: block;
   position: relative;
+  width: 100%;
+  padding: 0;
   aspect-ratio: 2 / 3;
   border-radius: 1px;
   overflow: hidden;
   background: var(--fallback-bg, #3a4258);
-  box-shadow: 0 1px 3px rgb(60 50 10 / .28), 0 6px 14px -8px rgb(60 50 10 / .3);
+  box-shadow: var(--shadow-tile);
   transition: transform .18s ease, box-shadow .18s ease;
 }
-.tile a:hover,
-.tile a:focus-visible {
+.tile:hover,
+.tile:focus-visible {
   transform: translateY(-3px);
-  box-shadow: 0 2px 5px rgb(60 50 10 / .3), 0 14px 26px -10px rgb(60 50 10 / .42);
+  box-shadow: 0 2px 6px rgb(38 32 22 / .2), 0 16px 28px -12px rgb(38 32 22 / .32);
 }
+.tile.is-open { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .tile img {
   display: block;
@@ -250,13 +362,14 @@ a { color: inherit; }
   object-fit: cover;
 }
 
-/* Typographic stand-in, shown when there is no cover image or the
+/* Typographic stand-in, shown when a book has no cover image or the
    image fails to load. */
 .tile .fallback {
   display: flex;
   flex-direction: column;
   height: 100%;
   padding: .55rem .5rem .5rem .6rem;
+  text-align: left;
   background: linear-gradient(150deg,
     color-mix(in srgb, var(--fallback-bg) 92%, #000 8%),
     color-mix(in srgb, var(--fallback-bg) 68%, #10131a 32%));
@@ -269,9 +382,8 @@ a { color: inherit; }
   background: linear-gradient(90deg, rgb(0 0 0 / .34), rgb(0 0 0 / .05));
 }
 .tile .fb-title {
-  font-family: var(--serif);
-  font-size: .72rem;
-  font-weight: 500;
+  font-size: .74rem;
+  font-weight: 600;
   line-height: 1.18;
   color: #fff;
   overflow: hidden;
@@ -282,7 +394,7 @@ a { color: inherit; }
 .tile .fb-author {
   margin-top: auto;
   padding-top: .4rem;
-  font-size: .53rem;
+  font-size: .54rem;
   letter-spacing: .07em;
   text-transform: uppercase;
   color: rgb(255 255 255 / .78);
@@ -292,167 +404,344 @@ a { color: inherit; }
   -webkit-box-orient: vertical;
 }
 
-/* --- Hover detail card ------------------------------------------ */
+.empty {
+  padding: 4rem 0;
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--quiet);
+}
+.filters-reset-inline {
+  display: block;
+  margin: .9rem auto 0;
+  padding: .4rem 1rem;
+  font-size: .82rem;
+  color: var(--paper);
+  background: var(--ink);
+}
 
-.peek {
+.footer {
+  margin-top: clamp(3rem, 8vw, 5rem);
+  padding-block: 1.5rem 3rem;
+  border-top: 1px solid var(--rule);
+  font-size: .8rem;
+  color: var(--muted);
+}
+.footer p { margin: 0 0 .3rem; }
+
+/* --- Floating book windows --------------------------------------- */
+
+.book-windows {
   position: fixed;
-  z-index: 50;
-  width: 17rem;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.bookwin {
+  position: absolute;
+  width: 20rem;
   max-width: calc(100vw - 2rem);
-  padding: .85rem .95rem 1rem;
   background: var(--card);
   border: 1px solid var(--rule);
-  box-shadow: 0 10px 30px -10px rgb(60 50 10 / .45);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .13s ease;
+  box-shadow: var(--shadow-pop);
+  pointer-events: auto;
 }
-.peek.on { opacity: 1; }
-.peek.interactive { pointer-events: auto; }
 
-.peek-theme {
-  margin: 0 0 .4rem;
+.bookwin-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .35rem .4rem .35rem .7rem;
+  border-bottom: 1px solid var(--rule);
+  cursor: grab;
+  touch-action: none;
+}
+.bookwin-bar:active { cursor: grabbing; }
+.bookwin-kind {
   font-size: .62rem;
   letter-spacing: .09em;
   text-transform: uppercase;
   color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.peek-title {
-  margin: 0;
-  font-family: var(--serif);
+.bookwin-close {
+  margin-left: auto;
+  padding: .1rem .35rem;
   font-size: 1.05rem;
+  line-height: 1;
+  color: var(--muted);
+}
+.bookwin-close:hover { color: var(--ink); }
+
+.bookwin-body { padding: .85rem .95rem 1rem; }
+.bookwin-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
   line-height: 1.22;
   text-wrap: pretty;
 }
-.peek-author {
-  margin: .3rem 0 0;
-  font-size: .82rem;
+.bookwin-author { margin: .35rem 0 0; font-size: .88rem; }
+.bookwin-pub { margin: .45rem 0 0; font-size: .76rem; color: var(--muted); }
+.bookwin-body p.bookwin-text {
+  margin: .55rem 0 0;
+  font-size: .86rem;
+  line-height: 1.55;
+  color: var(--quiet);
 }
-.peek-pub {
-  margin: .45rem 0 0;
-  font-size: .72rem;
-  color: var(--muted);
-}
-.peek-link { margin: .7rem 0 0; }
-.peek-link a {
-  font-size: .75rem;
+.bookwin-link { margin: .8rem 0 0; }
+.bookwin-link a {
+  font-size: .8rem;
   color: var(--accent);
   text-decoration: none;
   border-bottom: 1px solid currentColor;
 }
 
-/* --- Empty state / footer --------------------------------------- */
+/* --- Floating actions -------------------------------------------- */
 
-.empty {
-  padding: 4rem 0;
-  text-align: center;
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  color: #4a4736;
-}
-.empty button {
-  display: block;
-  margin: .9rem auto 0;
-  padding: .4rem 1rem;
-  font: inherit;
-  font-family: var(--sans);
+.float-action {
+  position: fixed;
+  z-index: 70;
+  padding: .45rem .9rem;
   font-size: .8rem;
   color: var(--paper);
   background: var(--ink);
   border: 0;
-  cursor: pointer;
+  border-radius: 2px;
+  box-shadow: var(--shadow-pop);
 }
+.float-action-reset { left: 50%; bottom: 1.25rem; transform: translateX(-50%); }
 
-.foot {
-  margin-top: clamp(3rem, 8vw, 5rem);
-  padding-block: 1.5rem 3rem;
+.scroll-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  box-shadow: var(--shadow-pop);
+  opacity: 0;
+  transition: opacity .16s ease;
+}
+.scroll-top.is-visible { opacity: 1; }
+
+/* --- Filters modal ------------------------------------------------ */
+
+.filters-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: none;
+}
+.filters-modal.is-open { display: block; }
+
+.filters-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(25 24 19 / .34);
+}
+.filters-modal-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.filters-modal-card {
+  position: relative;
+  width: 100%;
+  max-height: 86vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem var(--gutter) 2rem;
+  background: var(--paper);
   border-top: 1px solid var(--rule);
-  font-size: .78rem;
+}
+.modal-close {
+  position: absolute;
+  top: .6rem;
+  right: .6rem;
+  display: grid;
+  place-items: center;
+  padding: .2rem;
   color: var(--muted);
 }
-.foot p { margin: 0 0 .3rem; }
+.modal-close:hover { color: var(--ink); }
+.filters-modal-head {
+  display: flex;
+  align-items: center;
+  min-height: 1.9rem;
+  margin-bottom: .35rem;
+}
 
-/* --- Narrow screens --------------------------------------------- */
+/* The rail itself is moved in here when the modal opens, so undo the
+   sizing it carries as a sticky column. */
+.filters-modal-body .side-scroll {
+  display: block;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+}
 
-@media (max-width: 760px) {
-  :root { --tile: 84px; }
-  .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .scroller { max-height: 9rem; }
+/* --- Narrow screens ----------------------------------------------- */
+
+@media (max-width: 900px) {
+  :root { --tile: 92px; }
+
+  .layout { grid-template-columns: minmax(0, 1fr); }
+
+  .side-nav {
+    position: static;
+    height: auto;
+    padding: clamp(1.25rem, 4vw, 1.75rem) var(--gutter) 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .side-brand { padding-right: 0; }
+  .brand-bar { margin-bottom: 1.1rem; }
+
+  /* The stack moves into the modal; the rail keeps only the brand. */
+  .side-scroll { display: none; }
+  .filters-toggle {
+    display: inline-block;
+    padding: .12rem .5rem;
+    font-size: .78rem;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+  }
+  .filters-toggle:hover { color: var(--ink); border-color: var(--ink); }
+
+  .main { padding-top: clamp(1.25rem, 4vw, 1.75rem); }
+
+  /* Dragging a window with one thumb is no use; centre them instead. */
+  .bookwin {
+    left: 50% !important;
+    top: auto !important;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    width: min(22rem, calc(100vw - 2rem));
+  }
+  .bookwin-bar { cursor: default; }
 }
 
 @media (max-width: 420px) {
-  :root { --tile: 76px; }
-  .filters { grid-template-columns: 1fr; gap: 1.15rem; }
-  .scroller { max-height: 7.5rem; }
+  :root { --tile: 84px; }
 }
 </style>
 </head>
 <body>
 
-<a class="skip-link" href="#grid">Skip to the books</a>
+<a class="skip-link" href="#main">Skip to content</a>
 
-<header class="masthead">
-  <p class="name"><a href="/">Andy Lim</a></p>
-  <nav class="nav" aria-label="Sections">
-    <a href="/about">About</a>
-    <a href="/writings">Writings</a>
-    <a href="/books" aria-current="page">Books</a>
-  </nav>
-</header>
+<div id="app" class="layout">
 
-<section class="intro">
-  <h1>100 Books on Korea</h1>
-  <p>The war and its long aftermath, two states built from the same country, the
-     alliance, the culture, and the people. Every cover links to its publisher.</p>
-</section>
-
-<nav class="filters" aria-label="Filter and sort">
-  <div class="col">
-    <p class="col-label" id="lbl-sort">Sort</p>
-    <ul class="opts" role="group" aria-labelledby="lbl-sort" data-group="sort"></ul>
-  </div>
-
-  <div class="col">
-    <p class="col-label" id="lbl-theme">Themes</p>
-    <ul class="opts scroller" role="group" aria-labelledby="lbl-theme" data-group="category"></ul>
-  </div>
-
-  <div class="col">
-    <p class="col-label" id="lbl-pub">Publishers</p>
-    <ul class="opts scroller" role="group" aria-labelledby="lbl-pub" data-group="publisher"></ul>
-  </div>
-
-  <div class="col">
-    <p class="col-label"><label for="search">Search</label></p>
-    <div class="searchwrap">
-      <input id="search" type="search" placeholder="Title, author…" autocomplete="off" spellcheck="false">
-      <button type="button" class="search-clear" data-clear hidden aria-label="Clear search">&times;</button>
+  <aside class="side-nav" aria-label="Filters">
+    <div class="side-brand">
+      <header class="site-head">
+        <a class="brand" href="/">Andy Lim</a>
+        <nav class="site-nav" aria-label="Site">
+          <a href="/">About</a>
+          <a href="/writings/">Writings</a>
+          <a href="./" class="active" aria-current="page">Books</a>
+        </nav>
+      </header>
+      <div class="brand-bar">
+        <button type="button" class="filters-toggle" id="filters-toggle" aria-expanded="false" aria-controls="filters-modal">
+          Filters
+        </button>
+        <button type="button" class="filters-reset" id="filters-reset" hidden>Reset</button>
+      </div>
     </div>
-    <p class="count" role="status" aria-live="polite"></p>
-  </div>
-</nav>
 
-<main>
-  <ol class="grid" id="grid"></ol>
-  <p class="empty" id="empty" hidden>
-    Nothing matches that.
-    <button type="button" data-reset>Clear filters</button>
-  </p>
-</main>
+    <div class="side-scroll" id="side-scroll">
+      <details class="side-block" open>
+        <summary class="side-head side-head-sort"><h2>Sort</h2></summary>
+        <nav class="link-list" id="sort-list" aria-label="Sort books"></nav>
+      </details>
 
-<!-- Hover/tap detail card, positioned next to the hovered cover. -->
-<div class="peek" id="peek" role="dialog" aria-modal="false" aria-labelledby="peek-title" hidden>
-  <p class="peek-theme" id="peek-theme"></p>
-  <p class="peek-title" id="peek-title"></p>
-  <p class="peek-author" id="peek-author"></p>
-  <p class="peek-pub" id="peek-pub"></p>
-  <p class="peek-link"><a id="peek-url" href="#" target="_blank" rel="noopener noreferrer">View at publisher &rarr;</a></p>
+      <details class="side-block" open>
+        <summary class="side-head"><h2>Search</h2></summary>
+        <div class="searchwrap">
+          <input id="search" type="search" placeholder="Title, author…" autocomplete="off" spellcheck="false" aria-label="Search the shelf">
+          <button type="button" class="search-clear" data-clear hidden aria-label="Clear search">&times;</button>
+        </div>
+      </details>
+
+      <details class="side-block side-themes" open>
+        <summary class="side-head"><h2>Themes</h2></summary>
+        <nav class="link-list" id="theme-list" aria-label="Filter by theme"></nav>
+      </details>
+
+      <details class="side-block" open>
+        <summary class="side-head"><h2>Publishers</h2></summary>
+        <nav class="link-list" id="publisher-list" aria-label="Filter by publisher"></nav>
+      </details>
+
+      <p class="side-note">
+        <button type="button" class="linkish" data-about>About this shelf</button>
+      </p>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <header class="shelf-head">
+      <h1>Top 100 Books on Korea</h1>
+      <p>The hundred I recommend — the war and its long aftermath, two states built
+         from the same country, the alliance, the culture, and the people.</p>
+    </header>
+
+    <p id="shelf-status" class="visually-hidden" role="status"></p>
+
+    <div id="shelf" class="shelf"></div>
+
+    <p class="empty" id="empty" hidden>
+      Nothing matches that.
+      <button type="button" class="filters-reset-inline" data-reset>Clear filters</button>
+    </p>
+
+    <footer class="footer">
+      <p>© <span class="footer-year">2026</span> Andy Lim. Open a cover for the details and a link to its publisher.</p>
+      <p class="footer-note">Themes are my own shelving, not the publishers' categories.</p>
+    </footer>
+  </main>
+
 </div>
 
-<footer class="foot">
-  <p>Compiled by Andy Lim. Covers link to each book's publisher.</p>
-  <p class="foot-note">Themes are my own shelving, not the publishers' categories.</p>
-</footer>
+<!-- Filters modal (mobile) -->
+<div class="filters-modal" id="filters-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Filters">
+  <div class="filters-modal-backdrop" id="filters-backdrop" aria-hidden="true"></div>
+  <div class="filters-modal-stage">
+    <article class="filters-modal-card">
+      <button type="button" class="modal-close" id="filters-close" aria-label="Close filters">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg>
+      </button>
+      <div class="filters-modal-head">
+        <button type="button" class="filters-reset" id="filters-reset-modal" hidden>Reset</button>
+      </div>
+      <div class="filters-modal-body" id="filters-modal-body"></div>
+    </article>
+  </div>
+</div>
+
+<!-- Floating actions — above the windows and the shelf -->
+<button type="button" class="float-action float-action-reset filters-reset filters-reset-float" id="filters-reset-float" hidden>Reset filters</button>
+
+<!-- Floating windows: books + about (multi-open, draggable) -->
+<div id="book-windows" class="book-windows"></div>
+
+<button type="button" class="scroll-top" id="scroll-top" aria-label="Back to top" hidden>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5l0 14"></path><path d="M18 11l-6 -6"></path><path d="M6 11l6 -6"></path></svg>
+</button>
 
 <script>
 /* 100 Books on Korea - book data.
@@ -1567,6 +1856,11 @@ window.BOOKS = [
 /* ---------------------------------------------------------------
    100 Books on Korea — shelf behaviour
    Data comes from books.js (window.BOOKS).
+
+   Structure follows minchi.co/books: the filter stack lives in the
+   left rail on wide screens and moves into a modal on narrow ones,
+   and a book opens as a draggable floating window rather than a
+   hover card, so several can stay open at once.
    --------------------------------------------------------------- */
 
 (function () {
@@ -1577,20 +1871,20 @@ window.BOOKS = [
   /* Tint for the typographic stand-in shown when a book has no cover
      image, or when the image fails to load. */
   var HUES = {
-    'Korean War':                        '#7c2d2a',
-    'History & Empire':                  '#8a5a2b',
-    'North Korea: Regime & Leadership':  '#2f3f63',
-    'North Korea: Nuclear & Security':   '#3f4a5c',
-    'North Korea: Society & Economy':    '#3c6060',
-    'Escape & Human Rights':             '#5b3a6b',
-    'South Korea: Politics & Democracy': '#1f5a6b',
-    'South Korea: Society & Economy':    '#2d6148',
-    'Alliances & Regional Order':        '#274b78',
-    'Culture & the Korean Wave':         '#9c4568',
-    'Fiction & Memoir':                  '#8d6a2f',
-    'Diaspora & Migration':              '#4a6a3c'
+    'Korean War':                        '#7a3a33',
+    'History & Empire':                  '#7d5a36',
+    'North Korea: Regime & Leadership':  '#35405c',
+    'North Korea: Nuclear & Security':   '#434c59',
+    'North Korea: Society & Economy':    '#3b5d5b',
+    'Escape & Human Rights':             '#584163',
+    'South Korea: Politics & Democracy': '#2b5a66',
+    'South Korea: Society & Economy':    '#37604c',
+    'Alliances & Regional Order':        '#2f4a6d',
+    'Culture & the Korean Wave':         '#8b4c63',
+    'Fiction & Memoir':                  '#846731',
+    'Diaspora & Migration':              '#4e6542'
   };
-  var FALLBACK_HUE = '#48526b';
+  var FALLBACK_HUE = '#4a5266';
 
   var SORTS = [
     { id: 'author',    label: 'Author A–Z' },
@@ -1599,27 +1893,41 @@ window.BOOKS = [
     { id: 'publisher', label: 'Publisher' }
   ];
 
+  var ABOUT = [
+    'A hundred recommendations: the war and its long aftermath, two states ' +
+    'built from the same country, the alliance, the culture, and the people.',
+    'Ranked by nothing — it is a shelf, not a league table. Themes are my own ' +
+    'shelving, not the publishers’ categories.',
+    'Open any cover for the details and a link to its publisher.'
+  ];
+
+  var $ = function (sel) { return document.querySelector(sel); };
+
   var els = {
-    grid:   document.getElementById('grid'),
-    empty:  document.getElementById('empty'),
-    search: document.getElementById('search'),
-    clear:  document.querySelector('[data-clear]'),
-    count:  document.querySelector('.count'),
-    peek:   document.getElementById('peek')
+    shelf:    $('#shelf'),
+    empty:    $('#empty'),
+    status:   $('#shelf-status'),
+    search:   $('#search'),
+    clear:    $('[data-clear]'),
+    rail:     $('#side-scroll'),
+    aside:    $('.side-nav'),
+    windows:  $('#book-windows'),
+    modal:    $('#filters-modal'),
+    modalBody:$('#filters-modal-body'),
+    toggle:   $('#filters-toggle'),
+    scrollTop:$('#scroll-top'),
+    floatReset:$('#filters-reset-float')
   };
 
-  var peekEls = {
-    theme:  document.getElementById('peek-theme'),
-    title:  document.getElementById('peek-title'),
-    author: document.getElementById('peek-author'),
-    pub:    document.getElementById('peek-pub'),
-    url:    document.getElementById('peek-url')
-  };
+  /* Every Reset button resets; the floating one is shown by scroll
+     position rather than by render(), so it is tracked separately. */
+  var allResets = Array.prototype.slice.call(document.querySelectorAll('.filters-reset'));
+  var resets = allResets.filter(function (b) { return b !== els.floatReset; });
 
   var state = { q: '', category: 'All', publisher: 'All', sort: 'author' };
 
   var COMPARE = new Intl.Collator('en', { sensitivity: 'base' }).compare;
-  var coarse = window.matchMedia('(hover: none)').matches;
+  var narrow = window.matchMedia('(max-width: 900px)');
 
   /* --- helpers ------------------------------------------------- */
 
@@ -1644,6 +1952,8 @@ window.BOOKS = [
     if (!b._hay) b._hay = norm([b.title, b.author, b.publisher, b.category].join('  '));
     return b._hay;
   }
+
+  function filtered() { return state.q || state.category !== 'All' || state.publisher !== 'All'; }
 
   /* --- filter & sort ------------------------------------------- */
 
@@ -1697,18 +2007,16 @@ window.BOOKS = [
   }
 
   function tileNode(b) {
-    var li = document.createElement('li');
-    li.className = 'tile';
-
-    var a = document.createElement('a');
-    a.href = b.url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.setProperty('--fallback-bg', hue(b.category));
-    /* The cover art carries no text for a screen reader, so the link
-       states the book itself. */
-    a.setAttribute('aria-label', b.title + ' by ' + b.author);
-    a._book = b;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tile';
+    btn.style.setProperty('--fallback-bg', hue(b.category));
+    /* The cover art carries no text for a screen reader, so the
+       control names the book itself. */
+    btn.setAttribute('aria-label', b.title + ' by ' + b.author);
+    btn.setAttribute('aria-haspopup', 'dialog');
+    btn.dataset.id = b.id;
+    btn._book = b;
 
     if (b.cover) {
       var img = document.createElement('img');
@@ -1720,110 +2028,208 @@ window.BOOKS = [
          the typographic stand-in when that happens. */
       img.addEventListener('error', function () {
         img.remove();
-        a.appendChild(fallbackNode(b));
+        btn.appendChild(fallbackNode(b));
       }, { once: true });
-      a.appendChild(img);
+      btn.appendChild(img);
     } else {
-      a.appendChild(fallbackNode(b));
+      btn.appendChild(fallbackNode(b));
     }
 
-    li.appendChild(a);
-    return li;
+    return btn;
   }
 
-  /* --- the peek card -------------------------------------------- */
+  /* --- floating windows ----------------------------------------- */
 
-  var peekTimer = null;
-  var peekFor = null;
+  var openWins = {};      /* key -> element */
+  var winZ = 1;
+  var cascade = 0;
 
-  function showPeek(anchor) {
-    var b = anchor._book;
-    if (!b) return;
-    peekFor = anchor;
-
-    peekEls.theme.textContent = b.category;
-    peekEls.title.textContent = b.title;
-    peekEls.author.textContent = b.author;
-    peekEls.pub.textContent = b.publisher || b.source || '';
-    peekEls.url.href = b.url;
-
-    els.peek.hidden = false;
-    /* Measure after it is laid out, then place it. */
-    var r = anchor.getBoundingClientRect();
-    var p = els.peek.getBoundingClientRect();
-    var pad = 10;
-
-    var left = r.right + pad;
-    if (left + p.width > window.innerWidth - pad) left = r.left - p.width - pad;
-    if (left < pad) left = Math.max(pad, (window.innerWidth - p.width) / 2);
-
-    var top = r.top + (r.height - p.height) / 2;
-    top = Math.max(pad, Math.min(top, window.innerHeight - p.height - pad));
-
-    els.peek.style.left = Math.round(left) + 'px';
-    els.peek.style.top = Math.round(top) + 'px';
-    els.peek.classList.add('on');
-    if (coarse) els.peek.classList.add('interactive');
+  function markTiles() {
+    els.shelf.querySelectorAll('.tile').forEach(function (t) {
+      var on = Object.prototype.hasOwnProperty.call(openWins, 'book:' + t.dataset.id);
+      t.classList.toggle('is-open', on);
+      t.setAttribute('aria-expanded', String(on));
+    });
   }
 
-  function hidePeek() {
-    peekFor = null;
-    els.peek.classList.remove('on', 'interactive');
-    els.peek.hidden = true;
+  function raise(win) { win.style.zIndex = ++winZ; }
+
+  function closeWin(key) {
+    var win = openWins[key];
+    if (!win) return;
+    delete openWins[key];
+    win.remove();
+    markTiles();
   }
 
-  function scheduleHide() {
-    clearTimeout(peekTimer);
-    peekTimer = setTimeout(hidePeek, 90);
+  function place(win, anchor) {
+    /* Narrow screens pin windows to the bottom centre in CSS. */
+    if (narrow.matches) return;
+
+    var w = win.offsetWidth;
+    var h = win.offsetHeight;
+    var pad = 12;
+    var left, top;
+
+    if (anchor) {
+      var r = anchor.getBoundingClientRect();
+      left = r.right + pad;
+      if (left + w > window.innerWidth - pad) left = r.left - w - pad;
+      top = r.top + (r.height - h) / 2;
+    } else {
+      left = (window.innerWidth - w) / 2;
+      top = (window.innerHeight - h) / 2;
+    }
+
+    /* Offset each additional window so they do not stack exactly. */
+    left += cascade * 18;
+    top += cascade * 18;
+    cascade = (cascade + 1) % 6;
+
+    left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
+    top = Math.max(pad, Math.min(top, window.innerHeight - h - pad));
+
+    win.style.left = Math.round(left) + 'px';
+    win.style.top = Math.round(top) + 'px';
   }
 
-  els.grid.addEventListener('pointerover', function (e) {
-    if (coarse) return;
-    var a = e.target.closest('.tile a');
-    if (!a || a === peekFor) return;
-    clearTimeout(peekTimer);
-    showPeek(a);
+  function makeWindow(key, kind, buildBody, anchor) {
+    if (openWins[key]) { raise(openWins[key]); return openWins[key]; }
+
+    var win = document.createElement('div');
+    win.className = 'bookwin';
+    win.setAttribute('role', 'dialog');
+    win.setAttribute('aria-label', kind);
+
+    var bar = document.createElement('div');
+    bar.className = 'bookwin-bar';
+
+    var label = document.createElement('span');
+    label.className = 'bookwin-kind';
+    label.textContent = kind;
+
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'bookwin-close';
+    close.setAttribute('aria-label', 'Close');
+    close.textContent = '×';
+    close.addEventListener('click', function () {
+      closeWin(key);
+      if (anchor && document.contains(anchor)) anchor.focus();
+    });
+
+    bar.appendChild(label);
+    bar.appendChild(close);
+
+    var body = document.createElement('div');
+    body.className = 'bookwin-body';
+    buildBody(body);
+
+    win.appendChild(bar);
+    win.appendChild(body);
+    els.windows.appendChild(win);
+
+    openWins[key] = win;
+    raise(win);
+    place(win, anchor);
+    drag(win, bar);
+
+    win.addEventListener('pointerdown', function () { raise(win); });
+    return win;
+  }
+
+  function drag(win, bar) {
+    var dx = 0, dy = 0, id = null;
+
+    bar.addEventListener('pointerdown', function (e) {
+      if (narrow.matches) return;
+      if (e.target.closest('.bookwin-close')) return;
+      id = e.pointerId;
+      var r = win.getBoundingClientRect();
+      dx = e.clientX - r.left;
+      dy = e.clientY - r.top;
+      bar.setPointerCapture(id);
+      e.preventDefault();
+    });
+
+    bar.addEventListener('pointermove', function (e) {
+      if (id === null || e.pointerId !== id) return;
+      var pad = 8;
+      var left = Math.max(pad, Math.min(e.clientX - dx, window.innerWidth - win.offsetWidth - pad));
+      var top = Math.max(pad, Math.min(e.clientY - dy, window.innerHeight - win.offsetHeight - pad));
+      win.style.left = Math.round(left) + 'px';
+      win.style.top = Math.round(top) + 'px';
+    });
+
+    function end(e) {
+      if (id === null || e.pointerId !== id) return;
+      if (bar.hasPointerCapture(id)) bar.releasePointerCapture(id);
+      id = null;
+    }
+    bar.addEventListener('pointerup', end);
+    bar.addEventListener('pointercancel', end);
+  }
+
+  function openBook(b, anchor) {
+    makeWindow('book:' + b.id, b.category, function (body) {
+      var t = document.createElement('p');
+      t.className = 'bookwin-title';
+      t.textContent = b.title;
+
+      var a = document.createElement('p');
+      a.className = 'bookwin-author';
+      a.textContent = b.author;
+
+      var p = document.createElement('p');
+      p.className = 'bookwin-pub';
+      p.textContent = b.publisher || b.source || '';
+
+      var link = document.createElement('p');
+      link.className = 'bookwin-link';
+      var anchorEl = document.createElement('a');
+      anchorEl.href = b.url;
+      anchorEl.target = '_blank';
+      anchorEl.rel = 'noopener noreferrer';
+      anchorEl.textContent = 'View at publisher →';
+      link.appendChild(anchorEl);
+
+      body.appendChild(t);
+      body.appendChild(a);
+      body.appendChild(p);
+      body.appendChild(link);
+    }, anchor);
+    markTiles();
+  }
+
+  function openAbout() {
+    makeWindow('about', 'About', function (body) {
+      var t = document.createElement('p');
+      t.className = 'bookwin-title';
+      t.textContent = 'Top 100 Books on Korea';
+      body.appendChild(t);
+
+      ABOUT.forEach(function (line) {
+        var p = document.createElement('p');
+        p.className = 'bookwin-text';
+        p.textContent = line;
+        body.appendChild(p);
+      });
+    }, null);
+  }
+
+  els.shelf.addEventListener('click', function (e) {
+    var tile = e.target.closest('.tile');
+    if (!tile || !tile._book) return;
+    var key = 'book:' + tile._book.id;
+    if (openWins[key]) closeWin(key);
+    else openBook(tile._book, tile);
   });
 
-  els.grid.addEventListener('pointerout', function (e) {
-    if (coarse) return;
-    var a = e.target.closest('.tile a');
-    if (!a) return;
-    if (e.relatedTarget && a.contains(e.relatedTarget)) return;
-    scheduleHide();
+  document.querySelectorAll('[data-about]').forEach(function (b) {
+    b.addEventListener('click', openAbout);
   });
 
-  els.grid.addEventListener('focusin', function (e) {
-    var a = e.target.closest('.tile a');
-    if (a) showPeek(a);
-  });
-  els.grid.addEventListener('focusout', scheduleHide);
-
-  /* On a touch screen there is no hover, so the first tap opens the
-     card and the link inside it does the navigating. */
-  els.grid.addEventListener('click', function (e) {
-    if (!coarse) return;
-    var a = e.target.closest('.tile a');
-    if (!a) return;
-    if (peekFor === a) return;      // tapped again: let the link through
-    e.preventDefault();
-    showPeek(a);
-  });
-
-  document.addEventListener('click', function (e) {
-    if (!coarse || !peekFor) return;
-    if (e.target.closest('#peek') || e.target.closest('.tile a')) return;
-    hidePeek();
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && peekFor) hidePeek();
-  });
-
-  window.addEventListener('scroll', function () { if (peekFor) hidePeek(); }, { passive: true });
-  window.addEventListener('resize', function () { if (peekFor) hidePeek(); });
-
-  /* --- filter columns ------------------------------------------- */
+  /* --- filter lists --------------------------------------------- */
 
   function tally(key) {
     var counts = {};
@@ -1834,14 +2240,14 @@ window.BOOKS = [
     return counts;
   }
 
-  function buildOptions(group, rows) {
-    var ul = document.querySelector('[data-group="' + group + '"]');
+  function buildList(id, group, rows) {
+    var nav = document.getElementById(id);
     var frag = document.createDocumentFragment();
 
     rows.forEach(function (row) {
-      var li = document.createElement('li');
       var btn = document.createElement('button');
       btn.type = 'button';
+      btn.dataset.group = group;
       btn.dataset.value = row.id;
       btn.setAttribute('aria-pressed', String(state[group] === row.id));
       btn.appendChild(document.createTextNode(row.label));
@@ -1853,25 +2259,24 @@ window.BOOKS = [
         btn.appendChild(n);
       }
 
-      li.appendChild(btn);
-      frag.appendChild(li);
+      frag.appendChild(btn);
     });
 
-    ul.replaceChildren(frag);
+    nav.replaceChildren(frag);
   }
 
   function buildFilters() {
-    buildOptions('sort', SORTS);
+    buildList('sort-list', 'sort', SORTS);
 
     var cats = tally('category');
-    buildOptions('category', [{ id: 'All', label: 'All', n: books.length }].concat(
+    buildList('theme-list', 'category', [{ id: 'All', label: 'All', n: books.length }].concat(
       Object.keys(cats).sort(COMPARE).map(function (c) {
         return { id: c, label: c, n: cats[c] };
       })
     ));
 
     var pubs = tally('publisher');
-    buildOptions('publisher', [{ id: 'All', label: 'All', n: books.length }].concat(
+    buildList('publisher-list', 'publisher', [{ id: 'All', label: 'All', n: books.length }].concat(
       Object.keys(pubs).sort(COMPARE).map(function (p) {
         return { id: p, label: p, n: pubs[p] };
       })
@@ -1879,15 +2284,15 @@ window.BOOKS = [
   }
 
   function markGroup(group) {
-    document.querySelectorAll('[data-group="' + group + '"] button').forEach(function (b) {
+    els.rail.querySelectorAll('button[data-group="' + group + '"]').forEach(function (b) {
       b.setAttribute('aria-pressed', String(b.dataset.value === state[group]));
     });
   }
 
-  document.querySelector('.filters').addEventListener('click', function (e) {
+  els.rail.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-value]');
     if (!btn) return;
-    var group = btn.closest('[data-group]').dataset.group;
+    var group = btn.dataset.group;
     var value = btn.dataset.value;
 
     /* Re-picking the active theme or publisher clears it; sort always
@@ -1899,27 +2304,138 @@ window.BOOKS = [
     render();
   });
 
-  /* --- render --------------------------------------------------- */
+  /* --- filters modal -------------------------------------------- */
+
+  function openModal() {
+    els.modalBody.appendChild(els.rail);       /* move, don't clone */
+    els.modal.classList.add('is-open');
+    els.modal.setAttribute('aria-hidden', 'false');
+    els.toggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    $('#filters-close').focus();
+  }
+
+  function closeModal() {
+    if (!els.modal.classList.contains('is-open')) return;
+    els.aside.appendChild(els.rail);           /* put the rail back */
+    els.modal.classList.remove('is-open');
+    els.modal.setAttribute('aria-hidden', 'true');
+    els.toggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    els.toggle.focus();
+  }
+
+  els.toggle.addEventListener('click', openModal);
+  $('#filters-close').addEventListener('click', closeModal);
+  $('#filters-backdrop').addEventListener('click', closeModal);
+
+  /* A wide viewport has the rail back on screen, so the modal has no
+     reason to stay open. */
+  narrow.addEventListener('change', function (e) { if (!e.matches) closeModal(); });
+
+  /* --- reset ----------------------------------------------------- */
+
+  function resetAll() {
+    state.q = '';
+    state.category = 'All';
+    state.publisher = 'All';
+    els.search.value = '';
+    markGroup('category');
+    markGroup('publisher');
+    render();
+  }
+
+  allResets.forEach(function (b) { b.addEventListener('click', resetAll); });
+  els.empty.querySelector('[data-reset]').addEventListener('click', resetAll);
+
+  /* --- search ---------------------------------------------------- */
+
+  function debounce(fn, ms) {
+    var id;
+    return function () { clearTimeout(id); id = setTimeout(fn, ms); };
+  }
+
+  els.search.addEventListener('input', debounce(function () {
+    state.q = els.search.value.trim();
+    render();
+  }, 120));
+
+  els.search.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && els.search.value) {
+      e.preventDefault();
+      els.search.value = '';
+      state.q = '';
+      render();
+    }
+  });
+
+  els.clear.addEventListener('click', function () {
+    els.search.value = '';
+    state.q = '';
+    render();
+    els.search.focus();
+  });
+
+  /* --- scroll to top --------------------------------------------- */
+
+  var topShown = null;
+  function syncScrollTop() {
+    var show = window.scrollY > window.innerHeight * 0.8;
+    /* The rail carries its own Reset, so the floating one is only worth
+       showing once the rail has scrolled out of reach. */
+    els.floatReset.hidden = !(show && filtered());
+    if (show === topShown) return;
+    topShown = show;
+    els.scrollTop.hidden = !show;
+    els.scrollTop.classList.toggle('is-visible', show);
+  }
+  window.addEventListener('scroll', syncScrollTop, { passive: true });
+  els.scrollTop.addEventListener('click', function () {
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    });
+  });
+
+  /* --- keyboard --------------------------------------------------- */
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (els.modal.classList.contains('is-open')) { closeModal(); return; }
+
+    /* Close the topmost window. */
+    var keys = Object.keys(openWins);
+    if (!keys.length) return;
+    var top = keys.reduce(function (best, k) {
+      return (+openWins[k].style.zIndex > +openWins[best].style.zIndex) ? k : best;
+    }, keys[0]);
+    closeWin(top);
+  });
+
+  /* --- render ----------------------------------------------------- */
 
   function render() {
-    hidePeek();
     var list = visible();
 
     var frag = document.createDocumentFragment();
     list.forEach(function (b) { frag.appendChild(tileNode(b)); });
-    els.grid.replaceChildren(frag);
+    els.shelf.replaceChildren(frag);
+    markTiles();
 
-    els.count.textContent = (list.length === books.length)
+    var msg = (list.length === books.length)
       ? books.length + ' books'
       : list.length + ' of ' + books.length + ' books';
+    els.status.textContent = msg;
 
     els.empty.hidden = list.length > 0;
     els.clear.hidden = !state.q;
+    resets.forEach(function (b) { b.hidden = !filtered(); });
+    syncScrollTop();
 
     syncUrl();
   }
 
-  /* --- URL sync ------------------------------------------------- */
+  /* --- URL sync ---------------------------------------------------- */
 
   function syncUrl() {
     var p = new URLSearchParams();
@@ -1947,51 +2463,22 @@ window.BOOKS = [
     els.search.value = state.q;
   }
 
-  /* --- search --------------------------------------------------- */
+  /* --- boot -------------------------------------------------------- */
 
-  function debounce(fn, ms) {
-    var id;
-    return function () { clearTimeout(id); id = setTimeout(fn, ms); };
-  }
-
-  function resetSearch() {
-    els.search.value = '';
-    state.q = '';
-    render();
-    els.search.focus();
-  }
-
-  els.search.addEventListener('input', debounce(function () {
-    state.q = els.search.value.trim();
-    render();
-  }, 120));
-
-  els.search.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && els.search.value) { e.preventDefault(); resetSearch(); }
+  document.querySelectorAll('.footer-year').forEach(function (el) {
+    el.textContent = new Date().getFullYear();
   });
-
-  els.clear.addEventListener('click', resetSearch);
-
-  els.empty.querySelector('[data-reset]').addEventListener('click', function () {
-    state.q = '';
-    state.category = 'All';
-    state.publisher = 'All';
-    els.search.value = '';
-    markGroup('category');
-    markGroup('publisher');
-    render();
-  });
-
-  /* --- boot ----------------------------------------------------- */
 
   if (!books.length) {
-    els.count.textContent = 'The book list failed to load.';
+    els.status.textContent = 'The book list failed to load.';
+    els.empty.hidden = false;
     return;
   }
 
   readUrl();
   buildFilters();
   render();
+  syncScrollTop();
 })();
 </script>
 </body>

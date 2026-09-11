@@ -1,13 +1,18 @@
-# 100 Books on Korea
+# Top 100 Books on Korea
 
-A browsable shelf of 100 books on Korea, built as a static page for
-[andysaulim.com](https://andysaulim.com).
+A browsable shelf of the hundred books on Korea Andy Lim recommends, built as a
+static page for a subpath of [andysaulim.com](https://andysaulim.com).
 
 ## Status
 
-Data layer complete. Layout follows the structure of `minchi.co/books/` — pale
-ground, name and nav at top left, filter columns as plain text lists under hairline
-rules, then a dense wall of covers with a hover detail card.
+Complete. Layout follows the structure of `minchi.co/books/`: a fixed left rail
+carrying the brand, the site nav and a collapsible filter stack, with the shelf
+filling the rest; the rail moves into a modal on narrow screens; a book opens as
+a draggable floating window, so several can sit open at once. Set in Source Serif
+4, the same face that page uses.
+
+The palette is this site's own — a warm off-white ground so the covers carry the
+colour, hairline rules in the same warm grey, and one restrained rust accent.
 
 **All 100 books carry an ISBN and a cover URL.** 58 were resolved from an ISBN in
 the book's own publisher link; the other 42 link by slug or product id, so their
@@ -20,10 +25,12 @@ See *Covers* below.
 ```
 index.html          the page
 assets/styles.css   styling
-assets/app.js       search, theme filters, sorting, grid/list views
+assets/app.js       search, filters, sorting, floating windows
+assets/og.png       the 1200x630 social card
 books.js            the book data the page reads (edit this to change the list)
 books.json          the same data, for anything else that wants to consume it
 build.py            bundles the above into one portable file
+make_og.py          redraws assets/og.png
 dist/books.html     that bundle — one file, no relative paths
 ```
 
@@ -105,22 +112,47 @@ Georgia and the system sans, which is fine.
 ## Dropping it into another site
 
 `dist/books.html` is the whole shelf as a single file — CSS, behaviour and data
-all inlined, nothing loaded by relative path. Drop it anywhere and it works; only
-the web font and the cover images come over the network. Rebuild it after editing
-the page or the data:
+all inlined, nothing loaded by relative path. Drop it at any subpath and it works;
+only the web font, the social card and the cover images come over the network.
+Rebuild it after editing the page or the data:
 
 ```sh
 python3 build.py
 ```
 
-The masthead links (`/about`, `/writings`, `/books`) are root-relative, so adjust
-them if the page lands somewhere other than the site root.
+Every link in the page is relative, so it needs no telling where it lives. The one
+exception is the canonical and Open Graph URLs, which have to be absolute for a
+link preview to resolve. Pass the URL the page will be served from:
+
+```sh
+python3 build.py --base https://andysaulim.com/books/
+```
+
+The site nav points at `/` and `/writings/`; change those in `index.html` if the
+surrounding site uses different paths.
+
+## The social card
+
+`assets/og.png` is the 1200x630 image link previews show. Redraw it with:
+
+```sh
+python3 make_og.py
+```
+
+It shells out to headless Chrome's own `--screenshot`, so there is nothing to
+install. The card is set in Source Serif 4 pulled from Google Fonts at render
+time — without network access the shot still succeeds but falls back to a system
+serif, so look at the result.
 
 ## Features
 
 - Search across title, author, publisher, and theme (accent- and quote-insensitive)
 - Filter by theme or publisher; click an active option again to clear it
 - Sort by author, title, theme, or publisher
-- Hover (or tap, on touch) a cover for a detail card with a link to the publisher
+- Open a cover for a floating window with the details and a link to the publisher —
+  windows are draggable and several can stay open at once
+- Reset appears in the rail once anything is filtered, and floats into reach once
+  you have scrolled away from it
+- Back-to-top button past the first screen
 - Filter state is kept in the URL, so any view can be linked to
-- Responsive to phone widths, keyboard accessible
+- Filters collapse into a bottom sheet under 900px; keyboard accessible throughout
