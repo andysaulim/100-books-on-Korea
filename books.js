@@ -1,6 +1,8 @@
-/* 100 Books on Korea — book data.
+/* 100 Books on Korea - book data.
    Edit this file to change the list; the page reads it directly.
-   Fields: id, author, title, url, category, publisher, source */
+   Fields: id, author, title, url, category, publisher, source, isbn, cover
+   `cover` may be null, and may 404 - the page falls back to a
+   generated typographic cover in both cases. */
 window.BOOKS = [
   {
     "id": "troubled-apologies-among-japan-korea-and-the-united-states",
@@ -9,7 +11,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/troubled-apologies-among-japan-korea-and-the-united-states/9780231141772",
     "category": "Alliances & Regional Order",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231141772",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231141772-L.jpg?default=false"
   },
   {
     "id": "sovereignty-experiments-korean-migrants-and-the-building-of-",
@@ -18,7 +22,9 @@ window.BOOKS = [
     "url": "https://www.cornellpress.cornell.edu/book/9781501738364/sovereignty-experiments/",
     "category": "Diaspora & Migration",
     "publisher": "Cornell University Press",
-    "source": "cornellpress.cornell.edu"
+    "source": "cornellpress.cornell.edu",
+    "isbn": "9781501738364",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781501738364-L.jpg?default=false"
   },
   {
     "id": "the-real-north-korea",
@@ -27,7 +33,9 @@ window.BOOKS = [
     "url": "https://global.oup.com/academic/product/the-real-north-korea-9780199390038?cc=us&lang=en&",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Oxford University Press",
-    "source": "global.oup.com"
+    "source": "global.oup.com",
+    "isbn": "9780199390038",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780199390038-L.jpg?default=false"
   },
   {
     "id": "activists-alliances-and-anti-u-s-base-protests",
@@ -36,7 +44,9 @@ window.BOOKS = [
     "url": "https://www.cambridge.org/core/books/activists-alliances-and-antius-base-protests/7FB051506DD80F1042FDB25AACD8860D",
     "category": "Alliances & Regional Order",
     "publisher": "Cambridge University Press",
-    "source": "cambridge.org"
+    "source": "cambridge.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "kim-jong-un-and-the-bomb",
@@ -45,7 +55,9 @@ window.BOOKS = [
     "url": "https://www.hurstpublishers.com/book/kim-jong-un-and-the-bomb/",
     "category": "North Korea: Nuclear & Security",
     "publisher": "Hurst",
-    "source": "hurstpublishers.com"
+    "source": "hurstpublishers.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-great-successor",
@@ -54,7 +66,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/anna-fifield/the-great-successor/9781541742505/?lens=publicaffairs",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9781541742505",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781541742505-L.jpg?default=false"
   },
   {
     "id": "to-save-the-children-of-korea-the-cold-war-origins-of-intern",
@@ -63,7 +77,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/asian-american-studies/save-children-korea",
     "category": "Diaspora & Migration",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "operation-broken-reed-truman-s-secret-north-korean-spy-missi",
@@ -72,7 +88,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/arthur-l-boyd/operation-broken-reed/9780786732616/",
     "category": "Korean War",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9780786732616",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780786732616-L.jpg?default=false"
   },
   {
     "id": "the-cleanest-race-how-north-koreans-see-themselves-and-why-i",
@@ -81,7 +99,9 @@ window.BOOKS = [
     "url": "https://www.barnesandnoble.com/w/the-cleanest-race-b-r-myers/1100410201",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Barnes & Noble",
-    "source": "barnesandnoble.com"
+    "source": "barnesandnoble.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "i-want-to-die-but-i-want-to-eat-tteokbokki",
@@ -90,7 +110,9 @@ window.BOOKS = [
     "url": "https://www.bloomsbury.com/us/i-want-to-die-but-i-want-to-eat-tteokbokki-9781639732043/",
     "category": "Fiction & Memoir",
     "publisher": "Bloomsbury",
-    "source": "bloomsbury.com"
+    "source": "bloomsbury.com",
+    "isbn": "9781639732043",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781639732043-L.jpg?default=false"
   },
   {
     "id": "nothing-to-envy-ordinary-lives-in-north-korea",
@@ -99,7 +121,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/39398/nothing-to-envy-by-barbara-demick/",
     "category": "North Korea: Society & Economy",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "guns-guerillas-and-the-great-leader-north-korea-and-the-thir",
@@ -108,7 +132,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/history/guns-guerillas-and-great-leader",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "escape-from-camp-14",
@@ -117,7 +143,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/307766/escape-from-camp-14-by-blaine-harden/9780143122913/",
     "category": "Escape & Human Rights",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": "9780143122913",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780143122913-L.jpg?default=false"
   },
   {
     "id": "the-great-leader-and-the-fighter-pilot",
@@ -126,7 +154,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/315267/the-great-leader-and-the-fighter-pilot-by-blaine-harden/",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "critically-capitalist-the-spirit-of-asset-capitalism-in-sout",
@@ -135,7 +165,9 @@ window.BOOKS = [
     "url": "https://press.umich.edu/Books/C/Critically-Capitalist3",
     "category": "South Korea: Society & Economy",
     "publisher": "University of Michigan Press",
-    "source": "press.umich.edu"
+    "source": "press.umich.edu",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-japan-south-korea-identity-clash-east-asian-security-and",
@@ -144,7 +176,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/the-japansouth-korea-identity-clash/9780231171717",
     "category": "Alliances & Regional Order",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231171717",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231171717-L.jpg?default=false"
   },
   {
     "id": "under-the-loving-care-of-the-fatherly-leader-north-korea-and",
@@ -153,7 +187,9 @@ window.BOOKS = [
     "url": "https://us.macmillan.com/books/9781429906999/underthelovingcareofthefatherlyleader/",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Macmillan",
-    "source": "us.macmillan.com"
+    "source": "us.macmillan.com",
+    "isbn": "9781429906999",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781429906999-L.jpg?default=false"
   },
   {
     "id": "korea-s-place-in-the-sun-a-modern-history",
@@ -162,7 +198,9 @@ window.BOOKS = [
     "url": "https://wwnorton.com/books/9780393327021",
     "category": "History & Empire",
     "publisher": "W. W. Norton",
-    "source": "wwnorton.com"
+    "source": "wwnorton.com",
+    "isbn": "9780393327021",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780393327021-L.jpg?default=false"
   },
   {
     "id": "the-korean-war-a-history",
@@ -171,7 +209,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/35571/the-korean-war-by-bruce-cumings/",
     "category": "Korean War",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "suffering-and-smiling-daily-life-in-north-korea",
@@ -180,7 +220,9 @@ window.BOOKS = [
     "url": "https://rowman.com/ISBN/9781538193853/Suffering-and-Smiling-Daily-Life-in-North-Korea",
     "category": "North Korea: Society & Economy",
     "publisher": "Rowman & Littlefield",
-    "source": "rowman.com"
+    "source": "rowman.com",
+    "isbn": "9781538193853",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781538193853-L.jpg?default=false"
   },
   {
     "id": "the-park-chung-hee-era-the-transformation-of-south-korea",
@@ -189,7 +231,9 @@ window.BOOKS = [
     "url": "https://www.hup.harvard.edu/books/9780674072312",
     "category": "South Korea: Politics & Democracy",
     "publisher": "Harvard University Press",
-    "source": "hup.harvard.edu"
+    "source": "hup.harvard.edu",
+    "isbn": "9780674072312",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780674072312-L.jpg?default=false"
   },
   {
     "id": "unveiling-the-north-korean-economy-collapse-and-transition",
@@ -198,7 +242,9 @@ window.BOOKS = [
     "url": "https://www.cambridge.org/core/books/unveiling-the-north-korean-economy/796B9543D8B334BD82B0DD75B84E81BC",
     "category": "North Korea: Society & Economy",
     "publisher": "Cambridge University Press",
-    "source": "cambridge.org"
+    "source": "cambridge.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "ghost-flames-life-and-death-in-a-hidden-war-korea-1950-1953",
@@ -207,7 +253,9 @@ window.BOOKS = [
     "url": "https://www.amazon.com/Ghost-Flames-Death-Hidden-1950-1953/dp/1541768175",
     "category": "Korean War",
     "publisher": "Amazon",
-    "source": "amazon.com"
+    "source": "amazon.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "whale",
@@ -216,7 +264,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/691554/whale-by-cheon-myeong-kwan/",
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "kim-jiyoung-born-1982",
@@ -225,7 +275,9 @@ window.BOOKS = [
     "url": "https://www.simonandschuster.co.uk/books/Kim-Jiyoung-Born-1982/Cho-Nam-Joo/9781471184307",
     "category": "Fiction & Memoir",
     "publisher": "Simon & Schuster",
-    "source": "simonandschuster.co.uk"
+    "source": "simonandschuster.co.uk",
+    "isbn": "9781471184307",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781471184307-L.jpg?default=false"
   },
   {
     "id": "figuring-korean-futures-children-s-literature-in-modern-kore",
@@ -234,7 +286,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/asian-studies/figuring-korean-futures",
     "category": "Culture & the Korean Wave",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "korea-s-online-gaming-empire",
@@ -243,7 +297,9 @@ window.BOOKS = [
     "url": "https://mitpress.mit.edu/9780262014762/koreas-online-gaming-empire/",
     "category": "Culture & the Korean Wave",
     "publisher": "MIT Press",
-    "source": "mitpress.mit.edu"
+    "source": "mitpress.mit.edu",
+    "isbn": "9780262014762",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780262014762-L.jpg?default=false"
   },
   {
     "id": "north-korea-confidential",
@@ -252,7 +308,9 @@ window.BOOKS = [
     "url": "https://www.tuttlepublishing.com/korea/north-korea-confidential",
     "category": "North Korea: Society & Economy",
     "publisher": "Tuttle",
-    "source": "tuttlepublishing.com"
+    "source": "tuttlepublishing.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "contentious-activism-and-inter-korean-relations",
@@ -261,7 +319,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/contentious-activism-and-interkorean-relations/9780231161367",
     "category": "South Korea: Politics & Democracy",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231161367",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231161367-L.jpg?default=false"
   },
   {
     "id": "east-asia-before-the-west-five-centuries-of-trade-and-tribut",
@@ -270,7 +330,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/east-asia-before-the-west/9780231153188",
     "category": "History & Empire",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231153188",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231153188-L.jpg?default=false"
   },
   {
     "id": "the-coldest-winter-america-and-the-korean-war",
@@ -279,7 +341,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/david-halberstam/the-coldest-winter/9781401389642/?lens=hachette-books",
     "category": "Korean War",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9781401389642",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781401389642-L.jpg?default=false"
   },
   {
     "id": "the-two-koreas",
@@ -288,7 +352,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/don-oberdorfer/the-two-koreas/9780465031238/?lens=basic-books",
     "category": "Alliances & Regional Order",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9780465031238",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780465031238-L.jpg?default=false"
   },
   {
     "id": "flawless-lessons-in-looks-and-culture-from-the-k-beauty-capi",
@@ -297,7 +363,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/667034/flawless-by-elise-hu/",
     "category": "Culture & the Korean Wave",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "korea-a-history",
@@ -306,7 +374,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/asian-studies/korea",
     "category": "History & Empire",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-birth-of-korean-cool",
@@ -315,7 +385,9 @@ window.BOOKS = [
     "url": "https://us.macmillan.com/books/9781250045119/thebirthofkoreancool/",
     "category": "Culture & the Korean Wave",
     "publisher": "Macmillan",
-    "source": "us.macmillan.com"
+    "source": "us.macmillan.com",
+    "isbn": "9781250045119",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781250045119-L.jpg?default=false"
   },
   {
     "id": "if-i-had-your-face",
@@ -324,7 +396,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/610610/if-i-had-your-face-by-frances-cha/",
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-lazarus-heist",
@@ -333,7 +407,9 @@ window.BOOKS = [
     "url": "https://www.penguin.co.uk/books/447163/the-lazarus-heist-by-white-geoff/9780241554272",
     "category": "North Korea: Nuclear & Security",
     "publisher": "Penguin",
-    "source": "penguin.co.uk"
+    "source": "penguin.co.uk",
+    "isbn": "9780241554272",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780241554272-L.jpg?default=false"
   },
   {
     "id": "south-korea-s-democracy-in-crisis-the-threats-of-illiberalis",
@@ -342,7 +418,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/south-koreas-democracy-crisis",
     "category": "South Korea: Politics & Democracy",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "privilege-and-anxiety-the-korean-middle-class-in-the-global-",
@@ -351,7 +429,9 @@ window.BOOKS = [
     "url": "https://www.cornellpress.cornell.edu/book/9781501764943/privilege-and-anxiety/",
     "category": "South Korea: Society & Economy",
     "publisher": "Cornell University Press",
-    "source": "cornellpress.cornell.edu"
+    "source": "cornellpress.cornell.edu",
+    "isbn": "9781501764943",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781501764943-L.jpg?default=false"
   },
   {
     "id": "on-desperate-ground-the-epic-story-of-chosin-reservoir-the-g",
@@ -360,7 +440,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/534710/on-desperate-ground-by-hampton-sides/",
     "category": "Korean War",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-vegetarian",
@@ -369,7 +451,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/250333/the-vegetarian-by-han-kang/",
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "flowers-of-fire",
@@ -378,7 +462,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/718956/flowers-of-fire-by-hawon-jung/",
     "category": "South Korea: Society & Economy",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "welcome-to-the-hyunam-dong-bookshop",
@@ -387,7 +473,9 @@ window.BOOKS = [
     "url": "https://www.bloomsbury.com/us/welcome-to-the-hyunamdong-bookshop-9781639732425/",
     "category": "Fiction & Memoir",
     "publisher": "Bloomsbury",
-    "source": "bloomsbury.com"
+    "source": "bloomsbury.com",
+    "isbn": "9781639732425",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781639732425-L.jpg?default=false"
   },
   {
     "id": "gwangju-uprising-the-rebellion-for-democracy-in-south-korea",
@@ -396,7 +484,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/697249/gwangju-uprising-by-hwang-sok-yong-lee-jae-eui-and-jeon-yong-ho/",
     "category": "South Korea: Politics & Democracy",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-girl-with-seven-names-escape-from-north-korea",
@@ -405,7 +495,9 @@ window.BOOKS = [
     "url": "https://www.harpercollins.com/products/the-girl-with-seven-names-escape-from-north-korea-hyeonseo-lee?variant=32173126647842",
     "category": "Escape & Human Rights",
     "publisher": "HarperCollins",
-    "source": "harpercollins.com"
+    "source": "harpercollins.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "contested-embrace-transborder-membership-politics-in-twentie",
@@ -414,7 +506,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/asian-studies/contested-embrace",
     "category": "Diaspora & Migration",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "a-corpse-in-the-koryo",
@@ -423,7 +517,9 @@ window.BOOKS = [
     "url": "https://us.macmillan.com/books/9780312374310/acorpseinthekoryo/",
     "category": "Fiction & Memoir",
     "publisher": "Macmillan",
-    "source": "us.macmillan.com"
+    "source": "us.macmillan.com",
+    "isbn": "9780312374310",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780312374310-L.jpg?default=false"
   },
   {
     "id": "dear-leader-my-escape-from-north-korea",
@@ -432,7 +528,9 @@ window.BOOKS = [
     "url": "https://www.simonandschuster.com/books/Dear-Leader/Jang-Jin-sung/9781476766560",
     "category": "Escape & Human Rights",
     "publisher": "Simon & Schuster",
-    "source": "simonandschuster.com"
+    "source": "simonandschuster.com",
+    "isbn": "9781476766560",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781476766560-L.jpg?default=false"
   },
   {
     "id": "the-2020-commission-report-on-the-north-korean-nuclear-attac",
@@ -441,7 +539,9 @@ window.BOOKS = [
     "url": "https://www.harpercollins.com/products/the-2020-commission-report-on-the-north-korean-nuclear-attacks-against-the-us-jeffrey-lewis?variant=39934995922978",
     "category": "Fiction & Memoir",
     "publisher": "HarperCollins",
-    "source": "harpercollins.com"
+    "source": "harpercollins.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "china-s-hegemony-four-hundred-years-of-east-asian-domination",
@@ -450,7 +550,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/chinas-hegemony/9780231179744",
     "category": "History & Empire",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231179744",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231179744-L.jpg?default=false"
   },
   {
     "id": "north-korea-s-hidden-revolution-how-the-information-undergro",
@@ -459,7 +561,9 @@ window.BOOKS = [
     "url": "https://yalebooks.yale.edu/book/9780300217810/north-koreas-hidden-revolution/",
     "category": "North Korea: Society & Economy",
     "publisher": "Yale University Press",
-    "source": "yalebooks.yale.edu"
+    "source": "yalebooks.yale.edu",
+    "isbn": "9780300217810",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780300217810-L.jpg?default=false"
   },
   {
     "id": "the-hard-road-out-one-woman-s-escape-from-north-korea",
@@ -468,7 +572,9 @@ window.BOOKS = [
     "url": "https://www.harpercollins.com/products/the-hard-road-out-one-womans-escape-from-north-korea-jihyun-parkseh-lynn-chai?variant=40299088969762",
     "category": "Escape & Human Rights",
     "publisher": "HarperCollins",
-    "source": "harpercollins.com"
+    "source": "harpercollins.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "seeds-of-mobilization-the-authoritarian-roots-of-south-korea",
@@ -477,7 +583,9 @@ window.BOOKS = [
     "url": "https://press.umich.edu/Books/S/Seeds-of-Mobilization2",
     "category": "South Korea: Politics & Democracy",
     "publisher": "University of Michigan Press",
-    "source": "press.umich.edu"
+    "source": "press.umich.edu",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "under-the-same-sky-from-starvation-in-north-korea-to-salvati",
@@ -486,7 +594,9 @@ window.BOOKS = [
     "url": "https://www.harperacademic.com/book/9780544705272/under-the-same-sky/",
     "category": "Escape & Human Rights",
     "publisher": "HarperCollins",
-    "source": "harperacademic.com"
+    "source": "harperacademic.com",
+    "isbn": "9780544705272",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780544705272-L.jpg?default=false"
   },
   {
     "id": "border-of-water-and-ice-the-yalu-river-and-japan-s-empire-in",
@@ -495,7 +605,9 @@ window.BOOKS = [
     "url": "https://www.cornellpress.cornell.edu/book/9781501777370/border-of-water-and-ice/",
     "category": "History & Empire",
     "publisher": "Cornell University Press",
-    "source": "cornellpress.cornell.edu"
+    "source": "cornellpress.cornell.edu",
+    "isbn": "9781501777370",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781501777370-L.jpg?default=false"
   },
   {
     "id": "becoming-kim-jong-un",
@@ -504,7 +616,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/604727/becoming-kim-jong-un-by-jung-h-pak/",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "a-most-enterprising-country-north-korea-in-the-global-econom",
@@ -513,7 +627,9 @@ window.BOOKS = [
     "url": "https://www.cornellpress.cornell.edu/book/9781501704901/a-most-enterprising-country/",
     "category": "North Korea: Society & Economy",
     "publisher": "Cornell University Press",
-    "source": "cornellpress.cornell.edu"
+    "source": "cornellpress.cornell.edu",
+    "isbn": "9781501704901",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781501704901-L.jpg?default=false"
   },
   {
     "id": "the-aquariums-of-pyongyang-ten-years-in-the-north-korean-gul",
@@ -522,7 +638,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/chol-hwan-kang/the-aquariums-of-pyongyang/9780465004713/?lens=basic-books",
     "category": "Escape & Human Rights",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9780465004713",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780465004713-L.jpg?default=false"
   },
   {
     "id": "please-look-after-mom",
@@ -531,7 +649,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/203116/please-look-after-mom-by-kyung-sook-shin/",
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "a-river-in-darkness-one-man-s-escape-from-north-korea",
@@ -540,7 +660,9 @@ window.BOOKS = [
     "url": "https://www.barnesandnoble.com/w/a-river-in-darkness-masaji-ishikawa/1126160014",
     "category": "Escape & Human Rights",
     "publisher": "Barnes & Noble",
-    "source": "barnesandnoble.com"
+    "source": "barnesandnoble.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-korean-war",
@@ -549,7 +671,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/matthew-b-ridgway/the-korean-war/9780306802676/?lens=hachette-books",
     "category": "Korean War",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9780306802676",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780306802676-L.jpg?default=false"
   },
   {
     "id": "the-korean-war",
@@ -558,7 +682,9 @@ window.BOOKS = [
     "url": "https://www.simonandschuster.com/books/Korean-War/Max-Hastings/9781501131905",
     "category": "Korean War",
     "publisher": "Simon & Schuster",
-    "source": "simonandschuster.com"
+    "source": "simonandschuster.com",
+    "isbn": "9781501131905",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781501131905-L.jpg?default=false"
   },
   {
     "id": "supercorporate-distinction-and-participation-in-post-hierarc",
@@ -567,7 +693,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/asian-studies/supercorporate",
     "category": "South Korea: Society & Economy",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "crying-in-h-mart",
@@ -576,7 +704,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/612676/crying-in-h-mart-by-michelle-zauner/",
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "pachinko",
@@ -585,7 +715,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/min-jin-lee/pachinko-national-book-award-finalist/9781455569496/?lens=grand-central-publishing",
     "category": "Fiction & Memoir",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9781455569496",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781455569496-L.jpg?default=false"
   },
   {
     "id": "the-interrogation-rooms-of-the-korean-war-the-untold-history",
@@ -594,7 +726,9 @@ window.BOOKS = [
     "url": "https://press.princeton.edu/books/paperback/9780691210421/the-interrogation-rooms-of-the-korean-war",
     "category": "Korean War",
     "publisher": "Princeton University Press",
-    "source": "press.princeton.edu"
+    "source": "press.princeton.edu",
+    "isbn": "9780691210421",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780691210421-L.jpg?default=false"
   },
   {
     "id": "the-making-of-minjung-democracy-and-the-politics-of-represen",
@@ -603,7 +737,9 @@ window.BOOKS = [
     "url": "https://www.cornellpress.cornell.edu/book/9780801475733/the-making-of-minjung/",
     "category": "South Korea: Politics & Democracy",
     "publisher": "Cornell University Press",
-    "source": "cornellpress.cornell.edu"
+    "source": "cornellpress.cornell.edu",
+    "isbn": "9780801475733",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780801475733-L.jpg?default=false"
   },
   {
     "id": "shrimp-to-whale-south-korea-from-the-forgotten-war-to-k-pop",
@@ -612,7 +748,9 @@ window.BOOKS = [
     "url": "https://global.oup.com/academic/product/shrimp-to-whale-9780197764930?cc=us&lang=en&",
     "category": "History & Empire",
     "publisher": "Oxford University Press",
-    "source": "global.oup.com"
+    "source": "global.oup.com",
+    "isbn": "9780197764930",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780197764930-L.jpg?default=false"
   },
   {
     "id": "south-korea-s-grand-strategy-making-its-own-destiny",
@@ -621,7 +759,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/south-koreas-grand-strategy/9780231203234",
     "category": "Alliances & Regional Order",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231203234",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231203234-L.jpg?default=false"
   },
   {
     "id": "patterns-of-impunity-human-rights-in-north-korea-and-the-rol",
@@ -630,7 +770,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/patterns-impunity",
     "category": "Escape & Human Rights",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-invitation-only-zone-the-true-story-of-north-korea-s-abd",
@@ -639,7 +781,9 @@ window.BOOKS = [
     "url": "https://us.macmillan.com/books/9780374536725/theinvitationonlyzone/",
     "category": "Escape & Human Rights",
     "publisher": "Macmillan",
-    "source": "us.macmillan.com"
+    "source": "us.macmillan.com",
+    "isbn": "9780374536725",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780374536725-L.jpg?default=false"
   },
   {
     "id": "north-korea-kidnapped-my-daughter",
@@ -648,7 +792,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/194965/north-korea-kidnapped-my-daughter-by-sakie-yokota/",
     "category": "Escape & Human Rights",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "marching-through-suffering-loss-and-survival-in-north-korea",
@@ -657,7 +803,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/marching-through-suffering/9780231171359",
     "category": "Escape & Human Rights",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231171359",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231171359-L.jpg?default=false"
   },
   {
     "id": "south-korea-at-the-crossroads-autonomy-and-alliance-in-an-er",
@@ -666,7 +814,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/south-korea-at-the-crossroads/9780231185493",
     "category": "Alliances & Regional Order",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231185493",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231185493-L.jpg?default=false"
   },
   {
     "id": "korean-endgame-a-strategy-for-reunification-and-u-s-disengag",
@@ -675,7 +825,9 @@ window.BOOKS = [
     "url": "https://press.princeton.edu/books/paperback/9780691116266/korean-endgame",
     "category": "Alliances & Regional Order",
     "publisher": "Princeton University Press",
-    "source": "press.princeton.edu"
+    "source": "press.princeton.edu",
+    "isbn": "9780691116266",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780691116266-L.jpg?default=false"
   },
   {
     "id": "civic-activism-in-south-korea",
@@ -684,7 +836,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/civic-activism-in-south-korea/9780231211499",
     "category": "South Korea: Politics & Democracy",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231211499",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231211499-L.jpg?default=false"
   },
   {
     "id": "politics-of-the-north-korean-diaspora",
@@ -693,7 +847,9 @@ window.BOOKS = [
     "url": "https://www.cambridge.org/core/elements/abs/politics-of-the-north-korean-diaspora/8E00C18DAD49699A9CD3D923F4683FED",
     "category": "Diaspora & Migration",
     "publisher": "Cambridge University Press",
-    "source": "cambridge.org"
+    "source": "cambridge.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-other-great-game-the-opening-of-korea-and-the-birth-of-m",
@@ -702,7 +858,9 @@ window.BOOKS = [
     "url": "https://www.hup.harvard.edu/books/9780674983397",
     "category": "History & Empire",
     "publisher": "Harvard University Press",
-    "source": "hup.harvard.edu"
+    "source": "hup.harvard.edu",
+    "isbn": "9780674983397",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780674983397-L.jpg?default=false"
   },
   {
     "id": "hinge-points-an-inside-look-at-north-korea-s-nuclear-program",
@@ -711,7 +869,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/politics/hinge-points",
     "category": "North Korea: Nuclear & Security",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "k-culture-k-pop-cuisine-on-screen-and-more-celebrating-the-k",
@@ -720,7 +880,9 @@ window.BOOKS = [
     "url": "https://www.barnesandnoble.com/w/k-culture-simon-clair/1142973700",
     "category": "Culture & the Korean Wave",
     "publisher": "Barnes & Noble",
-    "source": "barnesandnoble.com"
+    "source": "barnesandnoble.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "boundless-winds-of-empire-rhetoric-and-ritual-in-early-choso",
@@ -729,7 +891,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/boundless-winds-of-empire/9780231205474",
     "category": "History & Empire",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231205474",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231205474-L.jpg?default=false"
   },
   {
     "id": "a-christmas-far-from-home",
@@ -738,7 +902,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/stanley-weintraub/a-christmas-far-from-home/9780306824135/?lens=hachette-books",
     "category": "Korean War",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9780306824135",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780306824135-L.jpg?default=false"
   },
   {
     "id": "famine-in-north-korea-markets-aid-and-reform",
@@ -747,7 +913,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/famine-in-north-korea/9780231140010",
     "category": "North Korea: Society & Economy",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231140010",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231140010-L.jpg?default=false"
   },
   {
     "id": "hard-target-sanctions-inducements-and-the-case-of-north-kore",
@@ -756,7 +924,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/asian-studies/hard-target",
     "category": "North Korea: Nuclear & Security",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "witness-to-transformation-refugee-insights-into-north-korea",
@@ -765,7 +935,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/witness-to-transformation/9780881324389",
     "category": "North Korea: Society & Economy",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780881324389",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780881324389-L.jpg?default=false"
   },
   {
     "id": "constructing-student-mobility-how-universities-recruit-stude",
@@ -774,7 +946,9 @@ window.BOOKS = [
     "url": "https://mitpress.mit.edu/9780262545143/constructing-student-mobility/",
     "category": "Diaspora & Migration",
     "publisher": "MIT Press",
-    "source": "mitpress.mit.edu"
+    "source": "mitpress.mit.edu",
+    "isbn": "9780262545143",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780262545143-L.jpg?default=false"
   },
   {
     "id": "millennial-north-korea-forbidden-media-and-living-creatively",
@@ -783,7 +957,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/asian-studies/millennial-north-korea",
     "category": "North Korea: Society & Economy",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "without-you-there-is-no-us",
@@ -792,7 +968,9 @@ window.BOOKS = [
     "url": "https://www.penguinrandomhouse.com/books/207216/without-you-there-is-no-us-by-suki-kim/",
     "category": "Fiction & Memoir",
     "publisher": "Penguin Random House",
-    "source": "penguinrandomhouse.com"
+    "source": "penguinrandomhouse.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-sister-north-korea-s-kim-yo-jong-the-most-dangerous-woma",
@@ -801,7 +979,9 @@ window.BOOKS = [
     "url": "https://www.hachettebookgroup.com/titles/sung-yoon-lee/the-sister/9781541704121/?lens=publicaffairs",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Hachette",
-    "source": "hachettebookgroup.com"
+    "source": "hachettebookgroup.com",
+    "isbn": "9781541704121",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781541704121-L.jpg?default=false"
   },
   {
     "id": "everyday-life-in-the-north-korean-revolution-1945-1950",
@@ -810,7 +990,9 @@ window.BOOKS = [
     "url": "https://www.cornellpress.cornell.edu/book/9781501705687/everyday-life-in-the-north-korean-revolution-19451950/",
     "category": "History & Empire",
     "publisher": "Cornell University Press",
-    "source": "cornellpress.cornell.edu"
+    "source": "cornellpress.cornell.edu",
+    "isbn": "9781501705687",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781501705687-L.jpg?default=false"
   },
   {
     "id": "this-kind-of-war-the-classic-korean-war-history-fiftieth-ann",
@@ -819,7 +1001,9 @@ window.BOOKS = [
     "url": "https://www.nebraskapress.unl.edu/potomac/9781574883343/this-kind-of-war/",
     "category": "Korean War",
     "publisher": "University of Nebraska Press",
-    "source": "nebraskapress.unl.edu"
+    "source": "nebraskapress.unl.edu",
+    "isbn": "9781574883343",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781574883343-L.jpg?default=false"
   },
   {
     "id": "japan-south-korea-and-the-united-states-nuclear-umbrella",
@@ -828,7 +1012,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/japan-south-korea-and-the-united-states-nuclear-umbrella/9780231157995",
     "category": "Alliances & Regional Order",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231157995",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231157995-L.jpg?default=false"
   },
   {
     "id": "passcode-to-the-third-floor-an-insider-s-account-of-life-amo",
@@ -837,7 +1023,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/passcode-to-the-third-floor/9780231198868",
     "category": "Escape & Human Rights",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231198868",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231198868-L.jpg?default=false"
   },
   {
     "id": "alignment-despite-antagonism-the-united-states-korea-japan-s",
@@ -846,7 +1034,9 @@ window.BOOKS = [
     "url": "https://www.sup.org/books/politics/alignment-despite-antagonism",
     "category": "Alliances & Regional Order",
     "publisher": "Stanford University Press",
-    "source": "sup.org"
+    "source": "sup.org",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "the-black-box-demystifying-the-study-of-korean-unification-a",
@@ -855,7 +1045,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/the-black-box/9780231558730",
     "category": "North Korea: Regime & Leadership",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231558730",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231558730-L.jpg?default=false"
   },
   {
     "id": "the-impossible-state",
@@ -864,7 +1056,9 @@ window.BOOKS = [
     "url": "https://www.harpercollins.com/products/the-impossible-state-updated-edition-victor-cha?variant=32207276933154",
     "category": "North Korea: Regime & Leadership",
     "publisher": "HarperCollins",
-    "source": "harpercollins.com"
+    "source": "harpercollins.com",
+    "isbn": null,
+    "cover": null
   },
   {
     "id": "nuclear-north-korea",
@@ -873,7 +1067,9 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/nuclear-north-korea/9780231189231",
     "category": "North Korea: Nuclear & Security",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231189231",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231189231-L.jpg?default=false"
   },
   {
     "id": "korea-a-new-history-of-south-and-north",
@@ -882,7 +1078,9 @@ window.BOOKS = [
     "url": "https://yalebooks.yale.edu/book/9780300278705/korea/",
     "category": "History & Empire",
     "publisher": "Yale University Press",
-    "source": "yalebooks.yale.edu"
+    "source": "yalebooks.yale.edu",
+    "isbn": "9780300278705",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780300278705-L.jpg?default=false"
   },
   {
     "id": "rethinking-the-korean-war-a-new-diplomatic-and-strategic-his",
@@ -891,7 +1089,9 @@ window.BOOKS = [
     "url": "https://press.princeton.edu/books/paperback/9780691118475/rethinking-the-korean-war",
     "category": "Korean War",
     "publisher": "Princeton University Press",
-    "source": "press.princeton.edu"
+    "source": "press.princeton.edu",
+    "isbn": "9780691118475",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780691118475-L.jpg?default=false"
   },
   {
     "id": "a-misunderstood-friendship-mao-zedong-kim-il-sung-and-sino-n",
@@ -900,6 +1100,8 @@ window.BOOKS = [
     "url": "https://cup.columbia.edu/book/a-misunderstood-friendship/9780231200554",
     "category": "Alliances & Regional Order",
     "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu"
+    "source": "cup.columbia.edu",
+    "isbn": "9780231200554",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780231200554-L.jpg?default=false"
   }
 ];

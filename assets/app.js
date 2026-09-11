@@ -8,8 +8,8 @@
 
   var books = Array.isArray(window.BOOKS) ? window.BOOKS.slice() : [];
 
-  /* A colour per theme, used for the generated covers and the dot on
-     each theme chip. Anything not listed falls back to slate. */
+  /* Tint for the typographic stand-in shown when a book has no cover
+     image, or when the image fails to load. */
   var HUES = {
     'Korean War':                        '#7c2d2a',
     'History & Empire':                  '#8a5a2b',
@@ -26,32 +26,44 @@
   };
   var FALLBACK_HUE = '#48526b';
 
+  var SORTS = [
+    { id: 'author',    label: 'Author A–Z' },
+    { id: 'title',     label: 'Title A–Z' },
+    { id: 'category',  label: 'Theme' },
+    { id: 'publisher', label: 'Publisher' }
+  ];
+
   var els = {
-    books:  document.getElementById('books'),
-    chips:  document.getElementById('chips'),
-    search: document.getElementById('search'),
-    sort:   document.getElementById('sort'),
-    count:  document.querySelector('.count'),
+    grid:   document.getElementById('grid'),
     empty:  document.getElementById('empty'),
+    search: document.getElementById('search'),
     clear:  document.querySelector('[data-clear]'),
-    views:  document.querySelectorAll('[data-view]')
+    count:  document.querySelector('.count'),
+    peek:   document.getElementById('peek')
   };
 
-  var state = { q: '', category: 'All', sort: 'author', view: 'grid' };
+  var peekEls = {
+    theme:  document.getElementById('peek-theme'),
+    title:  document.getElementById('peek-title'),
+    author: document.getElementById('peek-author'),
+    pub:    document.getElementById('peek-pub'),
+    url:    document.getElementById('peek-url')
+  };
+
+  var state = { q: '', category: 'All', publisher: 'All', sort: 'author' };
+
+  var COMPARE = new Intl.Collator('en', { sensitivity: 'base' }).compare;
+  var coarse = window.matchMedia('(hover: none)').matches;
 
   /* --- helpers ------------------------------------------------- */
 
-  function hue(cat) {
-    return HUES[cat] || FALLBACK_HUE;
-  }
+  function hue(cat) { return HUES[cat] || FALLBACK_HUE; }
 
   /* Drop leading articles so "The Vegetarian" files under V. */
-  function titleKey(t) {
-    return t.replace(/^(the|a|an)\s+/i, '').toLowerCase();
-  }
+  function titleKey(t) { return t.replace(/^(the|a|an)\s+/i, '').toLowerCase(); }
 
-  /* Fold accents, curly quotes and dashes so "Choson" finds
-     "Chosŏn" and a typed hyphen matches an en dash. */
+  /* Fold accents, curly quotes and dashes so "Choson" finds "Chosŏn"
+     and a typed hyphen matches an en dash. */
   function norm(s) {
     return (s || '')
       .normalize('NFD')
@@ -62,28 +74,24 @@
       .toLowerCase();
   }
 
-  var COMPARE = new Intl.Collator('en', { sensitivity: 'base' }).compare;
-
   function haystack(b) {
-    if (!b._hay) {
-      b._hay = norm([b.title, b.author, b.publisher, b.category].join('  '));
-    }
+    if (!b._hay) b._hay = norm([b.title, b.author, b.publisher, b.category].join('  '));
     return b._hay;
   }
 
-  /* --- filtering & sorting ------------------------------------- */
+  /* --- filter & sort ------------------------------------------- */
 
   function visible() {
     var terms = norm(state.q).split(/\s+/).filter(Boolean);
 
     var out = books.filter(function (b) {
       if (state.category !== 'All' && b.category !== state.category) return false;
+      if (state.publisher !== 'All' && b.publisher !== state.publisher) return false;
       if (!terms.length) return true;
       var hay = haystack(b);
       return terms.every(function (t) { return hay.indexOf(t) !== -1; });
     });
 
-    /* Sort last so an unmapped publisher lands at the end. */
     var LAST = '￿';
     var by = {
       author: function (a, b) {
@@ -103,87 +111,241 @@
     return out.sort(by[state.sort] || by.author);
   }
 
-  /* --- rendering ----------------------------------------------- */
+  /* --- tiles ---------------------------------------------------- */
 
-  function bookNode(b, index) {
+  function fallbackNode(b) {
+    var box = document.createElement('span');
+    box.className = 'fallback';
+
+    var t = document.createElement('span');
+    t.className = 'fb-title';
+    t.textContent = b.title;
+
+    var a = document.createElement('span');
+    a.className = 'fb-author';
+    a.textContent = b.author;
+
+    box.appendChild(t);
+    box.appendChild(a);
+    return box;
+  }
+
+  function tileNode(b) {
     var li = document.createElement('li');
-    li.className = 'book';
-    li.style.setProperty('--hue', hue(b.category));
+    li.className = 'tile';
 
     var a = document.createElement('a');
     a.href = b.url;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
+    a.style.setProperty('--fallback-bg', hue(b.category));
+    /* The cover art carries no text for a screen reader, so the link
+       states the book itself. */
+    a.setAttribute('aria-label', b.title + ' by ' + b.author);
+    a._book = b;
 
-    var num = document.createElement('span');
-    num.className = 'num';
-    num.textContent = String(index + 1).padStart(2, '0');
-
-    /* The cover is decorative: it repeats the title and author that
-       the .meta block already states, so screen readers skip it. */
-    var cover = document.createElement('span');
-    cover.className = 'cover';
-    cover.setAttribute('aria-hidden', 'true');
-
-    var rule = document.createElement('span');
-    rule.className = 'cover-rule';
-    cover.appendChild(rule);
-
-    var ct = document.createElement('span');
-    ct.className = 'cover-title';
-    ct.textContent = b.title;
-    cover.appendChild(ct);
-
-    var ca = document.createElement('span');
-    ca.className = 'cover-author';
-    ca.textContent = b.author;
-    cover.appendChild(ca);
-
-    var meta = document.createElement('span');
-    meta.className = 'meta';
-
-    var t = document.createElement('span');
-    t.className = 't';
-    t.textContent = b.title;
-
-    var au = document.createElement('span');
-    au.className = 'a';
-    au.textContent = b.author;
-
-    meta.appendChild(t);
-    meta.appendChild(au);
-
-    if (b.publisher) {
-      var p = document.createElement('span');
-      p.className = 'p';
-      p.textContent = b.publisher;
-      meta.appendChild(p);
+    if (b.cover) {
+      var img = document.createElement('img');
+      img.src = b.cover;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      /* Open Library 404s when it has no cover for the ISBN; swap in
+         the typographic stand-in when that happens. */
+      img.addEventListener('error', function () {
+        img.remove();
+        a.appendChild(fallbackNode(b));
+      }, { once: true });
+      a.appendChild(img);
+    } else {
+      a.appendChild(fallbackNode(b));
     }
 
-    var tag = document.createElement('span');
-    tag.className = 'tag';
-    tag.textContent = b.category;
-
-    a.appendChild(num);
-    a.appendChild(cover);
-    a.appendChild(meta);
-    a.appendChild(tag);
     li.appendChild(a);
     return li;
   }
 
+  /* --- the peek card -------------------------------------------- */
+
+  var peekTimer = null;
+  var peekFor = null;
+
+  function showPeek(anchor) {
+    var b = anchor._book;
+    if (!b) return;
+    peekFor = anchor;
+
+    peekEls.theme.textContent = b.category;
+    peekEls.title.textContent = b.title;
+    peekEls.author.textContent = b.author;
+    peekEls.pub.textContent = b.publisher || b.source || '';
+    peekEls.url.href = b.url;
+
+    els.peek.hidden = false;
+    /* Measure after it is laid out, then place it. */
+    var r = anchor.getBoundingClientRect();
+    var p = els.peek.getBoundingClientRect();
+    var pad = 10;
+
+    var left = r.right + pad;
+    if (left + p.width > window.innerWidth - pad) left = r.left - p.width - pad;
+    if (left < pad) left = Math.max(pad, (window.innerWidth - p.width) / 2);
+
+    var top = r.top + (r.height - p.height) / 2;
+    top = Math.max(pad, Math.min(top, window.innerHeight - p.height - pad));
+
+    els.peek.style.left = Math.round(left) + 'px';
+    els.peek.style.top = Math.round(top) + 'px';
+    els.peek.classList.add('on');
+    if (coarse) els.peek.classList.add('interactive');
+  }
+
+  function hidePeek() {
+    peekFor = null;
+    els.peek.classList.remove('on', 'interactive');
+    els.peek.hidden = true;
+  }
+
+  function scheduleHide() {
+    clearTimeout(peekTimer);
+    peekTimer = setTimeout(hidePeek, 90);
+  }
+
+  els.grid.addEventListener('pointerover', function (e) {
+    if (coarse) return;
+    var a = e.target.closest('.tile a');
+    if (!a || a === peekFor) return;
+    clearTimeout(peekTimer);
+    showPeek(a);
+  });
+
+  els.grid.addEventListener('pointerout', function (e) {
+    if (coarse) return;
+    var a = e.target.closest('.tile a');
+    if (!a) return;
+    if (e.relatedTarget && a.contains(e.relatedTarget)) return;
+    scheduleHide();
+  });
+
+  els.grid.addEventListener('focusin', function (e) {
+    var a = e.target.closest('.tile a');
+    if (a) showPeek(a);
+  });
+  els.grid.addEventListener('focusout', scheduleHide);
+
+  /* On a touch screen there is no hover, so the first tap opens the
+     card and the link inside it does the navigating. */
+  els.grid.addEventListener('click', function (e) {
+    if (!coarse) return;
+    var a = e.target.closest('.tile a');
+    if (!a) return;
+    if (peekFor === a) return;      // tapped again: let the link through
+    e.preventDefault();
+    showPeek(a);
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!coarse || !peekFor) return;
+    if (e.target.closest('#peek') || e.target.closest('.tile a')) return;
+    hidePeek();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && peekFor) hidePeek();
+  });
+
+  window.addEventListener('scroll', function () { if (peekFor) hidePeek(); }, { passive: true });
+  window.addEventListener('resize', function () { if (peekFor) hidePeek(); });
+
+  /* --- filter columns ------------------------------------------- */
+
+  function tally(key) {
+    var counts = {};
+    books.forEach(function (b) {
+      var v = b[key];
+      if (v) counts[v] = (counts[v] || 0) + 1;
+    });
+    return counts;
+  }
+
+  function buildOptions(group, rows) {
+    var ul = document.querySelector('[data-group="' + group + '"]');
+    var frag = document.createDocumentFragment();
+
+    rows.forEach(function (row) {
+      var li = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.value = row.id;
+      btn.setAttribute('aria-pressed', String(state[group] === row.id));
+      btn.appendChild(document.createTextNode(row.label));
+
+      if (row.n != null) {
+        var n = document.createElement('span');
+        n.className = 'n';
+        n.textContent = row.n;
+        btn.appendChild(n);
+      }
+
+      li.appendChild(btn);
+      frag.appendChild(li);
+    });
+
+    ul.replaceChildren(frag);
+  }
+
+  function buildFilters() {
+    buildOptions('sort', SORTS);
+
+    var cats = tally('category');
+    buildOptions('category', [{ id: 'All', label: 'All', n: books.length }].concat(
+      Object.keys(cats).sort(COMPARE).map(function (c) {
+        return { id: c, label: c, n: cats[c] };
+      })
+    ));
+
+    var pubs = tally('publisher');
+    buildOptions('publisher', [{ id: 'All', label: 'All', n: books.length }].concat(
+      Object.keys(pubs).sort(COMPARE).map(function (p) {
+        return { id: p, label: p, n: pubs[p] };
+      })
+    ));
+  }
+
+  function markGroup(group) {
+    document.querySelectorAll('[data-group="' + group + '"] button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.value === state[group]));
+    });
+  }
+
+  document.querySelector('.filters').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-value]');
+    if (!btn) return;
+    var group = btn.closest('[data-group]').dataset.group;
+    var value = btn.dataset.value;
+
+    /* Re-picking the active theme or publisher clears it; sort always
+       has exactly one choice. */
+    if (group !== 'sort' && state[group] === value) value = 'All';
+    state[group] = value;
+
+    markGroup(group);
+    render();
+  });
+
+  /* --- render --------------------------------------------------- */
+
   function render() {
+    hidePeek();
     var list = visible();
 
     var frag = document.createDocumentFragment();
-    list.forEach(function (b, i) { frag.appendChild(bookNode(b, i)); });
+    list.forEach(function (b) { frag.appendChild(tileNode(b)); });
+    els.grid.replaceChildren(frag);
 
-    els.books.replaceChildren(frag);
-    els.books.dataset.view = state.view;
-
-    els.count.innerHTML = (list.length === books.length)
-      ? 'All <strong>' + books.length + '</strong> books'
-      : '<strong>' + list.length + '</strong> of ' + books.length + ' books';
+    els.count.textContent = (list.length === books.length)
+      ? books.length + ' books'
+      : list.length + ' of ' + books.length + ' books';
 
     els.empty.hidden = list.length > 0;
     els.clear.hidden = !state.q;
@@ -191,112 +353,39 @@
     syncUrl();
   }
 
-  function renderChips() {
-    var counts = {};
-    books.forEach(function (b) { counts[b.category] = (counts[b.category] || 0) + 1; });
-
-    var rows = [['All', books.length]].concat(
-      Object.keys(counts).sort(COMPARE).map(function (c) { return [c, counts[c]]; })
-    );
-
-    var frag = document.createDocumentFragment();
-
-    rows.forEach(function (pair) {
-      var name = pair[0];
-      var li = document.createElement('li');
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.category = name;
-      btn.setAttribute('aria-pressed', String(state.category === name));
-
-      if (name !== 'All') {
-        var sw = document.createElement('span');
-        sw.className = 'swatch';
-        sw.style.setProperty('--chip', hue(name));
-        btn.appendChild(sw);
-      }
-
-      btn.appendChild(document.createTextNode(name));
-
-      var n = document.createElement('span');
-      n.className = 'n';
-      n.textContent = pair[1];
-      btn.appendChild(n);
-
-      li.appendChild(btn);
-      frag.appendChild(li);
-    });
-
-    els.chips.replaceChildren(frag);
-  }
-
-  function markChips() {
-    els.chips.querySelectorAll('button').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.category === state.category));
-    });
-  }
-
-  function renderStats() {
-    function uniq(key) {
-      var seen = Object.create(null), n = 0;
-      books.forEach(function (b) {
-        var v = b[key];
-        if (v && !seen[v]) { seen[v] = 1; n++; }
-      });
-      return n;
-    }
-    function set(name, value) {
-      var el = document.querySelector('[data-stat="' + name + '"]');
-      if (el) el.textContent = value;
-    }
-    set('books', books.length);
-    set('authors', uniq('author'));
-    set('categories', uniq('category'));
-    set('publishers', uniq('publisher'));
-  }
-
-  /* --- URL sync ------------------------------------------------ */
+  /* --- URL sync ------------------------------------------------- */
 
   function syncUrl() {
     var p = new URLSearchParams();
     if (state.q) p.set('q', state.q);
     if (state.category !== 'All') p.set('theme', state.category);
+    if (state.publisher !== 'All') p.set('publisher', state.publisher);
     if (state.sort !== 'author') p.set('sort', state.sort);
-    if (state.view !== 'grid') p.set('view', state.view);
-
     var qs = p.toString();
     history.replaceState(null, '', qs ? '?' + qs : location.pathname);
   }
 
   function readUrl() {
     var p = new URLSearchParams(location.search);
-
     state.q = p.get('q') || '';
 
     var theme = p.get('theme');
-    var known = books.some(function (b) { return b.category === theme; });
-    if (theme && known) state.category = theme;
+    if (theme && books.some(function (b) { return b.category === theme; })) state.category = theme;
+
+    var pub = p.get('publisher');
+    if (pub && books.some(function (b) { return b.publisher === pub; })) state.publisher = pub;
 
     var sort = p.get('sort');
-    if (['author', 'title', 'category', 'publisher'].indexOf(sort) !== -1) state.sort = sort;
-
-    if (p.get('view') === 'list') state.view = 'list';
+    if (SORTS.some(function (s) { return s.id === sort; })) state.sort = sort;
 
     els.search.value = state.q;
-    els.sort.value = state.sort;
-    els.views.forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.view === state.view));
-    });
   }
 
-  /* --- events -------------------------------------------------- */
+  /* --- search --------------------------------------------------- */
 
   function debounce(fn, ms) {
     var id;
-    return function () {
-      clearTimeout(id);
-      id = setTimeout(fn, ms);
-    };
+    return function () { clearTimeout(id); id = setTimeout(fn, ms); };
   }
 
   function resetSearch() {
@@ -312,58 +401,22 @@
   }, 120));
 
   els.search.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && els.search.value) {
-      e.preventDefault();
-      resetSearch();
-    }
+    if (e.key === 'Escape' && els.search.value) { e.preventDefault(); resetSearch(); }
   });
 
   els.clear.addEventListener('click', resetSearch);
 
-  els.sort.addEventListener('change', function () {
-    state.sort = els.sort.value;
-    render();
-  });
-
-  els.chips.addEventListener('click', function (e) {
-    var btn = e.target.closest('button[data-category]');
-    if (!btn) return;
-    /* Clicking the active theme again clears the filter. */
-    state.category = (state.category === btn.dataset.category) ? 'All' : btn.dataset.category;
-    markChips();
-    render();
-  });
-
-  els.views.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      state.view = btn.dataset.view;
-      els.views.forEach(function (b) {
-        b.setAttribute('aria-pressed', String(b === btn));
-      });
-      render();
-    });
-  });
-
   els.empty.querySelector('[data-reset]').addEventListener('click', function () {
     state.q = '';
     state.category = 'All';
+    state.publisher = 'All';
     els.search.value = '';
-    markChips();
+    markGroup('category');
+    markGroup('publisher');
     render();
-    els.search.focus();
   });
 
-  /* Press "/" anywhere to jump to the search box. */
-  document.addEventListener('keydown', function (e) {
-    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
-    var tag = (e.target.tagName || '').toLowerCase();
-    if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
-    e.preventDefault();
-    els.search.focus();
-    els.search.select();
-  });
-
-  /* --- boot ---------------------------------------------------- */
+  /* --- boot ----------------------------------------------------- */
 
   if (!books.length) {
     els.count.textContent = 'The book list failed to load.';
@@ -371,7 +424,6 @@
   }
 
   readUrl();
-  renderStats();
-  renderChips();
+  buildFilters();
   render();
 })();

@@ -5,10 +5,14 @@ A browsable shelf of 100 books on Korea, built as a static page for
 
 ## Status
 
-The **data layer is complete**. The **visual design is a first pass, not final** —
-it was meant to match the layout of `minchi.co/books/`, but that site is blocked by
-the network egress policy in the environment this was built in, so the current
-design is an original one. It should be restyled once the reference is available.
+Data layer complete. Layout follows the structure of `minchi.co/books/` — pale
+ground, name and nav at top left, filter columns as plain text lists under hairline
+rules, then a dense wall of covers with a hover detail card.
+
+**58 of 100 books have a real cover image.** Those are resolved from an ISBN found
+in the book's own publisher link. The other 42 link by slug or product id, so no
+ISBN can be extracted and they fall back to a generated typographic cover. See
+*Covers* below.
 
 ## What's here
 
@@ -53,9 +57,19 @@ One correction was made to the source data: `Brad Glossermana nd Scott A. Snyder
 
 ## Covers
 
-There are no cover images. Each book gets a generated typographic cover tinted by
-its theme. Swapping in real cover art means adding an `image` field to `books.js`
-and rendering it in `bookNode()` in `assets/app.js`.
+Cover images come from Open Library, addressed by ISBN:
+
+```
+https://covers.openlibrary.org/b/isbn/<isbn>-L.jpg?default=false
+```
+
+`default=false` makes the CDN return 404 rather than a blank placeholder, so the
+page can tell a miss from a hit. Any book with no `cover`, or whose image 404s,
+falls back to a generated typographic cover tinted by theme — handled by the
+`error` listener in `tileNode()` in `assets/app.js`.
+
+To use your own artwork instead, set `cover` on a book to any URL or local path.
+The 42 books without an ISBN are the ones worth doing first.
 
 ## Editing the list
 
@@ -88,8 +102,8 @@ Georgia and the system sans, which is fine.
 ## Features
 
 - Search across title, author, publisher, and theme (accent- and quote-insensitive)
-- Filter by theme; click the active theme again to clear it
+- Filter by theme or publisher; click an active option again to clear it
 - Sort by author, title, theme, or publisher
-- Covers and list views
+- Hover (or tap, on touch) a cover for a detail card with a link to the publisher
 - Filter state is kept in the URL, so any view can be linked to
-- Light and dark, responsive to phone widths, keyboard accessible (`/` focuses search)
+- Responsive to phone widths, keyboard accessible
