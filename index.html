@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>100 Books on Korea — Andy Lim</title>
+<meta name="description" content="A working shelf of 100 books on Korea — the war, the two states, the alliance, the culture, and the people. Browse by theme, author, or publisher.">
+<meta name="color-scheme" content="light dark">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="100 Books on Korea">
+<meta property="og:description" content="A working shelf of 100 books on Korea — the war, the two states, the alliance, the culture, and the people.">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#shelf">Skip to the shelf</a>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">A reading list</p>
+    <h1>100 Books<br><span class="hero-on">on</span> Korea</h1>
+    <div class="hero-body">
+      <p class="lede">
+        One shelf, a hundred titles. The war and its long aftermath, two states built from
+        the same country, an alliance that keeps getting renegotiated, and the writers who
+        made the peninsula legible to the rest of us.
+      </p>
+      <p class="sub">
+        Every entry links straight to the publisher. Filter by theme, search by author or
+        title, and read in whatever order you like — nothing here is ranked.
+      </p>
+    </div>
+    <dl class="stats">
+      <div><dt>Titles</dt><dd data-stat="books">100</dd></div>
+      <div><dt>Authors</dt><dd data-stat="authors">—</dd></div>
+      <div><dt>Themes</dt><dd data-stat="categories">—</dd></div>
+      <div><dt>Publishers</dt><dd data-stat="publishers">—</dd></div>
+    </dl>
+  </div>
+</header>
+
+<nav class="toolbar" aria-label="Filter and sort the shelf">
+  <div class="wrap toolbar-inner">
+    <div class="search">
+      <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M13.5 13.5 17.5 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <label class="visually-hidden" for="search">Search by title, author, or publisher</label>
+      <input id="search" type="search" placeholder="Search title, author, publisher…" autocomplete="off" spellcheck="false">
+      <button type="button" class="search-clear" data-clear hidden aria-label="Clear search">&times;</button>
+    </div>
+
+    <div class="controls">
+      <label class="visually-hidden" for="sort">Sort the shelf</label>
+      <select id="sort">
+        <option value="author">Author A–Z</option>
+        <option value="title">Title A–Z</option>
+        <option value="category">Theme</option>
+        <option value="publisher">Publisher</option>
+      </select>
+
+      <div class="view" role="group" aria-label="View">
+        <button type="button" data-view="grid" aria-pressed="true">Covers</button>
+        <button type="button" data-view="list" aria-pressed="false">List</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <ul class="chips" id="chips" aria-label="Filter by theme"></ul>
+  </div>
+</nav>
+
+<main id="shelf" class="wrap">
+  <p class="count" role="status" aria-live="polite"></p>
+  <ol class="books" id="books"></ol>
+  <p class="empty" id="empty" hidden>
+    Nothing on the shelf matches that.
+    <button type="button" data-reset>Clear the filters</button>
+  </p>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Compiled by <strong>Andy Lim</strong>. Links go to each book's publisher page.</p>
+    <p class="foot-note">Themes are my own rough shelving, not the publishers' categories.</p>
+  </div>
+</footer>
+
+<script src="books.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
