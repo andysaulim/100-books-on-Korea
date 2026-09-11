@@ -24,6 +24,7 @@ from urllib.parse import urljoin
 
 ROOT = pathlib.Path(__file__).parent
 OUT = ROOT / "dist" / "books.html"
+CHECK_OUT = ROOT / "dist" / "cover-check.html"
 
 # Rewritten by --base. Each is (attribute carrying the URL, relative value).
 ABSOLUTE_URLS = [
@@ -100,6 +101,17 @@ def main():
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(html, encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size:,} bytes)")
+
+    # The cover audit page needs the same data inlined so it can be opened
+    # straight from a downloads folder.
+    check = sub_once(
+        read("tools/cover-check.html"),
+        r"<!--BOOKS-->",
+        "<script>\n" + guard(read("books.js"), "books.js").strip() + "\n</script>",
+        "books placeholder",
+    )
+    CHECK_OUT.write_text(check, encoding="utf-8")
+    print(f"wrote {CHECK_OUT.relative_to(ROOT)} ({CHECK_OUT.stat().st_size:,} bytes)")
     if args.base:
         print(f"  canonical and Open Graph URLs resolved against {args.base}")
     else:

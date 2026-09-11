@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Cover check — Top 100 Books on Korea</title>
+<style>
+  :root {
+    --paper: #faf7f0; --ink: #191813; --muted: #7d7668;
+    --rule: #e4ded0; --card: #fff; --accent: #9c3d21; --quiet: #565043;
+    --ok: #37604c; --bad: #9c3d21;
+    --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem clamp(1rem, 4vw, 3rem) 4rem;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--serif); font-size: 16px; line-height: 1.5;
+  }
+  h1 { margin: 0 0 .4rem; font-size: 1.8rem; font-weight: 600; letter-spacing: -.015em; }
+  .lede { margin: 0 0 1.5rem; max-width: 62ch; color: var(--quiet); font-size: .95rem; }
+  button {
+    font: inherit; padding: .4rem 1rem; cursor: pointer;
+    color: var(--paper); background: var(--ink); border: 0; border-radius: 2px;
+  }
+  button.ghost { color: var(--muted); background: none; border: 1px solid var(--rule); }
+  button.ghost:hover { color: var(--ink); border-color: var(--ink); }
+  button[disabled] { opacity: .45; cursor: default; }
+  .bar { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin-bottom: 1.25rem; }
+  .tally { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: .9rem; color: var(--quiet); }
+  .tally b { font-variant-numeric: tabular-nums; }
+  progress { width: min(22rem, 100%); height: .5rem; }
+  .wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: .4rem .7rem .4rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  td.n { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.isbn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; color: var(--muted); white-space: nowrap; }
+  .src { font-size: .78rem; white-space: nowrap; }
+  .src.ok { color: var(--ok); }
+  .src.bad { color: var(--bad); font-weight: 600; }
+  .src.pending { color: var(--muted); }
+  tr.bad td { background: color-mix(in srgb, var(--bad) 6%, transparent); }
+  .thumb { width: 34px; height: 51px; object-fit: cover; background: var(--rule); border-radius: 1px; }
+  .out { width: 100%; min-height: 9rem; margin-top: .8rem; padding: .7rem;
+         font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem;
+         background: var(--card); border: 1px solid var(--rule); border-radius: 2px; }
+  details { margin-top: 1.75rem; }
+  summary { cursor: pointer; font-size: .9rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>Cover check</h1>
+<p class="lede">
+  Runs the shelf's own cover chain against all 100 books, in this browser, and
+  reports which source each cover came from. The shelf itself cannot be checked
+  from a sandbox because the cover hosts are unreachable there, so this page does
+  it where the requests actually work. Nothing is uploaded anywhere.
+</p>
+
+<div class="bar">
+  <button id="run">Run the check</button>
+  <button id="copy" class="ghost" disabled>Copy the missing list</button>
+  <progress id="prog" value="0" max="100"></progress>
+</div>
+
+<div class="tally" id="tally"></div>
+
+<div class="wrap">
+  <table>
+    <thead>
+      <tr><th></th><th>#</th><th>Book</th><th>ISBN</th><th>Cover from</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+
+<details>
+  <summary>Missing list, as text</summary>
+  <textarea class="out" id="out" readonly placeholder="Run the check first."></textarea>
+</details>
+
+<!--BOOKS-->
+
+<script>
+(function () {
+  'use strict';
+
+  var books = window.BOOKS || [];
+  var rows = document.getElementById('rows');
+  var prog = document.getElementById('prog');
+  var tally = document.getElementById('tally');
+  var out = document.getElementById('out');
+  var runBtn = document.getElementById('run');
+  var copyBtn = document.getElementById('copy');
+
+  /* Mirrors loadCover() in assets/app.js — keep the two in step. */
+  var LABEL = {
+    ol:     'Open Library (ISBN)',
+    g13:    'Google Books (ISBN-13)',
+    g10:    'Google Books (ISBN-10)',
+    search: 'Open Library (title search)',
+    none:   'MISSING'
+  };
+
+  function norm(s) {
+    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
+      .replace(/[‐-―]/g, '-').toLowerCase();
+  }
+
+  function isbn10(i13) {
+    if (!/^978\d{10}$/.test(i13)) return null;
+    var core = i13.slice(3, 12), sum = 0;
+    for (var i = 0; i < 9; i++) sum += (10 - i) * +core[i];
+    var c = (11 - (sum % 11)) % 11;
+    return core + (c === 10 ? 'X' : String(c));
+  }
+
+  function googleCover(isbn) {
+    return 'https://books.google.com/books/content?vid=ISBN' + isbn +
+           '&printsec=frontcover&img=1&zoom=1';
+  }
+
+  function firstAuthor(a) {
+    return (a || '').split(/\s+(?:and|&|with)\s+|,\s*/)[0].trim();
+  }
+
+  /* Resolves to the URL if it loads at a usable size, else null. */
+  function tryImage(url) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.referrerPolicy = 'no-referrer';
+      img.onload = function () {
+        resolve(img.naturalWidth >= 50 && img.naturalHeight >= 50 ? url : null);
+      };
+      img.onerror = function () { resolve(null); };
+      img.src = url;
+    });
+  }
+
+  function searchCover(b) {
+    var url = 'https://openlibrary.org/search.json?limit=3&fields=title,cover_i' +
+              '&title=' + encodeURIComponent(b.title) +
+              '&author=' + encodeURIComponent(firstAuthor(b.author));
+    return fetch(url)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.docs) return null;
+        var want = norm(b.title);
+        for (var i = 0; i < j.docs.length; i++) {
+          var d = j.docs[i];
+          if (!d.cover_i || !d.title) continue;
+          var got = norm(d.title);
+          if (want.indexOf(got) === 0 || got.indexOf(want) === 0) {
+            return 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-L.jpg';
+          }
+        }
+        return null;
+      })
+      .catch(function () { return null; });
+  }
+
+  function resolve(b) {
+    var steps = [];
+    if (b.cover) steps.push(['ol', b.cover]);
+    if (b.isbn) {
+      steps.push(['g13', googleCover(b.isbn)]);
+      var i10 = isbn10(b.isbn);
+      if (i10) steps.push(['g10', googleCover(i10)]);
+    }
+
+    var i = 0;
+    function step() {
+      if (i >= steps.length) {
+        return searchCover(b).then(function (url) {
+          if (!url) return { via: 'none', url: null };
+          return tryImage(url).then(function (good) {
+            return good ? { via: 'search', url: good } : { via: 'none', url: null };
+          });
+        });
+      }
+      var s = steps[i++];
+      return tryImage(s[1]).then(function (good) {
+        return good ? { via: s[0], url: good } : step();
+      });
+    }
+    return step();
+  }
+
+  function render() {
+    rows.replaceChildren();
+    books.forEach(function (b, n) {
+      var tr = document.createElement('tr');
+      tr.id = 'r' + n;
+      tr.innerHTML =
+        '<td><img class="thumb" alt=""></td>' +
+        '<td class="n">' + (n + 1) + '</td>' +
+        '<td><strong></strong><br><span class="n"></span></td>' +
+        '<td class="isbn">' + (b.isbn || '—') + '</td>' +
+        '<td><span class="src pending">waiting…</span></td>';
+      tr.querySelector('strong').textContent = b.title;
+      tr.querySelector('td:nth-child(3) .n').textContent = b.author;
+      rows.appendChild(tr);
+    });
+  }
+
+  function run() {
+    runBtn.disabled = true;
+    copyBtn.disabled = true;
+    var counts = { ol: 0, g13: 0, g10: 0, search: 0, none: 0 };
+    var missing = [];
+    var done = 0;
+    prog.value = 0;
+
+    /* Sequential rather than parallel: 100 books times up to four
+       requests is enough to get rate-limited if fired all at once. */
+    var chain = Promise.resolve();
+    books.forEach(function (b, n) {
+      chain = chain.then(function () {
+        return resolve(b).then(function (res) {
+          counts[res.via]++;
+          if (res.via === 'none') missing.push((n + 1) + '. ' + b.author + ' — ' + b.title + '  [' + (b.isbn || 'no isbn') + ']');
+
+          var tr = document.getElementById('r' + n);
+          var cell = tr.querySelector('.src');
+          cell.className = 'src ' + (res.via === 'none' ? 'bad' : 'ok');
+          cell.textContent = LABEL[res.via];
+          if (res.via === 'none') tr.classList.add('bad');
+          if (res.url) tr.querySelector('.thumb').src = res.url;
+
+          done++;
+          prog.value = done;
+          tally.innerHTML =
+            '<span>checked <b>' + done + '</b>/' + books.length + '</span>' +
+            '<span>Open Library by ISBN <b>' + counts.ol + '</b></span>' +
+            '<span>Google Books <b>' + (counts.g13 + counts.g10) + '</b></span>' +
+            '<span>Open Library by title <b>' + counts.search + '</b></span>' +
+            '<span>still missing <b>' + counts.none + '</b></span>';
+          out.value = missing.join('\n');
+        });
+      });
+    });
+
+    chain.then(function () {
+      runBtn.disabled = false;
+      runBtn.textContent = 'Run again';
+      copyBtn.disabled = missing.length === 0;
+      if (!missing.length) out.value = 'Every book resolved to a cover.';
+    });
+  }
+
+  copyBtn.addEventListener('click', function () {
+    out.select();
+    navigator.clipboard.writeText(out.value).then(function () {
+      copyBtn.textContent = 'Copied';
+      setTimeout(function () { copyBtn.textContent = 'Copy the missing list'; }, 1500);
+    }, function () { /* selection is the fallback */ });
+  });
+
+  runBtn.addEventListener('click', run);
+  prog.max = books.length;
+  render();
+})();
+</script>
+</body>
+</html>

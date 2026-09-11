@@ -14,7 +14,7 @@
   --paper:   #faf7f0;
   --paper-80:rgb(250 247 240 / .92);
   --ink:     #191813;
-  --muted:   #7d7668;
+  --muted:   #726b5d;   /* 4.9:1 on the paper — #7d7668 was 4.2 */
   --rule:    #e4ded0;
   --card:    #ffffff;
   --accent:  #9c3d21;
@@ -270,6 +270,9 @@ button { background: none; border: 0; cursor: pointer; }
 /* --- The shelf ---------------------------------------------------- */
 
 .shelf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--tile), 1fr));
   gap: clamp(1rem, 1.8vw, 1.75rem) clamp(.9rem, 1.5vw, 1.4rem);

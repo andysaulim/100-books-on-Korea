@@ -126,6 +126,42 @@
     return out;
   }
 
+  /* "Stephan Haggard and Marcus Noland" -> "Stephan Haggard". */
+  function firstAuthor(a) {
+    return (a || '').split(/\s+(?:and|&|with)\s+|,\s*/)[0].trim();
+  }
+
+  /* Open Library carries plenty of works it holds no ISBN-level cover
+     for, so when every ISBN attempt misses, ask its search API for the
+     work by title and author and use the cover id that comes back. Only
+     the books that got this far ever issue the request. */
+  function searchCover(b) {
+    if (!window.fetch) return Promise.resolve(null);
+    var url = 'https://openlibrary.org/search.json?limit=3&fields=title,cover_i' +
+              '&title=' + encodeURIComponent(b.title) +
+              '&author=' + encodeURIComponent(firstAuthor(b.author));
+
+    return fetch(url)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.docs) return null;
+        var want = norm(b.title);
+        for (var i = 0; i < j.docs.length; i++) {
+          var d = j.docs[i];
+          if (!d.cover_i || !d.title) continue;
+          /* Guard against the search handing back a different book:
+             one title has to be a prefix of the other, which tolerates
+             a missing subtitle but not a different work. */
+          var got = norm(d.title);
+          if (want.indexOf(got) === 0 || got.indexOf(want) === 0) {
+            return 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-L.jpg';
+          }
+        }
+        return null;
+      })
+      .catch(function () { return null; });
+  }
+
   function loadCover(btn, b) {
     var srcs = coverSources(b);
     if (!srcs.length) { btn.appendChild(fallbackNode(b)); b._noCover = true; return; }
@@ -138,14 +174,22 @@
     img.referrerPolicy = 'no-referrer';
 
     var i = 0;
+    var searched = false;
+
+    function giveUp() {
+      img.remove();
+      btn.appendChild(fallbackNode(b));
+      b._noCover = true;
+    }
+
     function next() {
-      if (i >= srcs.length) {
-        img.remove();
-        btn.appendChild(fallbackNode(b));
-        b._noCover = true;
-        return;
-      }
-      img.src = srcs[i++];
+      if (i < srcs.length) { img.src = srcs[i++]; return; }
+      if (searched) { giveUp(); return; }
+      searched = true;
+      searchCover(b).then(function (url) {
+        if (url) { srcs.push(url); next(); }
+        else giveUp();
+      });
     }
 
     img.addEventListener('error', next);
@@ -230,7 +274,10 @@
     btn._book = b;
 
     loadCover(btn, b);
-    return btn;
+
+    var li = document.createElement('li');
+    li.appendChild(btn);
+    return li;
   }
 
   /* --- floating windows ----------------------------------------- */
@@ -252,9 +299,13 @@
   function closeWin(key) {
     var win = openWins[key];
     if (!win) return;
+    var opener = win._opener;
+    var hadFocus = win.contains(document.activeElement);
     delete openWins[key];
     win.remove();
     markTiles();
+    /* Send focus back where it came from rather than to the document. */
+    if (hadFocus && opener && document.contains(opener)) opener.focus();
   }
 
   function place(win, anchor) {
@@ -308,10 +359,7 @@
     close.className = 'bookwin-close';
     close.setAttribute('aria-label', 'Close');
     close.textContent = '×';
-    close.addEventListener('click', function () {
-      closeWin(key);
-      if (anchor && document.contains(anchor)) anchor.focus();
-    });
+    close.addEventListener('click', function () { closeWin(key); });
 
     bar.appendChild(label);
     bar.appendChild(close);
@@ -325,9 +373,15 @@
     els.windows.appendChild(win);
 
     openWins[key] = win;
+    win._opener = anchor;
     raise(win);
     place(win, anchor);
     drag(win, bar);
+
+    /* The window is the last thing in the DOM, so leaving focus on the
+       cover would put a hundred covers between the two. Move into it. */
+    win.tabIndex = -1;
+    win.focus({ preventScroll: true });
 
     win.addEventListener('pointerdown', function () { raise(win); });
     return win;

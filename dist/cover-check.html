@@ -4,588 +4,83 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
-<title>Books — Andy Lim</title>
-<meta name="description" content="The hundred books on Korea I recommend most — the war and its long aftermath, two states built from the same country, the alliance, the culture, and the people. Browse the shelf by theme or publisher.">
-
-<!-- build:meta — `python3 build.py --base <url>` rewrites these to absolute URLs -->
-<link rel="canonical" href="./">
-<meta property="og:title" content="Top 100 Books on Korea">
-<meta property="og:description" content="The hundred books on Korea I recommend most — the war and its long aftermath, two states built from the same country, the alliance, the culture, and the people. Browse the shelf by theme or publisher.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="./">
-<meta property="og:image" content="assets/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:site_name" content="Andy Lim">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="assets/og.png">
-<!-- /build:meta -->
-
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&display=swap" rel="stylesheet">
+<title>Cover check — Top 100 Books on Korea</title>
 <style>
-/* ---------------------------------------------------------------
-   Top 100 Books on Korea
-
-   The shelf gets the full page width and the covers are sized to be
-   read at a glance; filtering lives in a sticky bar above it rather
-   than a side rail, so nothing competes with the grid for room.
-   Books open as draggable floating windows, minchi.co/books style,
-   so several can sit open at once.
-   --------------------------------------------------------------- */
-
-:root {
-  /* A warm off-white ground so the covers carry the colour, hairline
-     rules in the same warm grey, and one restrained accent. */
-  --paper:   #faf7f0;
-  --paper-80:rgb(250 247 240 / .92);
-  --ink:     #191813;
-  --muted:   #726b5d;   /* 4.9:1 on the paper — #7d7668 was 4.2 */
-  --rule:    #e4ded0;
-  --card:    #ffffff;
-  --accent:  #9c3d21;
-  --quiet:   #565043;
-
-  --serif: "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
-
-  --gutter: clamp(1rem, 4vw, 3.25rem);
-  --tile:   clamp(140px, 15vw, 196px);   /* cover width the shelf aims for */
-
-  --shadow-tile: 0 1px 2px rgb(38 32 22 / .16), 0 8px 18px -10px rgb(38 32 22 / .26);
-  --shadow-pop:  0 12px 34px -12px rgb(38 32 22 / .34);
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-
-html { -webkit-text-size-adjust: 100%; }
-
-body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--serif);
-  font-size: 16px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-
-img { max-width: 100%; }
-[hidden] { display: none !important; }
-a { color: inherit; }
-
-button, select, input {
-  font: inherit;
-  color: inherit;
-}
-button { background: none; border: 0; cursor: pointer; }
-
-:where(a, button, input, select):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px; height: 1px;
-  margin: -1px; padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.skip-link {
-  position: absolute; left: -9999px; top: 0; z-index: 100;
-  padding: .6rem 1rem;
-  background: var(--ink);
-  color: var(--paper);
-}
-.skip-link:focus { left: 0; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    transition-duration: .01ms !important;
-    animation-duration: .01ms !important;
+  :root {
+    --paper: #faf7f0; --ink: #191813; --muted: #7d7668;
+    --rule: #e4ded0; --card: #fff; --accent: #9c3d21; --quiet: #565043;
+    --ok: #37604c; --bad: #9c3d21;
+    --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
   }
-}
-
-/* --- Masthead ---------------------------------------------------- */
-
-.site-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: .4rem 1.4rem;
-  padding: clamp(1.25rem, 3vw, 2rem) var(--gutter) 0;
-}
-
-.brand {
-  font-size: 1.05rem;
-  font-weight: 600;
-  text-decoration: none;
-  letter-spacing: -.01em;
-}
-
-.site-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  font-size: .88rem;
-}
-.site-nav a { text-decoration: none; opacity: .68; }
-.site-nav a:hover { opacity: 1; }
-.site-nav a.active {
-  opacity: 1;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* --- Title block -------------------------------------------------- */
-
-.main { padding: 0 var(--gutter); }
-
-.shelf-head {
-  max-width: 58ch;
-  margin-block: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 1.9rem);
-}
-.shelf-head h1 {
-  margin: 0;
-  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -.018em;
-  text-wrap: balance;
-}
-.shelf-head p {
-  margin: .6rem 0 0;
-  font-size: .95rem;
-  line-height: 1.55;
-  color: var(--quiet);
-  text-wrap: pretty;
-}
-
-.linkish {
-  padding: 0;
-  font-size: inherit;
-  color: var(--muted);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  white-space: nowrap;
-}
-.linkish:hover { color: var(--ink); }
-
-/* --- Sticky filter bar -------------------------------------------- */
-
-.toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  margin-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
-  padding-block: .7rem .6rem;
-  background: var(--paper-80);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--rule);
-}
-/* Bleed the bar's background to the page edges while its contents stay
-   on the same measure as the shelf. */
-.toolbar::before {
-  content: "";
-  position: absolute;
-  inset: 0 calc(var(--gutter) * -1);
-  z-index: -1;
-  background: inherit;
-  border-bottom: 1px solid var(--rule);
-}
-
-.toolbar-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: .55rem 1.1rem;
-}
-
-.searchwrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex: 1 1 14rem;
-  max-width: 22rem;
-}
-.searchwrap input {
-  width: 100%;
-  padding: .2rem 1.4rem .35rem 0;
-  font-size: .92rem;
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--rule);
-}
-.searchwrap input::placeholder { color: var(--muted); }
-.searchwrap input::-webkit-search-cancel-button { display: none; }
-.search-clear {
-  position: absolute;
-  right: 0;
-  padding: 0 .2rem;
-  font-size: 1.1rem;
-  line-height: 1;
-  color: var(--muted);
-}
-.search-clear:hover { color: var(--ink); }
-
-.sel {
-  display: inline-flex;
-  align-items: baseline;
-  gap: .4rem;
-  font-size: .82rem;
-  color: var(--muted);
-}
-.sel select {
-  max-width: 13rem;
-  padding: .1rem 0 .2rem;
-  font-size: .88rem;
-  color: var(--ink);
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--rule);
-  cursor: pointer;
-}
-
-.count {
-  margin: 0 0 0 auto;
-  font-size: .8rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.filters-reset {
-  padding: .12rem .55rem;
-  font-size: .78rem;
-  color: var(--muted);
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-}
-.filters-reset:hover { color: var(--ink); border-color: var(--ink); }
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .3rem .45rem;
-  margin-top: .6rem;
-}
-.chips button {
-  padding: .12rem .55rem;
-  font-size: .8rem;
-  line-height: 1.5;
-  color: var(--quiet);
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  white-space: nowrap;
-}
-.chips button:hover { color: var(--ink); border-color: var(--muted); }
-.chips button[aria-pressed="true"] {
-  color: var(--paper);
-  background: var(--ink);
-  border-color: var(--ink);
-}
-.chips .n {
-  margin-left: .3rem;
-  font-size: .72rem;
-  opacity: .6;
-  font-variant-numeric: tabular-nums;
-}
-
-/* --- The shelf ---------------------------------------------------- */
-
-.shelf {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--tile), 1fr));
-  gap: clamp(1rem, 1.8vw, 1.75rem) clamp(.9rem, 1.5vw, 1.4rem);
-}
-
-.tile {
-  display: block;
-  position: relative;
-  width: 100%;
-  padding: 0;
-  aspect-ratio: 2 / 3;
-  border-radius: 2px;
-  overflow: hidden;
-  background: var(--fallback-bg, #3a4258);
-  box-shadow: var(--shadow-tile);
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-.tile:hover,
-.tile:focus-visible {
-  transform: translateY(-4px);
-  box-shadow: 0 2px 6px rgb(38 32 22 / .2), 0 20px 34px -14px rgb(38 32 22 / .34);
-}
-.tile.is-open { outline: 2px solid var(--accent); outline-offset: 3px; }
-
-.tile img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Typographic stand-in, used when no source has art for this book. At
-   this tile size it is meant to read as a plain cover, not a gap. */
-.tile .fallback {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 1.1rem .9rem .95rem 1.1rem;
-  text-align: left;
-  background: linear-gradient(155deg,
-    color-mix(in srgb, var(--fallback-bg) 94%, #fff 6%),
-    color-mix(in srgb, var(--fallback-bg) 64%, #10131a 36%));
-}
-.tile .fallback::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: .4rem;
-  background: linear-gradient(90deg, rgb(0 0 0 / .32), rgb(0 0 0 / .04));
-}
-.tile .fallback::after {
-  content: "";
-  position: absolute;
-  inset: .5rem .5rem .5rem .85rem;
-  border: 1px solid rgb(255 255 255 / .16);
-  pointer-events: none;
-}
-.tile .fb-title {
-  font-size: clamp(.78rem, 1.1vw, .95rem);
-  font-weight: 600;
-  line-height: 1.2;
-  color: #fff;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 7;
-  -webkit-box-orient: vertical;
-}
-.tile .fb-author {
-  margin-top: auto;
-  padding-top: .5rem;
-  font-size: clamp(.56rem, .72vw, .66rem);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: rgb(255 255 255 / .8);
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.empty {
-  padding: 4rem 0;
-  text-align: center;
-  font-size: 1.1rem;
-  color: var(--quiet);
-}
-.filters-reset-inline {
-  display: block;
-  margin: .9rem auto 0;
-  padding: .4rem 1rem;
-  font-size: .82rem;
-  color: var(--paper);
-  background: var(--ink);
-}
-
-.footer {
-  margin-top: clamp(3rem, 8vw, 5rem);
-  padding-block: 1.5rem 3rem;
-  border-top: 1px solid var(--rule);
-  font-size: .8rem;
-  color: var(--muted);
-}
-.footer p { margin: 0 0 .3rem; }
-
-/* --- Floating book windows ---------------------------------------- */
-
-.book-windows {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  pointer-events: none;
-}
-
-.bookwin {
-  position: absolute;
-  width: 23rem;
-  max-width: calc(100vw - 2rem);
-  background: var(--card);
-  border: 1px solid var(--rule);
-  box-shadow: var(--shadow-pop);
-  pointer-events: auto;
-}
-
-.bookwin-bar {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .35rem .4rem .35rem .8rem;
-  border-bottom: 1px solid var(--rule);
-  cursor: grab;
-  touch-action: none;
-}
-.bookwin-bar:active { cursor: grabbing; }
-.bookwin-kind {
-  font-size: .62rem;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.bookwin-close {
-  margin-left: auto;
-  padding: .1rem .4rem;
-  font-size: 1.1rem;
-  line-height: 1;
-  color: var(--muted);
-}
-.bookwin-close:hover { color: var(--ink); }
-
-.bookwin-body { padding: .95rem 1.05rem 1.1rem; }
-.bookwin-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-  line-height: 1.22;
-  text-wrap: pretty;
-}
-.bookwin-author { margin: .35rem 0 0; font-size: .9rem; }
-.bookwin-pub { margin: .3rem 0 0; font-size: .76rem; color: var(--muted); }
-.bookwin-text {
-  margin: .8rem 0 0;
-  padding-top: .8rem;
-  border-top: 1px solid var(--rule);
-  font-size: .88rem;
-  line-height: 1.6;
-  color: var(--quiet);
-  text-wrap: pretty;
-}
-.bookwin-text + .bookwin-text { border-top: 0; padding-top: 0; margin-top: .6rem; }
-.bookwin-link { margin: .9rem 0 0; }
-.bookwin-link a {
-  font-size: .82rem;
-  color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
-}
-
-/* --- Back to top --------------------------------------------------- */
-
-.scroll-top {
-  position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
-  z-index: 70;
-  display: grid;
-  place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  color: var(--ink);
-  background: var(--card);
-  border: 1px solid var(--rule);
-  border-radius: 50%;
-  box-shadow: var(--shadow-pop);
-  opacity: 0;
-  transition: opacity .16s ease;
-}
-.scroll-top.is-visible { opacity: 1; }
-
-/* --- Narrow screens ------------------------------------------------ */
-
-@media (max-width: 680px) {
-  .count { margin-left: 0; }
-  .sel select { max-width: 9.5rem; }
-
-  /* Dragging a window with one thumb is no use; centre them instead. */
-  .bookwin {
-    left: 50% !important;
-    top: auto !important;
-    bottom: 1rem;
-    transform: translateX(-50%);
-    width: min(23rem, calc(100vw - 1.5rem));
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem clamp(1rem, 4vw, 3rem) 4rem;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--serif); font-size: 16px; line-height: 1.5;
   }
-  .bookwin-bar { cursor: default; }
-}
+  h1 { margin: 0 0 .4rem; font-size: 1.8rem; font-weight: 600; letter-spacing: -.015em; }
+  .lede { margin: 0 0 1.5rem; max-width: 62ch; color: var(--quiet); font-size: .95rem; }
+  button {
+    font: inherit; padding: .4rem 1rem; cursor: pointer;
+    color: var(--paper); background: var(--ink); border: 0; border-radius: 2px;
+  }
+  button.ghost { color: var(--muted); background: none; border: 1px solid var(--rule); }
+  button.ghost:hover { color: var(--ink); border-color: var(--ink); }
+  button[disabled] { opacity: .45; cursor: default; }
+  .bar { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin-bottom: 1.25rem; }
+  .tally { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: .9rem; color: var(--quiet); }
+  .tally b { font-variant-numeric: tabular-nums; }
+  progress { width: min(22rem, 100%); height: .5rem; }
+  .wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: .4rem .7rem .4rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  td.n { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.isbn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; color: var(--muted); white-space: nowrap; }
+  .src { font-size: .78rem; white-space: nowrap; }
+  .src.ok { color: var(--ok); }
+  .src.bad { color: var(--bad); font-weight: 600; }
+  .src.pending { color: var(--muted); }
+  tr.bad td { background: color-mix(in srgb, var(--bad) 6%, transparent); }
+  .thumb { width: 34px; height: 51px; object-fit: cover; background: var(--rule); border-radius: 1px; }
+  .out { width: 100%; min-height: 9rem; margin-top: .8rem; padding: .7rem;
+         font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem;
+         background: var(--card); border: 1px solid var(--rule); border-radius: 2px; }
+  details { margin-top: 1.75rem; }
+  summary { cursor: pointer; font-size: .9rem; color: var(--muted); }
 </style>
 </head>
 <body>
 
-<a class="skip-link" href="#main">Skip to content</a>
+<h1>Cover check</h1>
+<p class="lede">
+  Runs the shelf's own cover chain against all 100 books, in this browser, and
+  reports which source each cover came from. The shelf itself cannot be checked
+  from a sandbox because the cover hosts are unreachable there, so this page does
+  it where the requests actually work. Nothing is uploaded anywhere.
+</p>
 
-<header class="site-head">
-  <a class="brand" href="/">Andy Lim</a>
-  <nav class="site-nav" aria-label="Site">
-    <a href="/">About</a>
-    <a href="/writings/">Writings</a>
-    <a href="./" class="active" aria-current="page">Books</a>
-  </nav>
-</header>
+<div class="bar">
+  <button id="run">Run the check</button>
+  <button id="copy" class="ghost" disabled>Copy the missing list</button>
+  <progress id="prog" value="0" max="100"></progress>
+</div>
 
-<main class="main" id="main">
+<div class="tally" id="tally"></div>
 
-  <header class="shelf-head">
-    <h1>Top 100 Books on Korea</h1>
-    <p>The hundred I recommend — the war and its long aftermath, two states built
-       from the same country, the alliance, the culture, and the people.
-       <button type="button" class="linkish" data-about>About this shelf</button></p>
-  </header>
+<div class="wrap">
+  <table>
+    <thead>
+      <tr><th></th><th>#</th><th>Book</th><th>ISBN</th><th>Cover from</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
 
-  <div class="toolbar">
-    <div class="toolbar-row">
-      <div class="searchwrap">
-        <input id="search" type="search" placeholder="Search title or author…" autocomplete="off" spellcheck="false" aria-label="Search the shelf">
-        <button type="button" class="search-clear" data-clear hidden aria-label="Clear search">&times;</button>
-      </div>
-
-      <label class="sel">
-        <span>Sort</span>
-        <select id="sort-select"></select>
-      </label>
-
-      <label class="sel">
-        <span>Publisher</span>
-        <select id="publisher-select"></select>
-      </label>
-
-      <p class="count" id="shelf-count" role="status"></p>
-      <button type="button" class="filters-reset" id="filters-reset" hidden>Reset</button>
-    </div>
-
-    <nav class="chips" id="theme-list" aria-label="Filter by theme"></nav>
-  </div>
-
-  <ul id="shelf" class="shelf"></ul>
-
-  <p class="empty" id="empty" hidden>
-    Nothing matches that.
-    <button type="button" class="filters-reset-inline" data-reset>Clear filters</button>
-  </p>
-
-  <footer class="footer">
-    <p>© <span class="footer-year">2026</span> Andy Lim. Open a cover for the details and a link to its publisher.</p>
-    <p class="footer-note">Themes are my own shelving, not the publishers' categories.</p>
-  </footer>
-
-</main>
-
-<!-- Floating windows: books + about (multi-open, draggable) -->
-<div id="book-windows" class="book-windows"></div>
-
-<button type="button" class="scroll-top" id="scroll-top" aria-label="Back to top" hidden>
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5l0 14"></path><path d="M18 11l-6 -6"></path><path d="M6 11l6 -6"></path></svg>
-</button>
+<details>
+  <summary>Missing list, as text</summary>
+  <textarea class="out" id="out" readonly placeholder="Run the check first."></textarea>
+</details>
 
 <script>
 /* 100 Books on Korea - book data.
@@ -1796,113 +1291,40 @@ window.BOOKS = [
   }
 ];
 </script>
+
 <script>
-/* ---------------------------------------------------------------
-   Top 100 Books on Korea — shelf behaviour
-   Data comes from books.js (window.BOOKS).
-
-   Filtering lives in the sticky bar above the shelf so the grid keeps
-   the full page width. A book opens as a draggable floating window,
-   minchi.co/books style, so several can sit open at once.
-   --------------------------------------------------------------- */
-
 (function () {
   'use strict';
 
-  var books = Array.isArray(window.BOOKS) ? window.BOOKS.slice() : [];
+  var books = window.BOOKS || [];
+  var rows = document.getElementById('rows');
+  var prog = document.getElementById('prog');
+  var tally = document.getElementById('tally');
+  var out = document.getElementById('out');
+  var runBtn = document.getElementById('run');
+  var copyBtn = document.getElementById('copy');
 
-  /* Tint for the typographic stand-in shown when no source has art. */
-  var HUES = {
-    'Korean War':                        '#7a3a33',
-    'History & Empire':                  '#7d5a36',
-    'North Korea: Regime & Leadership':  '#35405c',
-    'North Korea: Nuclear & Security':   '#434c59',
-    'North Korea: Society & Economy':    '#3b5d5b',
-    'Escape & Human Rights':             '#584163',
-    'South Korea: Politics & Democracy': '#2b5a66',
-    'South Korea: Society & Economy':    '#37604c',
-    'Alliances & Regional Order':        '#2f4a6d',
-    'Culture & the Korean Wave':         '#8b4c63',
-    'Fiction & Memoir':                  '#846731',
-    'Diaspora & Migration':              '#4e6542'
-  };
-  var FALLBACK_HUE = '#4a5266';
-
-  var SORTS = [
-    { id: 'author',    label: 'Author A–Z' },
-    { id: 'title',     label: 'Title A–Z' },
-    { id: 'category',  label: 'Theme' },
-    { id: 'publisher', label: 'Publisher' }
-  ];
-
-  var ABOUT = [
-    'A hundred recommendations: the war and its long aftermath, two states ' +
-    'built from the same country, the alliance, the culture, and the people.',
-    'Ranked by nothing — it is a shelf, not a league table. Themes are my own ' +
-    'shelving, not the publishers’ categories.',
-    'Open any cover for a short description and a link to its publisher.'
-  ];
-
-  var $ = function (sel) { return document.querySelector(sel); };
-
-  var els = {
-    shelf:     $('#shelf'),
-    empty:     $('#empty'),
-    count:     $('#shelf-count'),
-    search:    $('#search'),
-    clear:     $('[data-clear]'),
-    sort:      $('#sort-select'),
-    publisher: $('#publisher-select'),
-    themes:    $('#theme-list'),
-    reset:     $('#filters-reset'),
-    windows:   $('#book-windows'),
-    scrollTop: $('#scroll-top')
+  /* Mirrors loadCover() in assets/app.js — keep the two in step. */
+  var LABEL = {
+    ol:     'Open Library (ISBN)',
+    g13:    'Google Books (ISBN-13)',
+    g10:    'Google Books (ISBN-10)',
+    search: 'Open Library (title search)',
+    none:   'MISSING'
   };
 
-  var state = { q: '', category: 'All', publisher: 'All', sort: 'author' };
-
-  var COMPARE = new Intl.Collator('en', { sensitivity: 'base' }).compare;
-  var narrow = window.matchMedia('(max-width: 680px)');
-
-  /* --- helpers ------------------------------------------------- */
-
-  function hue(cat) { return HUES[cat] || FALLBACK_HUE; }
-
-  /* Drop leading articles so "The Vegetarian" files under V. */
-  function titleKey(t) { return t.replace(/^(the|a|an)\s+/i, '').toLowerCase(); }
-
-  /* Fold accents, curly quotes and dashes so "Choson" finds "Chosŏn"
-     and a typed hyphen matches an en dash. */
   function norm(s) {
-    return (s || '')
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .replace(/[‘’]/g, "'")
-      .replace(/[“”]/g, '"')
-      .replace(/[‐-―]/g, '-')
-      .toLowerCase();
+    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
+      .replace(/[‐-―]/g, '-').toLowerCase();
   }
 
-  function haystack(b) {
-    if (!b._hay) b._hay = norm([b.title, b.author, b.publisher, b.category].join('  '));
-    return b._hay;
-  }
-
-  function filtered() {
-    return !!state.q || state.category !== 'All' || state.publisher !== 'All';
-  }
-
-  /* --- covers ---------------------------------------------------- */
-
-  /* Google indexes some editions under the 10-digit ISBN only, so it is
-     worth deriving. Only 978-prefixed ISBN-13s have an ISBN-10 form. */
   function isbn10(i13) {
     if (!/^978\d{10}$/.test(i13)) return null;
-    var core = i13.slice(3, 12);
-    var sum = 0;
+    var core = i13.slice(3, 12), sum = 0;
     for (var i = 0; i < 9; i++) sum += (10 - i) * +core[i];
-    var check = (11 - (sum % 11)) % 11;
-    return core + (check === 10 ? 'X' : String(check));
+    var c = (11 - (sum % 11)) % 11;
+    return core + (c === 10 ? 'X' : String(c));
   }
 
   function googleCover(isbn) {
@@ -1910,36 +1332,27 @@ window.BOOKS = [
            '&printsec=frontcover&img=1&zoom=1';
   }
 
-  /* Open Library holds art for a good share of these ISBNs but nothing
-     like all of them, so a miss falls through to Google Books before
-     the typographic stand-in. `cover` stays the first candidate, which
-     is also the hook for pointing a book at your own artwork. */
-  function coverSources(b) {
-    var out = [];
-    if (b.cover) out.push(b.cover);
-    if (b.isbn) {
-      out.push(googleCover(b.isbn));
-      var i10 = isbn10(b.isbn);
-      if (i10) out.push(googleCover(i10));
-    }
-    return out;
-  }
-
-  /* "Stephan Haggard and Marcus Noland" -> "Stephan Haggard". */
   function firstAuthor(a) {
     return (a || '').split(/\s+(?:and|&|with)\s+|,\s*/)[0].trim();
   }
 
-  /* Open Library carries plenty of works it holds no ISBN-level cover
-     for, so when every ISBN attempt misses, ask its search API for the
-     work by title and author and use the cover id that comes back. Only
-     the books that got this far ever issue the request. */
+  /* Resolves to the URL if it loads at a usable size, else null. */
+  function tryImage(url) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.referrerPolicy = 'no-referrer';
+      img.onload = function () {
+        resolve(img.naturalWidth >= 50 && img.naturalHeight >= 50 ? url : null);
+      };
+      img.onerror = function () { resolve(null); };
+      img.src = url;
+    });
+  }
+
   function searchCover(b) {
-    if (!window.fetch) return Promise.resolve(null);
     var url = 'https://openlibrary.org/search.json?limit=3&fields=title,cover_i' +
               '&title=' + encodeURIComponent(b.title) +
               '&author=' + encodeURIComponent(firstAuthor(b.author));
-
     return fetch(url)
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
@@ -1948,9 +1361,6 @@ window.BOOKS = [
         for (var i = 0; i < j.docs.length; i++) {
           var d = j.docs[i];
           if (!d.cover_i || !d.title) continue;
-          /* Guard against the search handing back a different book:
-             one title has to be a prefix of the other, which tolerates
-             a missing subtitle but not a different work. */
           var got = norm(d.title);
           if (want.indexOf(got) === 0 || got.indexOf(want) === 0) {
             return 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-L.jpg';
@@ -1961,528 +1371,106 @@ window.BOOKS = [
       .catch(function () { return null; });
   }
 
-  function loadCover(btn, b) {
-    var srcs = coverSources(b);
-    if (!srcs.length) { btn.appendChild(fallbackNode(b)); b._noCover = true; return; }
-
-    var img = document.createElement('img');
-    img.alt = '';
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    /* Google's cover endpoint can refuse on referrer. */
-    img.referrerPolicy = 'no-referrer';
+  function resolve(b) {
+    var steps = [];
+    if (b.cover) steps.push(['ol', b.cover]);
+    if (b.isbn) {
+      steps.push(['g13', googleCover(b.isbn)]);
+      var i10 = isbn10(b.isbn);
+      if (i10) steps.push(['g10', googleCover(i10)]);
+    }
 
     var i = 0;
-    var searched = false;
-
-    function giveUp() {
-      img.remove();
-      btn.appendChild(fallbackNode(b));
-      b._noCover = true;
-    }
-
-    function next() {
-      if (i < srcs.length) { img.src = srcs[i++]; return; }
-      if (searched) { giveUp(); return; }
-      searched = true;
-      searchCover(b).then(function (url) {
-        if (url) { srcs.push(url); next(); }
-        else giveUp();
+    function step() {
+      if (i >= steps.length) {
+        return searchCover(b).then(function (url) {
+          if (!url) return { via: 'none', url: null };
+          return tryImage(url).then(function (good) {
+            return good ? { via: 'search', url: good } : { via: 'none', url: null };
+          });
+        });
+      }
+      var s = steps[i++];
+      return tryImage(s[1]).then(function (good) {
+        return good ? { via: s[0], url: good } : step();
       });
     }
-
-    img.addEventListener('error', next);
-    img.addEventListener('load', function () {
-      /* A source with no art for an ISBN may answer 200 with a 1x1 or a
-         "no cover" placeholder rather than 404, so judge it by size. */
-      if (img.naturalWidth < 50 || img.naturalHeight < 50) next();
-      else b._noCover = false;
-    });
-
-    btn.appendChild(img);
-    next();
+    return step();
   }
-
-  /* Which books ended up with no art, for filling gaps by hand. */
-  window.missingCovers = function () {
-    return books.filter(function (b) { return b._noCover; })
-      .map(function (b) { return b.author + ' — ' + b.title + ' (' + b.isbn + ')'; });
-  };
-
-  /* --- filter & sort ------------------------------------------- */
-
-  function visible() {
-    var terms = norm(state.q).split(/\s+/).filter(Boolean);
-
-    var out = books.filter(function (b) {
-      if (state.category !== 'All' && b.category !== state.category) return false;
-      if (state.publisher !== 'All' && b.publisher !== state.publisher) return false;
-      if (!terms.length) return true;
-      var hay = haystack(b);
-      return terms.every(function (t) { return hay.indexOf(t) !== -1; });
-    });
-
-    var LAST = '￿';
-    var by = {
-      author: function (a, b) {
-        return COMPARE(a.author, b.author) || COMPARE(titleKey(a.title), titleKey(b.title));
-      },
-      title: function (a, b) {
-        return COMPARE(titleKey(a.title), titleKey(b.title));
-      },
-      category: function (a, b) {
-        return COMPARE(a.category, b.category) || COMPARE(a.author, b.author);
-      },
-      publisher: function (a, b) {
-        return COMPARE(a.publisher || LAST, b.publisher || LAST) || COMPARE(a.author, b.author);
-      }
-    };
-
-    return out.sort(by[state.sort] || by.author);
-  }
-
-  /* --- tiles ---------------------------------------------------- */
-
-  function fallbackNode(b) {
-    var box = document.createElement('span');
-    box.className = 'fallback';
-
-    var t = document.createElement('span');
-    t.className = 'fb-title';
-    t.textContent = b.title;
-
-    var a = document.createElement('span');
-    a.className = 'fb-author';
-    a.textContent = b.author;
-
-    box.appendChild(t);
-    box.appendChild(a);
-    return box;
-  }
-
-  function tileNode(b) {
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'tile';
-    btn.style.setProperty('--fallback-bg', hue(b.category));
-    /* The cover art carries no text for a screen reader, so the
-       control names the book itself. */
-    btn.setAttribute('aria-label', b.title + ' by ' + b.author);
-    btn.setAttribute('aria-haspopup', 'dialog');
-    btn.dataset.id = b.id;
-    btn._book = b;
-
-    loadCover(btn, b);
-
-    var li = document.createElement('li');
-    li.appendChild(btn);
-    return li;
-  }
-
-  /* --- floating windows ----------------------------------------- */
-
-  var openWins = {};      /* key -> element */
-  var winZ = 1;
-  var cascade = 0;
-
-  function markTiles() {
-    els.shelf.querySelectorAll('.tile').forEach(function (t) {
-      var on = Object.prototype.hasOwnProperty.call(openWins, 'book:' + t.dataset.id);
-      t.classList.toggle('is-open', on);
-      t.setAttribute('aria-expanded', String(on));
-    });
-  }
-
-  function raise(win) { win.style.zIndex = ++winZ; }
-
-  function closeWin(key) {
-    var win = openWins[key];
-    if (!win) return;
-    var opener = win._opener;
-    var hadFocus = win.contains(document.activeElement);
-    delete openWins[key];
-    win.remove();
-    markTiles();
-    /* Send focus back where it came from rather than to the document. */
-    if (hadFocus && opener && document.contains(opener)) opener.focus();
-  }
-
-  function place(win, anchor) {
-    /* Narrow screens pin windows to the bottom centre in CSS. */
-    if (narrow.matches) return;
-
-    var w = win.offsetWidth;
-    var h = win.offsetHeight;
-    var pad = 12;
-    var left, top;
-
-    if (anchor) {
-      var r = anchor.getBoundingClientRect();
-      left = r.right + pad;
-      if (left + w > window.innerWidth - pad) left = r.left - w - pad;
-      top = r.top + (r.height - h) / 2;
-    } else {
-      left = (window.innerWidth - w) / 2;
-      top = (window.innerHeight - h) / 2;
-    }
-
-    /* Offset each additional window so they do not stack exactly. */
-    left += cascade * 20;
-    top += cascade * 20;
-    cascade = (cascade + 1) % 6;
-
-    left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
-    top = Math.max(pad, Math.min(top, window.innerHeight - h - pad));
-
-    win.style.left = Math.round(left) + 'px';
-    win.style.top = Math.round(top) + 'px';
-  }
-
-  function makeWindow(key, kind, buildBody, anchor) {
-    if (openWins[key]) { raise(openWins[key]); return openWins[key]; }
-
-    var win = document.createElement('div');
-    win.className = 'bookwin';
-    win.setAttribute('role', 'dialog');
-    win.setAttribute('aria-label', kind);
-
-    var bar = document.createElement('div');
-    bar.className = 'bookwin-bar';
-
-    var label = document.createElement('span');
-    label.className = 'bookwin-kind';
-    label.textContent = kind;
-
-    var close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'bookwin-close';
-    close.setAttribute('aria-label', 'Close');
-    close.textContent = '×';
-    close.addEventListener('click', function () { closeWin(key); });
-
-    bar.appendChild(label);
-    bar.appendChild(close);
-
-    var body = document.createElement('div');
-    body.className = 'bookwin-body';
-    buildBody(body);
-
-    win.appendChild(bar);
-    win.appendChild(body);
-    els.windows.appendChild(win);
-
-    openWins[key] = win;
-    win._opener = anchor;
-    raise(win);
-    place(win, anchor);
-    drag(win, bar);
-
-    /* The window is the last thing in the DOM, so leaving focus on the
-       cover would put a hundred covers between the two. Move into it. */
-    win.tabIndex = -1;
-    win.focus({ preventScroll: true });
-
-    win.addEventListener('pointerdown', function () { raise(win); });
-    return win;
-  }
-
-  function drag(win, bar) {
-    var dx = 0, dy = 0, id = null;
-
-    bar.addEventListener('pointerdown', function (e) {
-      if (narrow.matches) return;
-      if (e.target.closest('.bookwin-close')) return;
-      id = e.pointerId;
-      var r = win.getBoundingClientRect();
-      dx = e.clientX - r.left;
-      dy = e.clientY - r.top;
-      bar.setPointerCapture(id);
-      e.preventDefault();
-    });
-
-    bar.addEventListener('pointermove', function (e) {
-      if (id === null || e.pointerId !== id) return;
-      var pad = 8;
-      var left = Math.max(pad, Math.min(e.clientX - dx, window.innerWidth - win.offsetWidth - pad));
-      var top = Math.max(pad, Math.min(e.clientY - dy, window.innerHeight - win.offsetHeight - pad));
-      win.style.left = Math.round(left) + 'px';
-      win.style.top = Math.round(top) + 'px';
-    });
-
-    function end(e) {
-      if (id === null || e.pointerId !== id) return;
-      if (bar.hasPointerCapture(id)) bar.releasePointerCapture(id);
-      id = null;
-    }
-    bar.addEventListener('pointerup', end);
-    bar.addEventListener('pointercancel', end);
-  }
-
-  function para(cls, text) {
-    var p = document.createElement('p');
-    p.className = cls;
-    p.textContent = text;
-    return p;
-  }
-
-  function openBook(b, anchor) {
-    makeWindow('book:' + b.id, b.category, function (body) {
-      body.appendChild(para('bookwin-title', b.title));
-      body.appendChild(para('bookwin-author', b.author));
-      body.appendChild(para('bookwin-pub', b.publisher || b.source || ''));
-      if (b.blurb) body.appendChild(para('bookwin-text', b.blurb));
-
-      var link = document.createElement('p');
-      link.className = 'bookwin-link';
-      var a = document.createElement('a');
-      a.href = b.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.textContent = 'View at publisher →';
-      link.appendChild(a);
-      body.appendChild(link);
-    }, anchor);
-    markTiles();
-  }
-
-  function openAbout() {
-    makeWindow('about', 'About', function (body) {
-      body.appendChild(para('bookwin-title', 'Top 100 Books on Korea'));
-      ABOUT.forEach(function (line) { body.appendChild(para('bookwin-text', line)); });
-    }, null);
-  }
-
-  els.shelf.addEventListener('click', function (e) {
-    var tile = e.target.closest('.tile');
-    if (!tile || !tile._book) return;
-    var key = 'book:' + tile._book.id;
-    if (openWins[key]) closeWin(key);
-    else openBook(tile._book, tile);
-  });
-
-  document.querySelectorAll('[data-about]').forEach(function (b) {
-    b.addEventListener('click', openAbout);
-  });
-
-  /* --- filter controls ------------------------------------------- */
-
-  function tally(key) {
-    var counts = {};
-    books.forEach(function (b) {
-      var v = b[key];
-      if (v) counts[v] = (counts[v] || 0) + 1;
-    });
-    return counts;
-  }
-
-  function fillSelect(sel, rows) {
-    var frag = document.createDocumentFragment();
-    rows.forEach(function (row) {
-      var opt = document.createElement('option');
-      opt.value = row.id;
-      opt.textContent = row.n == null ? row.label : row.label + ' (' + row.n + ')';
-      frag.appendChild(opt);
-    });
-    sel.replaceChildren(frag);
-  }
-
-  function buildFilters() {
-    fillSelect(els.sort, SORTS);
-    els.sort.value = state.sort;
-
-    var pubs = tally('publisher');
-    fillSelect(els.publisher, [{ id: 'All', label: 'All publishers', n: books.length }].concat(
-      Object.keys(pubs).sort(COMPARE).map(function (p) {
-        return { id: p, label: p, n: pubs[p] };
-      })
-    ));
-    els.publisher.value = state.publisher;
-
-    var cats = tally('category');
-    var frag = document.createDocumentFragment();
-    [{ id: 'All', label: 'All', n: books.length }].concat(
-      Object.keys(cats).sort(COMPARE).map(function (c) {
-        return { id: c, label: c, n: cats[c] };
-      })
-    ).forEach(function (row) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.value = row.id;
-      btn.setAttribute('aria-pressed', String(state.category === row.id));
-      btn.appendChild(document.createTextNode(row.label));
-      var n = document.createElement('span');
-      n.className = 'n';
-      n.textContent = row.n;
-      btn.appendChild(n);
-      frag.appendChild(btn);
-    });
-    els.themes.replaceChildren(frag);
-  }
-
-  function markThemes() {
-    els.themes.querySelectorAll('button').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.value === state.category));
-    });
-  }
-
-  els.themes.addEventListener('click', function (e) {
-    var btn = e.target.closest('button[data-value]');
-    if (!btn) return;
-    var value = btn.dataset.value;
-    /* Re-picking the active theme clears it. */
-    state.category = (state.category === value) ? 'All' : value;
-    markThemes();
-    render();
-  });
-
-  els.sort.addEventListener('change', function () {
-    state.sort = els.sort.value;
-    render();
-  });
-
-  els.publisher.addEventListener('change', function () {
-    state.publisher = els.publisher.value;
-    render();
-  });
-
-  /* --- reset ----------------------------------------------------- */
-
-  function resetAll() {
-    state.q = '';
-    state.category = 'All';
-    state.publisher = 'All';
-    els.search.value = '';
-    els.publisher.value = 'All';
-    markThemes();
-    render();
-  }
-
-  els.reset.addEventListener('click', resetAll);
-  els.empty.querySelector('[data-reset]').addEventListener('click', resetAll);
-
-  /* --- search ---------------------------------------------------- */
-
-  function debounce(fn, ms) {
-    var id;
-    return function () { clearTimeout(id); id = setTimeout(fn, ms); };
-  }
-
-  els.search.addEventListener('input', debounce(function () {
-    state.q = els.search.value.trim();
-    render();
-  }, 120));
-
-  els.search.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && els.search.value) {
-      e.preventDefault();
-      els.search.value = '';
-      state.q = '';
-      render();
-    }
-  });
-
-  els.clear.addEventListener('click', function () {
-    els.search.value = '';
-    state.q = '';
-    render();
-    els.search.focus();
-  });
-
-  /* --- scroll to top --------------------------------------------- */
-
-  var topShown = null;
-  function syncScrollTop() {
-    var show = window.scrollY > window.innerHeight * 0.8;
-    if (show === topShown) return;
-    topShown = show;
-    els.scrollTop.hidden = !show;
-    els.scrollTop.classList.toggle('is-visible', show);
-  }
-  window.addEventListener('scroll', syncScrollTop, { passive: true });
-  els.scrollTop.addEventListener('click', function () {
-    window.scrollTo({
-      top: 0,
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-    });
-  });
-
-  /* --- keyboard --------------------------------------------------- */
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape') return;
-    var keys = Object.keys(openWins);
-    if (!keys.length) return;
-    var top = keys.reduce(function (best, k) {
-      return (+openWins[k].style.zIndex > +openWins[best].style.zIndex) ? k : best;
-    }, keys[0]);
-    closeWin(top);
-  });
-
-  /* --- render ----------------------------------------------------- */
 
   function render() {
-    var list = visible();
-
-    var frag = document.createDocumentFragment();
-    list.forEach(function (b) { frag.appendChild(tileNode(b)); });
-    els.shelf.replaceChildren(frag);
-    markTiles();
-
-    els.count.textContent = (list.length === books.length)
-      ? books.length + ' books'
-      : list.length + ' of ' + books.length + ' books';
-
-    els.empty.hidden = list.length > 0;
-    els.clear.hidden = !state.q;
-    els.reset.hidden = !filtered();
-
-    syncUrl();
+    rows.replaceChildren();
+    books.forEach(function (b, n) {
+      var tr = document.createElement('tr');
+      tr.id = 'r' + n;
+      tr.innerHTML =
+        '<td><img class="thumb" alt=""></td>' +
+        '<td class="n">' + (n + 1) + '</td>' +
+        '<td><strong></strong><br><span class="n"></span></td>' +
+        '<td class="isbn">' + (b.isbn || '—') + '</td>' +
+        '<td><span class="src pending">waiting…</span></td>';
+      tr.querySelector('strong').textContent = b.title;
+      tr.querySelector('td:nth-child(3) .n').textContent = b.author;
+      rows.appendChild(tr);
+    });
   }
 
-  /* --- URL sync ---------------------------------------------------- */
+  function run() {
+    runBtn.disabled = true;
+    copyBtn.disabled = true;
+    var counts = { ol: 0, g13: 0, g10: 0, search: 0, none: 0 };
+    var missing = [];
+    var done = 0;
+    prog.value = 0;
 
-  function syncUrl() {
-    var p = new URLSearchParams();
-    if (state.q) p.set('q', state.q);
-    if (state.category !== 'All') p.set('theme', state.category);
-    if (state.publisher !== 'All') p.set('publisher', state.publisher);
-    if (state.sort !== 'author') p.set('sort', state.sort);
-    var qs = p.toString();
-    history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+    /* Sequential rather than parallel: 100 books times up to four
+       requests is enough to get rate-limited if fired all at once. */
+    var chain = Promise.resolve();
+    books.forEach(function (b, n) {
+      chain = chain.then(function () {
+        return resolve(b).then(function (res) {
+          counts[res.via]++;
+          if (res.via === 'none') missing.push((n + 1) + '. ' + b.author + ' — ' + b.title + '  [' + (b.isbn || 'no isbn') + ']');
+
+          var tr = document.getElementById('r' + n);
+          var cell = tr.querySelector('.src');
+          cell.className = 'src ' + (res.via === 'none' ? 'bad' : 'ok');
+          cell.textContent = LABEL[res.via];
+          if (res.via === 'none') tr.classList.add('bad');
+          if (res.url) tr.querySelector('.thumb').src = res.url;
+
+          done++;
+          prog.value = done;
+          tally.innerHTML =
+            '<span>checked <b>' + done + '</b>/' + books.length + '</span>' +
+            '<span>Open Library by ISBN <b>' + counts.ol + '</b></span>' +
+            '<span>Google Books <b>' + (counts.g13 + counts.g10) + '</b></span>' +
+            '<span>Open Library by title <b>' + counts.search + '</b></span>' +
+            '<span>still missing <b>' + counts.none + '</b></span>';
+          out.value = missing.join('\n');
+        });
+      });
+    });
+
+    chain.then(function () {
+      runBtn.disabled = false;
+      runBtn.textContent = 'Run again';
+      copyBtn.disabled = missing.length === 0;
+      if (!missing.length) out.value = 'Every book resolved to a cover.';
+    });
   }
 
-  function readUrl() {
-    var p = new URLSearchParams(location.search);
-    state.q = p.get('q') || '';
-
-    var theme = p.get('theme');
-    if (theme && books.some(function (b) { return b.category === theme; })) state.category = theme;
-
-    var pub = p.get('publisher');
-    if (pub && books.some(function (b) { return b.publisher === pub; })) state.publisher = pub;
-
-    var sort = p.get('sort');
-    if (SORTS.some(function (s) { return s.id === sort; })) state.sort = sort;
-
-    els.search.value = state.q;
-  }
-
-  /* --- boot -------------------------------------------------------- */
-
-  document.querySelectorAll('.footer-year').forEach(function (el) {
-    el.textContent = new Date().getFullYear();
+  copyBtn.addEventListener('click', function () {
+    out.select();
+    navigator.clipboard.writeText(out.value).then(function () {
+      copyBtn.textContent = 'Copied';
+      setTimeout(function () { copyBtn.textContent = 'Copy the missing list'; }, 1500);
+    }, function () { /* selection is the fallback */ });
   });
 
-  if (!books.length) {
-    els.count.textContent = 'The book list failed to load.';
-    els.empty.hidden = false;
-    return;
-  }
-
-  readUrl();
-  buildFilters();
+  runBtn.addEventListener('click', run);
+  prog.max = books.length;
   render();
-  syncScrollTop();
 })();
 </script>
 </body>
