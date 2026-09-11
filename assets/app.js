@@ -1,11 +1,10 @@
 /* ---------------------------------------------------------------
-   100 Books on Korea — shelf behaviour
+   Top 100 Books on Korea — shelf behaviour
    Data comes from books.js (window.BOOKS).
 
-   Structure follows minchi.co/books: the filter stack lives in the
-   left rail on wide screens and moves into a modal on narrow ones,
-   and a book opens as a draggable floating window rather than a
-   hover card, so several can stay open at once.
+   Filtering lives in the sticky bar above the shelf so the grid keeps
+   the full page width. A book opens as a draggable floating window,
+   minchi.co/books style, so several can sit open at once.
    --------------------------------------------------------------- */
 
 (function () {
@@ -13,8 +12,7 @@
 
   var books = Array.isArray(window.BOOKS) ? window.BOOKS.slice() : [];
 
-  /* Tint for the typographic stand-in shown when a book has no cover
-     image, or when the image fails to load. */
+  /* Tint for the typographic stand-in shown when no source has art. */
   var HUES = {
     'Korean War':                        '#7a3a33',
     'History & Empire':                  '#7d5a36',
@@ -43,36 +41,29 @@
     'built from the same country, the alliance, the culture, and the people.',
     'Ranked by nothing — it is a shelf, not a league table. Themes are my own ' +
     'shelving, not the publishers’ categories.',
-    'Open any cover for the details and a link to its publisher.'
+    'Open any cover for a short description and a link to its publisher.'
   ];
 
   var $ = function (sel) { return document.querySelector(sel); };
 
   var els = {
-    shelf:    $('#shelf'),
-    empty:    $('#empty'),
-    status:   $('#shelf-status'),
-    search:   $('#search'),
-    clear:    $('[data-clear]'),
-    rail:     $('#side-scroll'),
-    aside:    $('.side-nav'),
-    windows:  $('#book-windows'),
-    modal:    $('#filters-modal'),
-    modalBody:$('#filters-modal-body'),
-    toggle:   $('#filters-toggle'),
-    scrollTop:$('#scroll-top'),
-    floatReset:$('#filters-reset-float')
+    shelf:     $('#shelf'),
+    empty:     $('#empty'),
+    count:     $('#shelf-count'),
+    search:    $('#search'),
+    clear:     $('[data-clear]'),
+    sort:      $('#sort-select'),
+    publisher: $('#publisher-select'),
+    themes:    $('#theme-list'),
+    reset:     $('#filters-reset'),
+    windows:   $('#book-windows'),
+    scrollTop: $('#scroll-top')
   };
-
-  /* Every Reset button resets; the floating one is shown by scroll
-     position rather than by render(), so it is tracked separately. */
-  var allResets = Array.prototype.slice.call(document.querySelectorAll('.filters-reset'));
-  var resets = allResets.filter(function (b) { return b !== els.floatReset; });
 
   var state = { q: '', category: 'All', publisher: 'All', sort: 'author' };
 
   var COMPARE = new Intl.Collator('en', { sensitivity: 'base' }).compare;
-  var narrow = window.matchMedia('(max-width: 900px)');
+  var narrow = window.matchMedia('(max-width: 680px)');
 
   /* --- helpers ------------------------------------------------- */
 
@@ -98,7 +89,82 @@
     return b._hay;
   }
 
-  function filtered() { return state.q || state.category !== 'All' || state.publisher !== 'All'; }
+  function filtered() {
+    return !!state.q || state.category !== 'All' || state.publisher !== 'All';
+  }
+
+  /* --- covers ---------------------------------------------------- */
+
+  /* Google indexes some editions under the 10-digit ISBN only, so it is
+     worth deriving. Only 978-prefixed ISBN-13s have an ISBN-10 form. */
+  function isbn10(i13) {
+    if (!/^978\d{10}$/.test(i13)) return null;
+    var core = i13.slice(3, 12);
+    var sum = 0;
+    for (var i = 0; i < 9; i++) sum += (10 - i) * +core[i];
+    var check = (11 - (sum % 11)) % 11;
+    return core + (check === 10 ? 'X' : String(check));
+  }
+
+  function googleCover(isbn) {
+    return 'https://books.google.com/books/content?vid=ISBN' + isbn +
+           '&printsec=frontcover&img=1&zoom=1';
+  }
+
+  /* Open Library holds art for a good share of these ISBNs but nothing
+     like all of them, so a miss falls through to Google Books before
+     the typographic stand-in. `cover` stays the first candidate, which
+     is also the hook for pointing a book at your own artwork. */
+  function coverSources(b) {
+    var out = [];
+    if (b.cover) out.push(b.cover);
+    if (b.isbn) {
+      out.push(googleCover(b.isbn));
+      var i10 = isbn10(b.isbn);
+      if (i10) out.push(googleCover(i10));
+    }
+    return out;
+  }
+
+  function loadCover(btn, b) {
+    var srcs = coverSources(b);
+    if (!srcs.length) { btn.appendChild(fallbackNode(b)); b._noCover = true; return; }
+
+    var img = document.createElement('img');
+    img.alt = '';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    /* Google's cover endpoint can refuse on referrer. */
+    img.referrerPolicy = 'no-referrer';
+
+    var i = 0;
+    function next() {
+      if (i >= srcs.length) {
+        img.remove();
+        btn.appendChild(fallbackNode(b));
+        b._noCover = true;
+        return;
+      }
+      img.src = srcs[i++];
+    }
+
+    img.addEventListener('error', next);
+    img.addEventListener('load', function () {
+      /* A source with no art for an ISBN may answer 200 with a 1x1 or a
+         "no cover" placeholder rather than 404, so judge it by size. */
+      if (img.naturalWidth < 50 || img.naturalHeight < 50) next();
+      else b._noCover = false;
+    });
+
+    btn.appendChild(img);
+    next();
+  }
+
+  /* Which books ended up with no art, for filling gaps by hand. */
+  window.missingCovers = function () {
+    return books.filter(function (b) { return b._noCover; })
+      .map(function (b) { return b.author + ' — ' + b.title + ' (' + b.isbn + ')'; });
+  };
 
   /* --- filter & sort ------------------------------------------- */
 
@@ -163,23 +229,7 @@
     btn.dataset.id = b.id;
     btn._book = b;
 
-    if (b.cover) {
-      var img = document.createElement('img');
-      img.src = b.cover;
-      img.alt = '';
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      /* Open Library 404s when it has no cover for the ISBN; swap in
-         the typographic stand-in when that happens. */
-      img.addEventListener('error', function () {
-        img.remove();
-        btn.appendChild(fallbackNode(b));
-      }, { once: true });
-      btn.appendChild(img);
-    } else {
-      btn.appendChild(fallbackNode(b));
-    }
-
+    loadCover(btn, b);
     return btn;
   }
 
@@ -227,8 +277,8 @@
     }
 
     /* Offset each additional window so they do not stack exactly. */
-    left += cascade * 18;
-    top += cascade * 18;
+    left += cascade * 20;
+    top += cascade * 20;
     cascade = (cascade + 1) % 6;
 
     left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
@@ -315,32 +365,28 @@
     bar.addEventListener('pointercancel', end);
   }
 
+  function para(cls, text) {
+    var p = document.createElement('p');
+    p.className = cls;
+    p.textContent = text;
+    return p;
+  }
+
   function openBook(b, anchor) {
     makeWindow('book:' + b.id, b.category, function (body) {
-      var t = document.createElement('p');
-      t.className = 'bookwin-title';
-      t.textContent = b.title;
-
-      var a = document.createElement('p');
-      a.className = 'bookwin-author';
-      a.textContent = b.author;
-
-      var p = document.createElement('p');
-      p.className = 'bookwin-pub';
-      p.textContent = b.publisher || b.source || '';
+      body.appendChild(para('bookwin-title', b.title));
+      body.appendChild(para('bookwin-author', b.author));
+      body.appendChild(para('bookwin-pub', b.publisher || b.source || ''));
+      if (b.blurb) body.appendChild(para('bookwin-text', b.blurb));
 
       var link = document.createElement('p');
       link.className = 'bookwin-link';
-      var anchorEl = document.createElement('a');
-      anchorEl.href = b.url;
-      anchorEl.target = '_blank';
-      anchorEl.rel = 'noopener noreferrer';
-      anchorEl.textContent = 'View at publisher →';
-      link.appendChild(anchorEl);
-
-      body.appendChild(t);
-      body.appendChild(a);
-      body.appendChild(p);
+      var a = document.createElement('a');
+      a.href = b.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = 'View at publisher →';
+      link.appendChild(a);
       body.appendChild(link);
     }, anchor);
     markTiles();
@@ -348,17 +394,8 @@
 
   function openAbout() {
     makeWindow('about', 'About', function (body) {
-      var t = document.createElement('p');
-      t.className = 'bookwin-title';
-      t.textContent = 'Top 100 Books on Korea';
-      body.appendChild(t);
-
-      ABOUT.forEach(function (line) {
-        var p = document.createElement('p');
-        p.className = 'bookwin-text';
-        p.textContent = line;
-        body.appendChild(p);
-      });
+      body.appendChild(para('bookwin-title', 'Top 100 Books on Korea'));
+      ABOUT.forEach(function (line) { body.appendChild(para('bookwin-text', line)); });
     }, null);
   }
 
@@ -374,7 +411,7 @@
     b.addEventListener('click', openAbout);
   });
 
-  /* --- filter lists --------------------------------------------- */
+  /* --- filter controls ------------------------------------------- */
 
   function tally(key) {
     var counts = {};
@@ -385,98 +422,75 @@
     return counts;
   }
 
-  function buildList(id, group, rows) {
-    var nav = document.getElementById(id);
+  function fillSelect(sel, rows) {
     var frag = document.createDocumentFragment();
-
     rows.forEach(function (row) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.group = group;
-      btn.dataset.value = row.id;
-      btn.setAttribute('aria-pressed', String(state[group] === row.id));
-      btn.appendChild(document.createTextNode(row.label));
-
-      if (row.n != null) {
-        var n = document.createElement('span');
-        n.className = 'n';
-        n.textContent = row.n;
-        btn.appendChild(n);
-      }
-
-      frag.appendChild(btn);
+      var opt = document.createElement('option');
+      opt.value = row.id;
+      opt.textContent = row.n == null ? row.label : row.label + ' (' + row.n + ')';
+      frag.appendChild(opt);
     });
-
-    nav.replaceChildren(frag);
+    sel.replaceChildren(frag);
   }
 
   function buildFilters() {
-    buildList('sort-list', 'sort', SORTS);
-
-    var cats = tally('category');
-    buildList('theme-list', 'category', [{ id: 'All', label: 'All', n: books.length }].concat(
-      Object.keys(cats).sort(COMPARE).map(function (c) {
-        return { id: c, label: c, n: cats[c] };
-      })
-    ));
+    fillSelect(els.sort, SORTS);
+    els.sort.value = state.sort;
 
     var pubs = tally('publisher');
-    buildList('publisher-list', 'publisher', [{ id: 'All', label: 'All', n: books.length }].concat(
+    fillSelect(els.publisher, [{ id: 'All', label: 'All publishers', n: books.length }].concat(
       Object.keys(pubs).sort(COMPARE).map(function (p) {
         return { id: p, label: p, n: pubs[p] };
       })
     ));
+    els.publisher.value = state.publisher;
+
+    var cats = tally('category');
+    var frag = document.createDocumentFragment();
+    [{ id: 'All', label: 'All', n: books.length }].concat(
+      Object.keys(cats).sort(COMPARE).map(function (c) {
+        return { id: c, label: c, n: cats[c] };
+      })
+    ).forEach(function (row) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.value = row.id;
+      btn.setAttribute('aria-pressed', String(state.category === row.id));
+      btn.appendChild(document.createTextNode(row.label));
+      var n = document.createElement('span');
+      n.className = 'n';
+      n.textContent = row.n;
+      btn.appendChild(n);
+      frag.appendChild(btn);
+    });
+    els.themes.replaceChildren(frag);
   }
 
-  function markGroup(group) {
-    els.rail.querySelectorAll('button[data-group="' + group + '"]').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.dataset.value === state[group]));
+  function markThemes() {
+    els.themes.querySelectorAll('button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.value === state.category));
     });
   }
 
-  els.rail.addEventListener('click', function (e) {
+  els.themes.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-value]');
     if (!btn) return;
-    var group = btn.dataset.group;
     var value = btn.dataset.value;
-
-    /* Re-picking the active theme or publisher clears it; sort always
-       has exactly one choice. */
-    if (group !== 'sort' && state[group] === value) value = 'All';
-    state[group] = value;
-
-    markGroup(group);
+    /* Re-picking the active theme clears it. */
+    state.category = (state.category === value) ? 'All' : value;
+    markThemes();
     render();
   });
 
-  /* --- filters modal -------------------------------------------- */
+  els.sort.addEventListener('change', function () {
+    state.sort = els.sort.value;
+    render();
+  });
 
-  function openModal() {
-    els.modalBody.appendChild(els.rail);       /* move, don't clone */
-    els.modal.classList.add('is-open');
-    els.modal.setAttribute('aria-hidden', 'false');
-    els.toggle.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
-    $('#filters-close').focus();
-  }
-
-  function closeModal() {
-    if (!els.modal.classList.contains('is-open')) return;
-    els.aside.appendChild(els.rail);           /* put the rail back */
-    els.modal.classList.remove('is-open');
-    els.modal.setAttribute('aria-hidden', 'true');
-    els.toggle.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-    els.toggle.focus();
-  }
-
-  els.toggle.addEventListener('click', openModal);
-  $('#filters-close').addEventListener('click', closeModal);
-  $('#filters-backdrop').addEventListener('click', closeModal);
-
-  /* A wide viewport has the rail back on screen, so the modal has no
-     reason to stay open. */
-  narrow.addEventListener('change', function (e) { if (!e.matches) closeModal(); });
+  els.publisher.addEventListener('change', function () {
+    state.publisher = els.publisher.value;
+    render();
+  });
 
   /* --- reset ----------------------------------------------------- */
 
@@ -485,12 +499,12 @@
     state.category = 'All';
     state.publisher = 'All';
     els.search.value = '';
-    markGroup('category');
-    markGroup('publisher');
+    els.publisher.value = 'All';
+    markThemes();
     render();
   }
 
-  allResets.forEach(function (b) { b.addEventListener('click', resetAll); });
+  els.reset.addEventListener('click', resetAll);
   els.empty.querySelector('[data-reset]').addEventListener('click', resetAll);
 
   /* --- search ---------------------------------------------------- */
@@ -526,9 +540,6 @@
   var topShown = null;
   function syncScrollTop() {
     var show = window.scrollY > window.innerHeight * 0.8;
-    /* The rail carries its own Reset, so the floating one is only worth
-       showing once the rail has scrolled out of reach. */
-    els.floatReset.hidden = !(show && filtered());
     if (show === topShown) return;
     topShown = show;
     els.scrollTop.hidden = !show;
@@ -546,9 +557,6 @@
 
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
-    if (els.modal.classList.contains('is-open')) { closeModal(); return; }
-
-    /* Close the topmost window. */
     var keys = Object.keys(openWins);
     if (!keys.length) return;
     var top = keys.reduce(function (best, k) {
@@ -567,15 +575,13 @@
     els.shelf.replaceChildren(frag);
     markTiles();
 
-    var msg = (list.length === books.length)
+    els.count.textContent = (list.length === books.length)
       ? books.length + ' books'
       : list.length + ' of ' + books.length + ' books';
-    els.status.textContent = msg;
 
     els.empty.hidden = list.length > 0;
     els.clear.hidden = !state.q;
-    resets.forEach(function (b) { b.hidden = !filtered(); });
-    syncScrollTop();
+    els.reset.hidden = !filtered();
 
     syncUrl();
   }
@@ -615,7 +621,7 @@
   });
 
   if (!books.length) {
-    els.status.textContent = 'The book list failed to load.';
+    els.count.textContent = 'The book list failed to load.';
     els.empty.hidden = false;
     return;
   }

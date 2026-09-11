@@ -5,20 +5,18 @@ static page for a subpath of [andysaulim.com](https://andysaulim.com).
 
 ## Status
 
-Complete. Layout follows the structure of `minchi.co/books/`: a fixed left rail
-carrying the brand, the site nav and a collapsible filter stack, with the shelf
-filling the rest; the rail moves into a modal on narrow screens; a book opens as
-a draggable floating window, so several can sit open at once. Set in Source Serif
-4, the same face that page uses.
+Complete. The shelf gets the full page width and the covers are sized to be read
+at a glance; filtering lives in a sticky bar above the grid rather than a side
+rail, so nothing competes with the covers for room. A book opens as a draggable
+floating window carrying a short description, `minchi.co/books` style, so several
+can sit open at once. Set in Source Serif 4, the same face that page uses.
 
 The palette is this site's own — a warm off-white ground so the covers carry the
 colour, hairline rules in the same warm grey, and one restrained rust accent.
 
-**All 100 books carry an ISBN and a cover URL.** 58 were resolved from an ISBN in
-the book's own publisher link; the other 42 link by slug or product id, so their
-ISBNs were looked up by hand against the edition each entry links to. Any cover
-Open Library happens not to hold still falls back to a generated typographic one.
-See *Covers* below.
+**All 100 books carry an ISBN, a cover, and a one-paragraph description.** Covers
+resolve through a chain of sources rather than a single one, because Open Library
+alone leaves a lot of gaps. See *Covers* below.
 
 ## What's here
 
@@ -67,19 +65,31 @@ One correction was made to the source data: `Brad Glossermana nd Scott A. Snyder
 
 ## Covers
 
-Cover images come from Open Library, addressed by ISBN:
+Open Library holds art for a good share of these ISBNs but nothing like all of
+them, so `loadCover()` in `assets/app.js` walks a chain and takes the first source
+that returns a real image:
 
+1. the book's `cover` field — Open Library by ISBN-13, and the hook for your own
+   artwork (see below)
+2. Google Books, by ISBN-13
+3. Google Books, by ISBN-10 — some editions are indexed only under the 10-digit
+   form, which is derived from the 13 for `978` prefixes
+4. a generated typographic cover, tinted by theme
+
+A source with no art for an ISBN sometimes answers `200` with a 1x1 or a "no
+cover" placeholder rather than a `404`, so the loader also rejects anything under
+50px square rather than trusting the status code. A hit on step 1 means steps 2
+and 3 are never requested.
+
+To see which books ended up with no art at all, open the console on the live page
+and run:
+
+```js
+missingCovers()
 ```
-https://covers.openlibrary.org/b/isbn/<isbn>-L.jpg?default=false
-```
 
-`default=false` makes the CDN return 404 rather than a blank placeholder, so the
-page can tell a miss from a hit. Any book with no `cover`, or whose image 404s,
-falls back to a generated typographic cover tinted by theme — handled by the
-`error` listener in `tileNode()` in `assets/app.js`.
-
-To use your own artwork instead, set `cover` on a book to any URL or local path —
-it does not have to point at Open Library.
+To supply your own artwork for any of them, set `cover` on that book to any URL
+or local path; it is tried first and does not have to point at Open Library.
 
 ## Editing the list
 
@@ -94,9 +104,15 @@ recounts and rebuilds the theme filters on its own. Each entry:
   "url": "https://global.oup.com/academic/product/...",
   "category": "North Korea: Regime & Leadership",
   "publisher": "Oxford University Press",
-  "source": "global.oup.com"
+  "source": "global.oup.com",
+  "isbn": "9780199390038",
+  "cover": "https://covers.openlibrary.org/b/isbn/9780199390038-L.jpg?default=false",
+  "blurb": "Lankov, who studied in Pyongyang, argues the regime is neither …"
 }
 ```
+
+`blurb` is the paragraph shown in a book's floating window. `id` must be unique —
+it keys the open windows, so two books sharing one would open and close together.
 
 ## Running it
 
@@ -149,10 +165,10 @@ serif, so look at the result.
 - Search across title, author, publisher, and theme (accent- and quote-insensitive)
 - Filter by theme or publisher; click an active option again to clear it
 - Sort by author, title, theme, or publisher
-- Open a cover for a floating window with the details and a link to the publisher —
-  windows are draggable and several can stay open at once
-- Reset appears in the rail once anything is filtered, and floats into reach once
-  you have scrolled away from it
+- Open a cover for a floating window with a one-paragraph description and a link
+  to the publisher — windows are draggable and several can stay open at once
+- Reset appears in the toolbar once anything is filtered
 - Back-to-top button past the first screen
 - Filter state is kept in the URL, so any view can be linked to
-- Filters collapse into a bottom sheet under 900px; keyboard accessible throughout
+- The toolbar sticks to the top of the viewport and reflows down to phone widths;
+  keyboard accessible throughout
