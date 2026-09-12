@@ -191,3 +191,34 @@ serif, so look at the result.
 - Filter state is kept in the URL, so any view can be linked to
 - The toolbar sticks to the top of the viewport and reflows down to phone widths;
   keyboard accessible throughout
+
+
+## Downloading the covers (the actual fix)
+
+Resolving covers in the browser has two failures that cannot be fixed there:
+
+- **Open Library** allows 100 cover requests per IP per 5 minutes *by
+  identifier* and answers `403` past that. This shelf is 101 books, so it sits
+  on the limit every load and a reload loses covers in batches.
+- **Google**, asked for a volume it has no art for, does not `404`. It returns
+  a real image reading *"image not available"*. Those bytes are cross-origin,
+  so nothing in the page can look at them and tell that picture from a cover.
+
+Downloading once fixes both, because a script can space the requests out *and*
+look at the bytes:
+
+```
+python3 fetch_covers.py            # fill assets/covers/, update books.json + books.js
+python3 fetch_covers.py --force    # re-fetch books that already have a file
+python3 fetch_covers.py --only demick
+python3 build.py                   # bake them into dist/books.html
+```
+
+It asks Google for a deliberately impossible ISBN first, so it learns that
+placeholder's digest and can reject it by content rather than by guesswork.
+It also rejects anything under 200px wide, under 6KB, or not a decodable
+image, and it only accepts a search result whose title is a prefix of the
+book's, so a near-miss cannot fetch another book's jacket.
+
+Needs only Python and a network that can reach the cover hosts — which the
+build sandbox cannot, so this has to be run on your own machine.

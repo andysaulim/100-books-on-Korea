@@ -130,17 +130,24 @@
     var out = [];
     var local = b.cover && !/^https?:/i.test(b.cover);
 
-    /* Your own artwork always wins. */
+    /* Your own artwork always wins, and is the only source that can be
+       trusted to be the right jacket. Run `python3 fetch_covers.py` to
+       give every book one. */
     if (local) out.push({ url: b.cover, min: ANY });
 
-    /* Google before Open Library, which is a change of order that matters.
-       Open Library's cover API allows 100 requests per IP per 5 minutes
-       when looking up BY IDENTIFIER, and answers 403 past that. This shelf
-       is 101 books, so asking Open Library by ISBN first meant a single
-       page load sat on the limit and a reload went straight through it —
-       which is why covers were vanishing in batches rather than one by
-       one. Google carries no comparable limit, so it goes first and Open
-       Library now only sees the handful Google has nothing for. */
+    /* Open Library first, then Google. Neither order is good, which is
+       why the downloader exists:
+         - Open Library's cover API allows 100 requests per IP per 5
+           minutes by identifier and 403s past that, and this shelf is 101
+           books, so a reload loses covers in batches.
+         - Google, asked for a volume it has no art for, does not 404. It
+           returns a real image reading "image not available". Those bytes
+           are cross-origin, so nothing here can look at them and tell that
+           picture from a cover.
+       Open Library leads because its misses are honest 404s that fall
+       through, where Google's misses are confidently wrong. */
+    if (b.cover && !local) out.push({ url: b.cover, min: ANY });
+
     if (b.isbn) {
       var ids = [b.isbn];
       var i10 = isbn10(b.isbn);
@@ -148,8 +155,6 @@
       ids.forEach(function (id) { out.push({ url: googleCover(id, 0), min: BIG }); });
       ids.forEach(function (id) { out.push({ url: googleCover(id, 1), min: ANY }); });
     }
-
-    if (b.cover && !local) out.push({ url: b.cover, min: ANY });
     return out;
   }
 

@@ -160,15 +160,6 @@ button { background: none; border: 0; cursor: pointer; }
   .hero-break { display: inline; height: auto; }
 }
 
-.hero-sub {
-  max-width: 34rem;
-  margin: clamp(1.1rem, 2.5vw, 1.6rem) auto 0;
-  font-size: clamp(1rem, 1.4vw, 1.125rem);
-  line-height: 1.7;
-  color: var(--quiet);
-  text-wrap: pretty;
-}
-
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
@@ -720,7 +711,6 @@ button { background: none; border: 0; cursor: pointer; }
 
 .hero-eyebrow { animation: rise-in 640ms var(--ease-book) both; }
 .hero-title   { animation: rise-in 760ms var(--ease-book) 70ms both; }
-.hero-sub     { animation: rise-in 700ms var(--ease-book) 150ms both; }
 .hero-meta    { animation: rise-in 700ms var(--ease-book) 220ms both; }
 .filters      { animation: rise-in 700ms var(--ease-book) 280ms both; }
 
@@ -734,7 +724,7 @@ button { background: none; border: 0; cursor: pointer; }
    less motion gets the page fully formed and still. */
 @media (prefers-reduced-motion: reduce) {
   .shelf li,
-  .hero-eyebrow, .hero-title, .hero-sub, .hero-meta, .filters,
+  .hero-eyebrow, .hero-title, .hero-meta, .filters,
   #shelf-count.is-changed {
     animation: none !important;
     transition: none !important;
