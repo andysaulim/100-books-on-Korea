@@ -160,9 +160,9 @@
       .catch(function () { return null; });
   }
 
-  function loadCover(btn, b) {
+  function loadCover(face, b) {
     var srcs = coverSources(b);
-    if (!srcs.length) { btn.appendChild(fallbackNode(b)); b._noCover = true; return; }
+    if (!srcs.length) { face.appendChild(fallbackNode(b)); b._noCover = true; return; }
 
     var img = document.createElement('img');
     img.alt = '';
@@ -176,7 +176,7 @@
 
     function giveUp() {
       img.remove();
-      btn.appendChild(fallbackNode(b));
+      face.appendChild(fallbackNode(b));
       b._noCover = true;
     }
 
@@ -198,7 +198,7 @@
       else b._noCover = false;
     });
 
-    btn.appendChild(img);
+    face.appendChild(img);
     next();
   }
 
@@ -259,11 +259,54 @@
     return box;
   }
 
+  /* The 3D book: back cover, three pages, front cover, spine, light.
+     `flat` drops the layers that stick out, for the detail window. */
+  function bookScene(b, flat) {
+    var scene = document.createElement('span');
+    scene.className = 'book-scene';
+    scene.setAttribute('aria-hidden', 'true');
+
+    var book = document.createElement('span');
+    book.className = 'book-3d';
+
+    if (!flat) {
+      var back = document.createElement('span');
+      back.className = 'b-back-cover';
+      book.appendChild(back);
+
+      var inside = document.createElement('span');
+      inside.className = 'b-inside';
+      for (var i = 0; i < 3; i++) {
+        var page = document.createElement('span');
+        page.className = 'b-page';
+        inside.appendChild(page);
+      }
+      book.appendChild(inside);
+    }
+
+    var face = document.createElement('span');
+    face.className = 'b-image';
+    face.style.setProperty('--fallback-bg', hue(b.category));
+    book.appendChild(face);
+
+    if (!flat) {
+      var effect = document.createElement('span');
+      effect.className = 'b-effect';
+      book.appendChild(effect);
+
+      var light = document.createElement('span');
+      light.className = 'b-light';
+      book.appendChild(light);
+    }
+
+    scene.appendChild(book);
+    return { scene: scene, face: face };
+  }
+
   function tileNode(b) {
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'tile';
-    btn.style.setProperty('--fallback-bg', hue(b.category));
+    btn.className = 'book-cell';
     /* The cover art carries no text for a screen reader, so the
        control names the book itself. */
     btn.setAttribute('aria-label', b.title + ' by ' + b.author);
@@ -271,12 +314,94 @@
     btn.dataset.id = b.id;
     btn._book = b;
 
-    loadCover(btn, b);
+    var built = bookScene(b, false);
+    btn.appendChild(built.scene);
+    loadCover(built.face, b);
 
     var li = document.createElement('li');
     li.appendChild(btn);
     return li;
   }
+
+  /* --- ambient tint ---------------------------------------------
+     Hovering a book washes the page toward that cover's average
+     colour. Sampling needs CORS; where a host refuses it the tint is
+     simply skipped, which is why the display image is never the one
+     being read. */
+
+  var PAPER = [233, 239, 226];
+  var tintCache = {};
+  var tintToken = 0;
+
+  function mixToward(c, t) {
+    return [
+      Math.round(c[0] * (1 - t) + PAPER[0] * t),
+      Math.round(c[1] * (1 - t) + PAPER[1] * t),
+      Math.round(c[2] * (1 - t) + PAPER[2] * t)
+    ];
+  }
+
+  function sampleCover(src) {
+    if (tintCache[src] !== undefined) return Promise.resolve(tintCache[src]);
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.decoding = 'async';
+      img.onload = function () {
+        try {
+          var size = 24;
+          var c = document.createElement('canvas');
+          c.width = c.height = size;
+          var ctx = c.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, size, size);
+          var d = ctx.getImageData(0, 0, size, size).data;
+          var r = 0, g = 0, bl = 0, n = 0;
+          for (var i = 0; i < d.length; i += 4) {
+            if (d[i + 3] < 140) continue;
+            var pr = d[i], pg = d[i + 1], pb = d[i + 2];
+            /* Skip near-black and near-white so the tint comes from the
+               artwork rather than its ink or its margins. */
+            if (Math.max(pr, pg, pb) < 18) continue;
+            if (Math.min(pr, pg, pb) > 238) continue;
+            r += pr; g += pg; bl += pb; n++;
+          }
+          if (!n) { tintCache[src] = null; resolve(null); return; }
+          var avg = [Math.round(r / n), Math.round(g / n), Math.round(bl / n)];
+          var soft = mixToward(avg, 0.78);
+          var out = 'rgb(' + soft[0] + ', ' + soft[1] + ', ' + soft[2] + ')';
+          tintCache[src] = out;
+          resolve(out);
+        } catch (err) {
+          tintCache[src] = null;   /* tainted canvas: host sent no CORS */
+          resolve(null);
+        }
+      };
+      img.onerror = function () { tintCache[src] = null; resolve(null); };
+      img.src = src;
+    });
+  }
+
+  function setAmbient(src) {
+    var token = ++tintToken;
+    if (!src) { document.documentElement.style.removeProperty('--bg'); return; }
+    sampleCover(src).then(function (colour) {
+      if (token !== tintToken || !colour) return;
+      document.documentElement.style.setProperty('--bg', colour);
+    });
+  }
+
+  function clearAmbient() {
+    tintToken++;
+    document.documentElement.style.removeProperty('--bg');
+  }
+
+  els.shelf.addEventListener('pointerover', function (e) {
+    var cell = e.target.closest('.book-cell');
+    if (!cell || !cell._book) return;
+    var img = cell.querySelector('img');
+    if (img && img.currentSrc) setAmbient(img.currentSrc);
+  });
+  els.shelf.addEventListener('pointerleave', clearAmbient);
 
   /* --- floating windows ----------------------------------------- */
 
@@ -285,7 +410,7 @@
   var cascade = 0;
 
   function markTiles() {
-    els.shelf.querySelectorAll('.tile').forEach(function (t) {
+    els.shelf.querySelectorAll('.book-cell').forEach(function (t) {
       var on = Object.prototype.hasOwnProperty.call(openWins, 'book:' + t.dataset.id);
       t.classList.toggle('is-open', on);
       t.setAttribute('aria-expanded', String(on));
@@ -337,69 +462,95 @@
     win.style.top = Math.round(top) + 'px';
   }
 
-  function makeWindow(key, kind, buildBody, anchor) {
+  var ICON = {
+    prev:  '<path d="M5 12l14 0"/><path d="M5 12l6 6"/><path d="M5 12l6 -6"/>',
+    next:  '<path d="M5 12l14 0"/><path d="M13 18l6 -6"/><path d="M13 6l6 6"/>',
+    close: '<path d="M18 6l-12 12"/><path d="M6 6l12 12"/>'
+  };
+
+  function iconBtn(name, label) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'winbtn';
+    b.setAttribute('aria-label', label);
+    b.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.3" stroke-linecap="round" ' +
+      'stroke-linejoin="round" aria-hidden="true">' + ICON[name] + '</svg>';
+    return b;
+  }
+
+  function makeWindow(key, kind, opts) {
     if (openWins[key]) { raise(openWins[key]); return openWins[key]; }
 
     var win = document.createElement('div');
-    win.className = 'bookwin';
+    win.className = 'bookwin' + (opts.about ? ' is-about' : '');
     win.setAttribute('role', 'dialog');
     win.setAttribute('aria-label', kind);
 
     var bar = document.createElement('div');
     bar.className = 'bookwin-bar';
 
-    var label = document.createElement('span');
-    label.className = 'bookwin-kind';
-    label.textContent = kind;
+    var nav = document.createElement('div');
+    nav.className = 'bookwin-nav';
+    if (opts.step) {
+      var prev = iconBtn('prev', 'Previous book');
+      var next = iconBtn('next', 'Next book');
+      prev.addEventListener('click', function (e) { e.stopPropagation(); opts.step(win, -1); });
+      next.addEventListener('click', function (e) { e.stopPropagation(); opts.step(win, 1); });
+      nav.appendChild(prev);
+      nav.appendChild(next);
+    }
 
-    var close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'bookwin-close';
-    close.setAttribute('aria-label', 'Close');
-    close.textContent = '×';
-    close.addEventListener('click', function () { closeWin(key); });
+    var close = iconBtn('close', 'Close');
+    close.addEventListener('click', function (e) { e.stopPropagation(); closeWin(win._key); });
 
-    bar.appendChild(label);
+    bar.appendChild(nav);
     bar.appendChild(close);
 
     var body = document.createElement('div');
     body.className = 'bookwin-body';
-    buildBody(body);
 
     win.appendChild(bar);
     win.appendChild(body);
     els.windows.appendChild(win);
 
+    win._key = key;
+    win._opener = opts.anchor;
     openWins[key] = win;
-    win._opener = anchor;
+    opts.build(body, win);
+
     raise(win);
-    place(win, anchor);
-    drag(win, bar);
+    place(win, opts.anchor);
+    drag(win);
+
+    win.addEventListener('pointerdown', function () { raise(win); });
 
     /* The window is the last thing in the DOM, so leaving focus on the
        cover would put a hundred covers between the two. Move into it. */
     win.tabIndex = -1;
     win.focus({ preventScroll: true });
-
-    win.addEventListener('pointerdown', function () { raise(win); });
     return win;
   }
 
-  function drag(win, bar) {
+  /* The whole window is a drag surface. The bar is mostly buttons now,
+     so limiting dragging to it would leave only a sliver to grab; the
+     controls and the prose keep their own behaviour instead. */
+  function drag(win) {
     var dx = 0, dy = 0, id = null;
 
-    bar.addEventListener('pointerdown', function (e) {
+    win.addEventListener('pointerdown', function (e) {
       if (narrow.matches) return;
-      if (e.target.closest('.bookwin-close')) return;
+      if (e.button !== 0) return;
+      if (e.target.closest('button, a, input, .bookwin-text')) return;
       id = e.pointerId;
       var r = win.getBoundingClientRect();
       dx = e.clientX - r.left;
       dy = e.clientY - r.top;
-      bar.setPointerCapture(id);
+      win.setPointerCapture(id);
       e.preventDefault();
     });
 
-    bar.addEventListener('pointermove', function (e) {
+    win.addEventListener('pointermove', function (e) {
       if (id === null || e.pointerId !== id) return;
       var pad = 8;
       var left = Math.max(pad, Math.min(e.clientX - dx, window.innerWidth - win.offsetWidth - pad));
@@ -410,11 +561,11 @@
 
     function end(e) {
       if (id === null || e.pointerId !== id) return;
-      if (bar.hasPointerCapture(id)) bar.releasePointerCapture(id);
+      if (win.hasPointerCapture(id)) win.releasePointerCapture(id);
       id = null;
     }
-    bar.addEventListener('pointerup', end);
-    bar.addEventListener('pointercancel', end);
+    win.addEventListener('pointerup', end);
+    win.addEventListener('pointercancel', end);
   }
 
   function para(cls, text) {
@@ -424,80 +575,107 @@
     return p;
   }
 
-  /* Reuse whatever the tile already resolved rather than fetching the
-     cover a second time; fall back to a miniature of the stand-in. */
-  function thumbNode(b, anchor) {
-    var box = document.createElement('div');
-    box.className = 'bookwin-thumb';
-    box.style.setProperty('--thumb-bg', hue(b.category));
+  function fillBook(body, b, anchor) {
+    body.replaceChildren();
 
+    var coverWrap = document.createElement('div');
+    coverWrap.className = 'bookwin-cover';
+    var built = bookScene(b, true);
+    coverWrap.appendChild(built.scene);
+
+    /* Reuse whatever the shelf already resolved rather than fetching the
+       cover a second time. */
     var tileImg = anchor && anchor.querySelector('img');
     if (tileImg && tileImg.currentSrc) {
       var img = document.createElement('img');
       img.src = tileImg.currentSrc;
       img.alt = '';
-      box.appendChild(img);
+      built.face.appendChild(img);
     } else {
-      var stub = document.createElement('span');
-      stub.className = 'stub';
-      stub.textContent = b.title;
-      box.appendChild(stub);
+      built.face.appendChild(fallbackNode(b));
     }
-    return box;
+    body.appendChild(coverWrap);
+
+    var col = document.createElement('div');
+    col.appendChild(para('bookwin-author', b.author));
+    col.appendChild(para('bookwin-title', b.title));
+
+    var facts = document.createElement('p');
+    facts.className = 'bookwin-facts';
+    [b.category, b.publisher || b.source].filter(Boolean).forEach(function (t) {
+      var span = document.createElement('span');
+      span.textContent = t;
+      facts.appendChild(span);
+    });
+    col.appendChild(facts);
+
+    if (b.blurb) col.appendChild(para('bookwin-text', b.blurb));
+
+    var link = document.createElement('p');
+    link.className = 'bookwin-link';
+    var a = document.createElement('a');
+    a.href = b.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = 'View at publisher \u2192';
+    link.appendChild(a);
+    col.appendChild(link);
+
+    body.appendChild(col);
+  }
+
+  /* Prev / next walk the shelf as it is currently filtered and sorted. */
+  function stepBook(win, dir) {
+    var list = visible();
+    if (!list.length) return;
+
+    var i = -1;
+    for (var k = 0; k < list.length; k++) {
+      if (list[k].id === win._bookId) { i = k; break; }
+    }
+    if (i < 0) i = 0;
+
+    var b = list[(i + dir + list.length) % list.length];
+    var cell = els.shelf.querySelector('.book-cell[data-id="' + b.id + '"]');
+
+    delete openWins[win._key];
+    win._key = 'book:' + b.id;
+    win._bookId = b.id;
+    win._opener = cell || null;
+    openWins[win._key] = win;
+    win.setAttribute('aria-label', b.category);
+
+    fillBook(win.querySelector('.bookwin-body'), b, cell);
+    markTiles();
+
+    var img = cell && cell.querySelector('img');
+    if (img && img.currentSrc) setAmbient(img.currentSrc);
   }
 
   function openBook(b, anchor) {
-    makeWindow('book:' + b.id, b.category, function (body) {
-      var head = document.createElement('div');
-      head.className = 'bookwin-head';
-      head.appendChild(thumbNode(b, anchor));
-
-      var titles = document.createElement('div');
-      titles.className = 'bookwin-titles';
-      titles.appendChild(para('bookwin-author', b.author));
-      titles.appendChild(para('bookwin-title', b.title));
-
-      var facts = document.createElement('p');
-      facts.className = 'bookwin-facts';
-      [b.category, b.publisher || b.source].filter(Boolean).forEach(function (t, i) {
-        if (i) {
-          var dot = document.createElement('span');
-          dot.className = 'dot';
-          dot.textContent = '\u00b7';
-          facts.appendChild(dot);
-        }
-        var span = document.createElement('span');
-        span.textContent = t;
-        facts.appendChild(span);
-      });
-      titles.appendChild(facts);
-      head.appendChild(titles);
-      body.appendChild(head);
-
-      if (b.blurb) body.appendChild(para('bookwin-text', b.blurb));
-
-      var link = document.createElement('p');
-      link.className = 'bookwin-link';
-      var a = document.createElement('a');
-      a.href = b.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.textContent = 'View at publisher →';
-      link.appendChild(a);
-      body.appendChild(link);
-    }, anchor);
+    makeWindow('book:' + b.id, b.category, {
+      anchor: anchor,
+      step: stepBook,
+      build: function (body, win) {
+        win._bookId = b.id;
+        fillBook(body, b, anchor);
+      }
+    });
     markTiles();
   }
 
   function openAbout() {
-    makeWindow('about', 'About', function (body) {
-      body.appendChild(para('bookwin-title', '100 Books on Korea'));
-      ABOUT.forEach(function (line) { body.appendChild(para('bookwin-text', line)); });
-    }, null);
+    makeWindow('about', 'About', {
+      about: true,
+      build: function (body) {
+        body.appendChild(para('bookwin-title', '100 Books on Korea'));
+        ABOUT.forEach(function (line) { body.appendChild(para('bookwin-text', line)); });
+      }
+    });
   }
 
   els.shelf.addEventListener('click', function (e) {
-    var tile = e.target.closest('.tile');
+    var tile = e.target.closest('.book-cell');
     if (!tile || !tile._book) return;
     var key = 'book:' + tile._book.id;
     if (openWins[key]) closeWin(key);

@@ -54,7 +54,14 @@
   --serif:   "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
 
   --gutter: clamp(1rem, 4vw, 3.25rem);
-  --tile:   clamp(140px, 15vw, 196px);
+
+  /* Book size drives the shelf tracks; 2:3, as on the reference page. */
+  --bw: 188px;
+  --bh: 282px;
+
+  --ease-out:  cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-book: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-page: cubic-bezier(0.455, 0.03, 0.515, 0.955);
 
   --shadow-tile: 0 1px 2px rgb(23 32 26 / .17), 0 8px 18px -10px rgb(23 32 26 / .3);
   --shadow-pop:  0 14px 38px -12px rgb(23 32 26 / .36);
@@ -66,7 +73,9 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: var(--paper);
+  /* --bg is set from the hovered cover's average colour; see setAmbient(). */
+  background: var(--bg, var(--paper));
+  transition: background-color 480ms ease;
   color: var(--ink);
   font-family: var(--serif);
   font-size: 16px;
@@ -306,68 +315,164 @@ button { background: none; border: 0; cursor: pointer; }
 
 /* --- The shelf ------------------------------------------------------ */
 
+/* Fixed book-width tracks spread edge to edge, so the first column sits
+   flush left and the last flush right. Generous row gap: an opened book
+   needs room to swing without colliding with the row below. */
 .shelf {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--tile), 1fr));
-  gap: clamp(1rem, 1.8vw, 1.75rem) clamp(.9rem, 1.5vw, 1.4rem);
+  grid-template-columns: repeat(auto-fill, var(--bw));
+  justify-content: space-between;
+  justify-items: start;
+  column-gap: 28px;
+  row-gap: 52px;
+  overflow: visible;
 }
 
-.tile {
+.book-cell {
   display: block;
-  position: relative;
-  width: 100%;
   padding: 0;
-  aspect-ratio: 2 / 3;
-  border-radius: 2px;
-  overflow: hidden;
-  background: var(--fallback-bg, #3a4258);
-  box-shadow: var(--shadow-tile);
-  transition: transform .18s ease, box-shadow .18s ease;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  overflow: visible;
+  transition: scale 160ms var(--ease-out);
 }
-.tile:hover,
-.tile:focus-visible {
-  transform: translateY(-4px);
-  box-shadow: 0 2px 6px rgb(23 32 26 / .22), 0 20px 34px -14px rgb(23 32 26 / .36);
-}
-.tile.is-open { outline: 2px solid var(--accent); outline-offset: 3px; }
+.book-cell:active { scale: .98; }
+.book-cell:focus-visible { outline: none; }
+.book-cell:focus-visible .b-image { outline: 2px solid var(--accent); outline-offset: 3px; }
+.book-cell.is-open .b-image { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-.tile img {
+/* --- 3D book -----------------------------------------------------------
+   After CodePen filipz/VYwqwXN, the structure the reference page uses:
+   back cover, three paper pages, front cover, spine shading, light sweep.
+   ---------------------------------------------------------------------- */
+
+.book-scene {
+  position: relative;
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: var(--bw);
+  height: var(--bh);
 }
 
-/* Typographic stand-in, used when no source has art for this book. */
-.tile .fallback {
+.book-3d { position: absolute; inset: 0; }
+
+.b-back-cover {
+  position: absolute;
+  top: 2%; left: 2%;
+  width: 96%; height: 96%;
+  z-index: 1;
+  background: linear-gradient(90deg, #6e6a64 0%, #8a857e 55%, #7a756e 100%);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 1px 1px 4px rgb(0 0 0 / .18);
+}
+
+.b-inside {
+  position: absolute;
+  top: 3%; left: 5%;
+  width: 90%; height: 94%;
+  z-index: 2;
+}
+
+.b-page {
+  position: absolute;
+  top: 0; right: 0;
+  width: 98%; height: 100%;
+  background: #f7f4ee;
+  border: 1px solid rgb(0 0 0 / .12);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+  transform: translateX(0);
+  transition: transform 700ms var(--ease-page);
+}
+
+.b-image {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  border-radius: 2px 6px 6px 2px;
+  background: var(--fallback-bg, #3a4258);
+  box-shadow: 0 2px 6px rgb(0 0 0 / .08), 0 8px 14px rgb(0 0 0 / .06);
+  transform: perspective(2000px) translateX(0) rotateY(0deg) scaleX(1);
+  transform-origin: left center;
+  transition: transform 700ms var(--ease-book), box-shadow 700ms var(--ease-book);
+}
+.b-image img {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Promote only the book being hovered, never all hundred at once. */
+.book-cell:hover .b-image { will-change: transform; }
+
+.b-effect {
+  position: absolute;
+  top: 0; left: 0;
+  width: 9%; height: 100%;
+  margin-left: 7.3%;
+  z-index: 4;
+  border-left: 2px solid rgb(0 0 0 / .06);
+  background: linear-gradient(90deg, rgb(255 255 255 / .2), rgb(255 255 255 / 0));
+  pointer-events: none;
+  transition: margin-left 700ms var(--ease-book);
+}
+
+.b-light {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: 2px 6px 6px 2px;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0), rgb(255 255 255 / .5));
+  opacity: .08;
+  transform: perspective(2000px) rotateY(0deg);
+  transform-origin: left center;
+  pointer-events: none;
+  transition: opacity 700ms var(--ease-book), transform 700ms var(--ease-book);
+}
+
+/* Open: the front cover swings on its spine and the pages fan out. */
+@media (hover: hover) and (pointer: fine) {
+  .book-cell:hover .b-image,
+  .book-cell:focus-visible .b-image {
+    transform: perspective(2000px) translateX(calc(var(--bw) * -0.027)) rotateY(-12deg) scaleX(.96);
+    box-shadow:
+      10px 10px 20px rgb(0 0 0 / .25),
+      20px 20px 40px rgb(0 0 0 / .2),
+      40px 40px 60px rgb(0 0 0 / .15);
+  }
+  .book-cell:hover .b-light,
+  .book-cell:focus-visible .b-light {
+    opacity: .1;
+    transform: perspective(2000px) rotateY(-12deg);
+  }
+  .book-cell:hover .b-effect,
+  .book-cell:focus-visible .b-effect { margin-left: 4.5%; }
+
+  .book-cell:hover .b-page:nth-child(1),
+  .book-cell:focus-visible .b-page:nth-child(1) { transform: translateX(calc(var(--bw) * 0.018)); }
+  .book-cell:hover .b-page:nth-child(2),
+  .book-cell:focus-visible .b-page:nth-child(2) { transform: translateX(calc(var(--bw) * 0.009)); }
+}
+
+/* Typographic stand-in, used when no source has art for this book. It
+   sits inside the front cover so it swings with the rest. */
+.b-image .fallback {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 1.1rem .9rem .95rem 1.1rem;
+  padding: 1.1rem .9rem .95rem 1.2rem;
   text-align: left;
   background: linear-gradient(155deg,
     color-mix(in srgb, var(--fallback-bg) 94%, #fff 6%),
     color-mix(in srgb, var(--fallback-bg) 64%, #10131a 36%));
 }
-.tile .fallback::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: .4rem;
-  background: linear-gradient(90deg, rgb(0 0 0 / .32), rgb(0 0 0 / .04));
-}
-.tile .fallback::after {
-  content: "";
-  position: absolute;
-  inset: .5rem .5rem .5rem .85rem;
-  border: 1px solid rgb(255 255 255 / .16);
-  pointer-events: none;
-}
-.tile .fb-title {
-  font-size: clamp(.78rem, 1.1vw, .95rem);
+.b-image .fb-title {
+  font-size: .95rem;
   font-weight: 600;
   line-height: 1.2;
   color: #fff;
@@ -376,10 +481,10 @@ button { background: none; border: 0; cursor: pointer; }
   -webkit-line-clamp: 7;
   -webkit-box-orient: vertical;
 }
-.tile .fb-author {
+.b-image .fb-author {
   margin-top: auto;
   padding-top: .5rem;
-  font-size: clamp(.56rem, .72vw, .66rem);
+  font-size: .64rem;
   letter-spacing: .08em;
   text-transform: uppercase;
   color: rgb(255 255 255 / .8);
@@ -413,121 +518,145 @@ button { background: none; border: 0; cursor: pointer; }
 }
 .footer p { margin: 0 0 .3rem; }
 
-/* --- Floating book windows ------------------------------------------ */
+/* --- Floating book windows ------------------------------------------
+   The striped drop shadow is three layers: ::before paints an offset
+   hatch, ::after the solid face, and the content sits above both. The
+   window must stay overflow:visible or the stripe gets clipped.
+   Adapted from a Temani Afif answer on Stack Overflow (CC BY-SA 4.0).
+   -------------------------------------------------------------------- */
 
 .book-windows {
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
+  overflow: visible;
 }
 
 .bookwin {
   position: absolute;
-  width: 26rem;
-  max-width: calc(100vw - 2rem);
-  background: var(--card);
-  border: 1px solid var(--rule);
-  box-shadow: var(--shadow-pop);
+  width: min(40rem, calc(100vw - 2rem));
+  isolation: isolate;
+  background: transparent;
+  border: 0;
+  overflow: visible;
   pointer-events: auto;
+  --face: var(--card);
+  --stripe: 6px;
+  cursor: grab;
 }
+.bookwin:active { cursor: grabbing; }
+.bookwin button, .bookwin a { cursor: pointer; }
+.bookwin .bookwin-text { cursor: auto; }
+.bookwin.is-about { --face: #e4ecdc; width: min(24rem, calc(100vw - 2rem)); }
+
+.bookwin::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: var(--stripe);
+  left: var(--stripe);
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(-45deg,
+    var(--ink) 0 1.5px, transparent 1.5px 4px);
+  pointer-events: none;
+}
+.bookwin::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: var(--face);
+  border: 1px solid var(--ink);
+  pointer-events: none;
+}
+.bookwin > * { position: relative; z-index: 2; }
 
 .bookwin-bar {
   display: flex;
   align-items: center;
-  gap: .5rem;
-  padding: .35rem .4rem .35rem .85rem;
-  border-bottom: 1px solid var(--rule);
-  cursor: grab;
+  justify-content: space-between;
+  padding: .55rem .55rem 0;
   touch-action: none;
 }
-.bookwin-bar:active { cursor: grabbing; }
-.bookwin-kind {
-  font-size: .62rem;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.bookwin-close {
-  margin-left: auto;
-  padding: .1rem .4rem;
-  font-size: 1.15rem;
-  line-height: 1;
-  color: var(--muted);
-}
-.bookwin-close:hover { color: var(--ink); }
 
-.bookwin-body { padding: 1.05rem 1.15rem 1.2rem; }
+.bookwin-nav { display: flex; gap: .1rem; }
 
-/* Cover alongside the title block, as on the reference page. */
-.bookwin-head { display: flex; gap: 1rem; }
-.bookwin-thumb {
-  flex: 0 0 auto;
-  width: 5.1rem;
-  aspect-ratio: 2 / 3;
-  border-radius: 1px;
-  overflow: hidden;
-  background: var(--thumb-bg, var(--rule));
-  box-shadow: 0 1px 2px rgb(23 32 26 / .2), 0 8px 16px -8px rgb(23 32 26 / .3);
+.winbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--ink);
+  opacity: .55;
 }
-.bookwin-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.bookwin-thumb .stub {
-  display: block;
-  padding: .45rem .4rem;
-  font-size: .55rem;
-  font-weight: 600;
-  line-height: 1.2;
-  color: #fff;
-  overflow: hidden;
+.winbtn:hover { opacity: 1; }
+.winbtn svg { display: block; width: 1.1rem; height: 1.1rem; }
+
+.bookwin-body {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: .35rem 1.5rem 1.5rem;
+  align-items: start;
+}
+.bookwin.is-about .bookwin-body { display: block; }
+
+.bookwin-cover { width: 168px; }
+/* In the window the book is shown closed and flat — the layers that
+   stick out belong on the shelf. */
+.bookwin-cover .book-scene { --bw: 168px; --bh: 252px; }
+.bookwin-cover .b-back-cover,
+.bookwin-cover .b-inside { display: none; }
+.bookwin-cover .b-image {
+  transition: none;
+  box-shadow: 0 4px 10px rgb(0 0 0 / .18), 0 14px 28px rgb(0 0 0 / .14);
 }
 
-.bookwin-titles { min-width: 0; }
 .bookwin-author {
-  margin: 0;
-  font-size: .85rem;
+  margin: 0 0 .35rem;
+  font-size: .88rem;
   color: var(--muted);
 }
 .bookwin-title {
-  margin: .15rem 0 0;
+  margin: 0;
   font-family: var(--display);
   font-optical-sizing: auto;
   font-weight: 600;
-  font-size: 1.3rem;
-  line-height: 1.15;
-  letter-spacing: -.012em;
+  font-size: 1.6rem;
+  line-height: 1.18;
+  letter-spacing: -.015em;
   color: var(--deep);
-  text-wrap: pretty;
+  text-wrap: balance;
 }
 .bookwin-facts {
   display: flex;
   flex-wrap: wrap;
-  gap: .2rem .7rem;
-  margin: .5rem 0 0;
-  font-size: .76rem;
+  gap: .2rem 1rem;
+  margin: .7rem 0 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  font-size: .86rem;
   color: var(--muted);
 }
-.bookwin-facts .dot { color: var(--rule); }
-
 .bookwin-text {
-  margin: .95rem 0 0;
-  padding-top: .95rem;
-  border-top: 1px solid var(--rule);
-  font-size: .89rem;
+  margin: 1.1rem 0 0;
+  font-size: .95rem;
   line-height: 1.6;
   color: var(--quiet);
   text-wrap: pretty;
 }
-.bookwin-text + .bookwin-text { border-top: 0; padding-top: 0; margin-top: .65rem; }
-
-.bookwin-link { margin: 1rem 0 0; }
+.bookwin-text + .bookwin-text { margin-top: .7rem; }
+.bookwin-link { margin: 1.1rem 0 0; }
 .bookwin-link a {
-  font-size: .82rem;
+  font-size: .88rem;
   color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
 }
 
 /* --- Back to top ----------------------------------------------------- */
@@ -2020,9 +2149,9 @@ window.BOOKS = [
       .catch(function () { return null; });
   }
 
-  function loadCover(btn, b) {
+  function loadCover(face, b) {
     var srcs = coverSources(b);
-    if (!srcs.length) { btn.appendChild(fallbackNode(b)); b._noCover = true; return; }
+    if (!srcs.length) { face.appendChild(fallbackNode(b)); b._noCover = true; return; }
 
     var img = document.createElement('img');
     img.alt = '';
@@ -2036,7 +2165,7 @@ window.BOOKS = [
 
     function giveUp() {
       img.remove();
-      btn.appendChild(fallbackNode(b));
+      face.appendChild(fallbackNode(b));
       b._noCover = true;
     }
 
@@ -2058,7 +2187,7 @@ window.BOOKS = [
       else b._noCover = false;
     });
 
-    btn.appendChild(img);
+    face.appendChild(img);
     next();
   }
 
@@ -2119,11 +2248,54 @@ window.BOOKS = [
     return box;
   }
 
+  /* The 3D book: back cover, three pages, front cover, spine, light.
+     `flat` drops the layers that stick out, for the detail window. */
+  function bookScene(b, flat) {
+    var scene = document.createElement('span');
+    scene.className = 'book-scene';
+    scene.setAttribute('aria-hidden', 'true');
+
+    var book = document.createElement('span');
+    book.className = 'book-3d';
+
+    if (!flat) {
+      var back = document.createElement('span');
+      back.className = 'b-back-cover';
+      book.appendChild(back);
+
+      var inside = document.createElement('span');
+      inside.className = 'b-inside';
+      for (var i = 0; i < 3; i++) {
+        var page = document.createElement('span');
+        page.className = 'b-page';
+        inside.appendChild(page);
+      }
+      book.appendChild(inside);
+    }
+
+    var face = document.createElement('span');
+    face.className = 'b-image';
+    face.style.setProperty('--fallback-bg', hue(b.category));
+    book.appendChild(face);
+
+    if (!flat) {
+      var effect = document.createElement('span');
+      effect.className = 'b-effect';
+      book.appendChild(effect);
+
+      var light = document.createElement('span');
+      light.className = 'b-light';
+      book.appendChild(light);
+    }
+
+    scene.appendChild(book);
+    return { scene: scene, face: face };
+  }
+
   function tileNode(b) {
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'tile';
-    btn.style.setProperty('--fallback-bg', hue(b.category));
+    btn.className = 'book-cell';
     /* The cover art carries no text for a screen reader, so the
        control names the book itself. */
     btn.setAttribute('aria-label', b.title + ' by ' + b.author);
@@ -2131,12 +2303,94 @@ window.BOOKS = [
     btn.dataset.id = b.id;
     btn._book = b;
 
-    loadCover(btn, b);
+    var built = bookScene(b, false);
+    btn.appendChild(built.scene);
+    loadCover(built.face, b);
 
     var li = document.createElement('li');
     li.appendChild(btn);
     return li;
   }
+
+  /* --- ambient tint ---------------------------------------------
+     Hovering a book washes the page toward that cover's average
+     colour. Sampling needs CORS; where a host refuses it the tint is
+     simply skipped, which is why the display image is never the one
+     being read. */
+
+  var PAPER = [233, 239, 226];
+  var tintCache = {};
+  var tintToken = 0;
+
+  function mixToward(c, t) {
+    return [
+      Math.round(c[0] * (1 - t) + PAPER[0] * t),
+      Math.round(c[1] * (1 - t) + PAPER[1] * t),
+      Math.round(c[2] * (1 - t) + PAPER[2] * t)
+    ];
+  }
+
+  function sampleCover(src) {
+    if (tintCache[src] !== undefined) return Promise.resolve(tintCache[src]);
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.decoding = 'async';
+      img.onload = function () {
+        try {
+          var size = 24;
+          var c = document.createElement('canvas');
+          c.width = c.height = size;
+          var ctx = c.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, size, size);
+          var d = ctx.getImageData(0, 0, size, size).data;
+          var r = 0, g = 0, bl = 0, n = 0;
+          for (var i = 0; i < d.length; i += 4) {
+            if (d[i + 3] < 140) continue;
+            var pr = d[i], pg = d[i + 1], pb = d[i + 2];
+            /* Skip near-black and near-white so the tint comes from the
+               artwork rather than its ink or its margins. */
+            if (Math.max(pr, pg, pb) < 18) continue;
+            if (Math.min(pr, pg, pb) > 238) continue;
+            r += pr; g += pg; bl += pb; n++;
+          }
+          if (!n) { tintCache[src] = null; resolve(null); return; }
+          var avg = [Math.round(r / n), Math.round(g / n), Math.round(bl / n)];
+          var soft = mixToward(avg, 0.78);
+          var out = 'rgb(' + soft[0] + ', ' + soft[1] + ', ' + soft[2] + ')';
+          tintCache[src] = out;
+          resolve(out);
+        } catch (err) {
+          tintCache[src] = null;   /* tainted canvas: host sent no CORS */
+          resolve(null);
+        }
+      };
+      img.onerror = function () { tintCache[src] = null; resolve(null); };
+      img.src = src;
+    });
+  }
+
+  function setAmbient(src) {
+    var token = ++tintToken;
+    if (!src) { document.documentElement.style.removeProperty('--bg'); return; }
+    sampleCover(src).then(function (colour) {
+      if (token !== tintToken || !colour) return;
+      document.documentElement.style.setProperty('--bg', colour);
+    });
+  }
+
+  function clearAmbient() {
+    tintToken++;
+    document.documentElement.style.removeProperty('--bg');
+  }
+
+  els.shelf.addEventListener('pointerover', function (e) {
+    var cell = e.target.closest('.book-cell');
+    if (!cell || !cell._book) return;
+    var img = cell.querySelector('img');
+    if (img && img.currentSrc) setAmbient(img.currentSrc);
+  });
+  els.shelf.addEventListener('pointerleave', clearAmbient);
 
   /* --- floating windows ----------------------------------------- */
 
@@ -2145,7 +2399,7 @@ window.BOOKS = [
   var cascade = 0;
 
   function markTiles() {
-    els.shelf.querySelectorAll('.tile').forEach(function (t) {
+    els.shelf.querySelectorAll('.book-cell').forEach(function (t) {
       var on = Object.prototype.hasOwnProperty.call(openWins, 'book:' + t.dataset.id);
       t.classList.toggle('is-open', on);
       t.setAttribute('aria-expanded', String(on));
@@ -2197,69 +2451,95 @@ window.BOOKS = [
     win.style.top = Math.round(top) + 'px';
   }
 
-  function makeWindow(key, kind, buildBody, anchor) {
+  var ICON = {
+    prev:  '<path d="M5 12l14 0"/><path d="M5 12l6 6"/><path d="M5 12l6 -6"/>',
+    next:  '<path d="M5 12l14 0"/><path d="M13 18l6 -6"/><path d="M13 6l6 6"/>',
+    close: '<path d="M18 6l-12 12"/><path d="M6 6l12 12"/>'
+  };
+
+  function iconBtn(name, label) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'winbtn';
+    b.setAttribute('aria-label', label);
+    b.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.3" stroke-linecap="round" ' +
+      'stroke-linejoin="round" aria-hidden="true">' + ICON[name] + '</svg>';
+    return b;
+  }
+
+  function makeWindow(key, kind, opts) {
     if (openWins[key]) { raise(openWins[key]); return openWins[key]; }
 
     var win = document.createElement('div');
-    win.className = 'bookwin';
+    win.className = 'bookwin' + (opts.about ? ' is-about' : '');
     win.setAttribute('role', 'dialog');
     win.setAttribute('aria-label', kind);
 
     var bar = document.createElement('div');
     bar.className = 'bookwin-bar';
 
-    var label = document.createElement('span');
-    label.className = 'bookwin-kind';
-    label.textContent = kind;
+    var nav = document.createElement('div');
+    nav.className = 'bookwin-nav';
+    if (opts.step) {
+      var prev = iconBtn('prev', 'Previous book');
+      var next = iconBtn('next', 'Next book');
+      prev.addEventListener('click', function (e) { e.stopPropagation(); opts.step(win, -1); });
+      next.addEventListener('click', function (e) { e.stopPropagation(); opts.step(win, 1); });
+      nav.appendChild(prev);
+      nav.appendChild(next);
+    }
 
-    var close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'bookwin-close';
-    close.setAttribute('aria-label', 'Close');
-    close.textContent = '×';
-    close.addEventListener('click', function () { closeWin(key); });
+    var close = iconBtn('close', 'Close');
+    close.addEventListener('click', function (e) { e.stopPropagation(); closeWin(win._key); });
 
-    bar.appendChild(label);
+    bar.appendChild(nav);
     bar.appendChild(close);
 
     var body = document.createElement('div');
     body.className = 'bookwin-body';
-    buildBody(body);
 
     win.appendChild(bar);
     win.appendChild(body);
     els.windows.appendChild(win);
 
+    win._key = key;
+    win._opener = opts.anchor;
     openWins[key] = win;
-    win._opener = anchor;
+    opts.build(body, win);
+
     raise(win);
-    place(win, anchor);
-    drag(win, bar);
+    place(win, opts.anchor);
+    drag(win);
+
+    win.addEventListener('pointerdown', function () { raise(win); });
 
     /* The window is the last thing in the DOM, so leaving focus on the
        cover would put a hundred covers between the two. Move into it. */
     win.tabIndex = -1;
     win.focus({ preventScroll: true });
-
-    win.addEventListener('pointerdown', function () { raise(win); });
     return win;
   }
 
-  function drag(win, bar) {
+  /* The whole window is a drag surface. The bar is mostly buttons now,
+     so limiting dragging to it would leave only a sliver to grab; the
+     controls and the prose keep their own behaviour instead. */
+  function drag(win) {
     var dx = 0, dy = 0, id = null;
 
-    bar.addEventListener('pointerdown', function (e) {
+    win.addEventListener('pointerdown', function (e) {
       if (narrow.matches) return;
-      if (e.target.closest('.bookwin-close')) return;
+      if (e.button !== 0) return;
+      if (e.target.closest('button, a, input, .bookwin-text')) return;
       id = e.pointerId;
       var r = win.getBoundingClientRect();
       dx = e.clientX - r.left;
       dy = e.clientY - r.top;
-      bar.setPointerCapture(id);
+      win.setPointerCapture(id);
       e.preventDefault();
     });
 
-    bar.addEventListener('pointermove', function (e) {
+    win.addEventListener('pointermove', function (e) {
       if (id === null || e.pointerId !== id) return;
       var pad = 8;
       var left = Math.max(pad, Math.min(e.clientX - dx, window.innerWidth - win.offsetWidth - pad));
@@ -2270,11 +2550,11 @@ window.BOOKS = [
 
     function end(e) {
       if (id === null || e.pointerId !== id) return;
-      if (bar.hasPointerCapture(id)) bar.releasePointerCapture(id);
+      if (win.hasPointerCapture(id)) win.releasePointerCapture(id);
       id = null;
     }
-    bar.addEventListener('pointerup', end);
-    bar.addEventListener('pointercancel', end);
+    win.addEventListener('pointerup', end);
+    win.addEventListener('pointercancel', end);
   }
 
   function para(cls, text) {
@@ -2284,80 +2564,107 @@ window.BOOKS = [
     return p;
   }
 
-  /* Reuse whatever the tile already resolved rather than fetching the
-     cover a second time; fall back to a miniature of the stand-in. */
-  function thumbNode(b, anchor) {
-    var box = document.createElement('div');
-    box.className = 'bookwin-thumb';
-    box.style.setProperty('--thumb-bg', hue(b.category));
+  function fillBook(body, b, anchor) {
+    body.replaceChildren();
 
+    var coverWrap = document.createElement('div');
+    coverWrap.className = 'bookwin-cover';
+    var built = bookScene(b, true);
+    coverWrap.appendChild(built.scene);
+
+    /* Reuse whatever the shelf already resolved rather than fetching the
+       cover a second time. */
     var tileImg = anchor && anchor.querySelector('img');
     if (tileImg && tileImg.currentSrc) {
       var img = document.createElement('img');
       img.src = tileImg.currentSrc;
       img.alt = '';
-      box.appendChild(img);
+      built.face.appendChild(img);
     } else {
-      var stub = document.createElement('span');
-      stub.className = 'stub';
-      stub.textContent = b.title;
-      box.appendChild(stub);
+      built.face.appendChild(fallbackNode(b));
     }
-    return box;
+    body.appendChild(coverWrap);
+
+    var col = document.createElement('div');
+    col.appendChild(para('bookwin-author', b.author));
+    col.appendChild(para('bookwin-title', b.title));
+
+    var facts = document.createElement('p');
+    facts.className = 'bookwin-facts';
+    [b.category, b.publisher || b.source].filter(Boolean).forEach(function (t) {
+      var span = document.createElement('span');
+      span.textContent = t;
+      facts.appendChild(span);
+    });
+    col.appendChild(facts);
+
+    if (b.blurb) col.appendChild(para('bookwin-text', b.blurb));
+
+    var link = document.createElement('p');
+    link.className = 'bookwin-link';
+    var a = document.createElement('a');
+    a.href = b.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = 'View at publisher \u2192';
+    link.appendChild(a);
+    col.appendChild(link);
+
+    body.appendChild(col);
+  }
+
+  /* Prev / next walk the shelf as it is currently filtered and sorted. */
+  function stepBook(win, dir) {
+    var list = visible();
+    if (!list.length) return;
+
+    var i = -1;
+    for (var k = 0; k < list.length; k++) {
+      if (list[k].id === win._bookId) { i = k; break; }
+    }
+    if (i < 0) i = 0;
+
+    var b = list[(i + dir + list.length) % list.length];
+    var cell = els.shelf.querySelector('.book-cell[data-id="' + b.id + '"]');
+
+    delete openWins[win._key];
+    win._key = 'book:' + b.id;
+    win._bookId = b.id;
+    win._opener = cell || null;
+    openWins[win._key] = win;
+    win.setAttribute('aria-label', b.category);
+
+    fillBook(win.querySelector('.bookwin-body'), b, cell);
+    markTiles();
+
+    var img = cell && cell.querySelector('img');
+    if (img && img.currentSrc) setAmbient(img.currentSrc);
   }
 
   function openBook(b, anchor) {
-    makeWindow('book:' + b.id, b.category, function (body) {
-      var head = document.createElement('div');
-      head.className = 'bookwin-head';
-      head.appendChild(thumbNode(b, anchor));
-
-      var titles = document.createElement('div');
-      titles.className = 'bookwin-titles';
-      titles.appendChild(para('bookwin-author', b.author));
-      titles.appendChild(para('bookwin-title', b.title));
-
-      var facts = document.createElement('p');
-      facts.className = 'bookwin-facts';
-      [b.category, b.publisher || b.source].filter(Boolean).forEach(function (t, i) {
-        if (i) {
-          var dot = document.createElement('span');
-          dot.className = 'dot';
-          dot.textContent = '\u00b7';
-          facts.appendChild(dot);
-        }
-        var span = document.createElement('span');
-        span.textContent = t;
-        facts.appendChild(span);
-      });
-      titles.appendChild(facts);
-      head.appendChild(titles);
-      body.appendChild(head);
-
-      if (b.blurb) body.appendChild(para('bookwin-text', b.blurb));
-
-      var link = document.createElement('p');
-      link.className = 'bookwin-link';
-      var a = document.createElement('a');
-      a.href = b.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.textContent = 'View at publisher →';
-      link.appendChild(a);
-      body.appendChild(link);
-    }, anchor);
+    makeWindow('book:' + b.id, b.category, {
+      anchor: anchor,
+      step: stepBook,
+      build: function (body, win) {
+        win._bookId = b.id;
+        fillBook(body, b, anchor);
+      }
+    });
     markTiles();
   }
 
   function openAbout() {
-    makeWindow('about', 'About', function (body) {
-      body.appendChild(para('bookwin-title', '100 Books on Korea'));
-      ABOUT.forEach(function (line) { body.appendChild(para('bookwin-text', line)); });
-    }, null);
+    makeWindow('about', 'About', {
+      about: true,
+      build: function (body) {
+        body.appendChild(para('bookwin-title', '100 Books on Korea'));
+        ABOUT.forEach(function (line) { body.appendChild(para('bookwin-text', line)); });
+      }
+    });
   }
 
   els.shelf.addEventListener('click', function (e) {
-    var tile = e.target.closest('.tile');
+    var tile = e.target.closest('.book-cell');
     if (!tile || !tile._book) return;
     var key = 'book:' + tile._book.id;
     if (openWins[key]) closeWin(key);
