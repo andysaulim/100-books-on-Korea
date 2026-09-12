@@ -248,6 +248,12 @@ button { background: none; border: 0; cursor: pointer; }
   scrollbar-width: thin;
   scrollbar-color: var(--rule) transparent;
 }
+/* Set by markScrollers() while there is more below. Without it the cap
+   slices a row in half and the list reads as broken rather than scrollable. */
+.scroller.has-more {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.6rem), transparent);
+          mask-image: linear-gradient(to bottom, #000 calc(100% - 1.6rem), transparent);
+}
 
 .searchwrap {
   position: relative;
@@ -660,7 +666,29 @@ button { background: none; border: 0; cursor: pointer; }
 
 @media (max-width: 560px) {
   .filters { grid-template-columns: 1fr; gap: 1.1rem; }
-  .scroller { max-height: 7.5rem; }
+
+  /* Stacked vertically, twelve themes and twenty-six publishers put two
+     full screens of chrome above the first cover. On a phone they become
+     one swipeable row each, so the books start where the filters end. */
+  .filters .col:has(.scroller) { min-width: 0; }
+  .scroller {
+    max-height: none;
+    display: flex;
+    gap: .1rem 1.1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroller::-webkit-scrollbar { display: none; }
+  .scroller li { flex: 0 0 auto; }
+  .scroller button { width: auto; white-space: nowrap; padding: .25rem 0; }
+  /* The tally would double the width of every chip. */
+  .scroller .n { display: none; }
+  .scroller.has-more {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  }
 
   /* Dragging a window with one thumb is no use; centre them instead. */
   .bookwin {
@@ -671,4 +699,46 @@ button { background: none; border: 0; cursor: pointer; }
     width: min(24rem, calc(100vw - 1.5rem));
   }
   .bookwin-bar { cursor: default; }
+}
+
+/* --- motion ------------------------------------------------------- */
+
+/* Books rise into place as you reach them, a beat apart across each row,
+   which also turns a filter change into a re-shelving rather than a cut.
+   `transform: none` at rest so the 3D hover inside is unaffected. */
+.shelf li {
+  transition: opacity 620ms var(--ease-book), transform 620ms var(--ease-book);
+  transition-delay: var(--enter-delay, 0ms);
+}
+.shelf li.is-out { opacity: 0; transform: translateY(18px) scale(.985); }
+.shelf li.is-in  { opacity: 1; transform: none; }
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.hero-eyebrow { animation: rise-in 640ms var(--ease-book) both; }
+.hero-title   { animation: rise-in 760ms var(--ease-book) 70ms both; }
+.hero-sub     { animation: rise-in 700ms var(--ease-book) 150ms both; }
+.hero-meta    { animation: rise-in 700ms var(--ease-book) 220ms both; }
+.filters      { animation: rise-in 700ms var(--ease-book) 280ms both; }
+
+/* A filter click should read as the shelf answering, so the count ticks. */
+@keyframes count-tick {
+  50% { color: var(--accent); }
+}
+#shelf-count.is-changed { animation: count-tick 520ms ease; }
+
+/* Everything above is decoration. Anyone who has asked their system for
+   less motion gets the page fully formed and still. */
+@media (prefers-reduced-motion: reduce) {
+  .shelf li,
+  .hero-eyebrow, .hero-title, .hero-sub, .hero-meta, .filters,
+  #shelf-count.is-changed {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

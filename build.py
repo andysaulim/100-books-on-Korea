@@ -18,6 +18,7 @@ pass the URL the page will be served from and they are rewritten to match.
 
 import argparse
 import base64
+import json
 import pathlib
 import re
 import sys
@@ -68,6 +69,29 @@ def inline_local_covers(books_js):
     return out, kept, sorted(missed)
 
 
+def check_data_in_step():
+    """books.js is what the page loads; books.json is what gets edited.
+
+    Editing one and forgetting the other ships a stale shelf that every
+    test still passes, because the tests read the JSON. Fail the build
+    instead.
+    """
+    js = read("books.js")
+    marker = "window.BOOKS = "
+    if marker not in js:
+        sys.exit("build: books.js no longer starts with window.BOOKS =")
+    literal = js[js.index(marker) + len(marker):].rstrip().rstrip(";")
+    try:
+        from_js = json.loads(literal)
+    except json.JSONDecodeError as e:
+        sys.exit(f"build: books.js is not valid JSON after window.BOOKS = ({e})")
+    from_json = json.loads(read("books.json"))
+    if from_js != from_json:
+        sys.exit("build: books.js and books.json disagree — regenerate books.js "
+                 f"({len(from_js)} vs {len(from_json)} books)")
+    return len(from_json)
+
+
 def guard(js, name):
     """A literal </script> inside inlined JS would end the block early."""
     if "</script" in js.lower():
@@ -104,6 +128,8 @@ def main():
     )
     args = ap.parse_args()
 
+    n_books = check_data_in_step()
+
     html = read("index.html")
 
     html = sub_once(
@@ -131,7 +157,7 @@ def main():
 
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(html, encoding="utf-8")
-    print(f"wrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size:,} bytes)")
+    print(f"wrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size:,} bytes, {n_books} books)")
     if inlined:
         print(f"  inlined {inlined} local cover"
               f"{'' if inlined == 1 else 's'} from assets/covers/")

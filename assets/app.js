@@ -373,6 +373,44 @@
     return { scene: scene, face: face };
   }
 
+  /* The shelf used to snap into place fully formed, and a filter change
+     was a hard cut. Books now rise into view a beat apart as you reach
+     them, which is also what makes a filter feel like a re-shelving
+     rather than a page swap. Anyone who has asked for less motion gets
+     the old instant behaviour. */
+  var STILL = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var shelfObserver = (!STILL && window.IntersectionObserver)
+    ? new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          en.target.classList.add('is-in');
+          obs.unobserve(en.target);
+        });
+      }, { rootMargin: '0px 0px -8% 0px' })
+    : null;
+
+  /* Reveal has to be decided after the books are in the document, because
+     what matters is where they landed. Anything already within reach rises
+     immediately — a filter click must show its answer without being
+     scrolled to, even when the shelf starts below the fold — and only the
+     books genuinely further down wait for the observer. */
+  function primeReveal() {
+    if (!shelfObserver) return;
+    var reach = window.innerHeight * 1.5;
+    var lis = els.shelf.children;
+    for (var i = 0; i < lis.length; i++) {
+      var li = lis[i];
+      li.style.setProperty('--enter-delay', (i % 6) * 55 + 'ms');
+      li.classList.add('is-out');
+      if (li.getBoundingClientRect().top < reach) {
+        li.classList.add('is-in');
+      } else {
+        shelfObserver.observe(li);
+      }
+    }
+  }
+
   function tileNode(b) {
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -437,7 +475,10 @@
           }
           if (!n) { tintCache[src] = null; resolve(null); return; }
           var avg = [Math.round(r / n), Math.round(g / n), Math.round(bl / n)];
-          var soft = mixToward(avg, 0.78);
+          /* 0.78 still swung the whole page off its green on a saturated
+             jacket. 0.88 reads as a warmth in the paper rather than a
+             change of background. */
+          var soft = mixToward(avg, 0.88);
           var out = 'rgb(' + soft[0] + ', ' + soft[1] + ', ' + soft[2] + ')';
           tintCache[src] = out;
           resolve(out);
@@ -464,6 +505,25 @@
     tintToken++;
     document.documentElement.style.removeProperty('--bg');
   }
+
+  /* The capped theme and publisher lists clip mid-row, which reads as a
+     rendering fault rather than "there is more". Mark them so the CSS can
+     fade the cut edge, and unmark once you have scrolled to the end. */
+  function markScrollers() {
+    els.filters.querySelectorAll('.scroller').forEach(function (el) {
+      /* Capped vertically on a wide screen, swiped horizontally on a
+         phone, so measure whichever axis actually overflows. */
+      var more = el.scrollWidth > el.clientWidth + 2
+        ? el.scrollWidth - el.clientWidth - el.scrollLeft > 2
+        : el.scrollHeight - el.clientHeight - el.scrollTop > 2;
+      el.classList.toggle('has-more', more);
+    });
+  }
+
+  els.filters.querySelectorAll('.scroller').forEach(function (el) {
+    el.addEventListener('scroll', markScrollers, { passive: true });
+  });
+  window.addEventListener('resize', markScrollers);
 
   els.shelf.addEventListener('pointerover', function (e) {
     var cell = e.target.closest('.book-cell');
@@ -913,16 +973,24 @@
     var frag = document.createDocumentFragment();
     list.forEach(function (b) { frag.appendChild(tileNode(b)); });
     els.shelf.replaceChildren(frag);
+    primeReveal();
     markTiles();
 
+    var was = els.count.textContent;
     els.count.textContent = (list.length === books.length)
       ? books.length + ' books'
       : list.length + ' of ' + books.length + ' books';
+    if (was && was !== els.count.textContent) {
+      els.count.classList.remove('is-changed');
+      void els.count.offsetWidth;          /* restart the animation */
+      els.count.classList.add('is-changed');
+    }
 
     els.empty.hidden = list.length > 0;
     els.clear.hidden = !state.q;
     els.reset.hidden = !filtered();
 
+    markScrollers();
     syncUrl();
   }
 

@@ -15,7 +15,7 @@ The palette is the house green with the Korean flag's red as the accent,
 deepened from `#cd2e3a` to `#b32530` so it clears WCAG AA on the green ground —
 every text style on the page is checked against its painted background.
 
-**All 95 books carry an ISBN and a one-paragraph description.** The list is being rebuilt toward 100; see *Filling the last slots* below. Covers
+**All 101 books carry an ISBN and a one-paragraph description.** The list is being rebuilt toward 100; see *Filling the last slots* below. Covers
 resolve through a chain of sources rather than a single one, because Open Library
 alone leaves a lot of gaps. See *Covers* below.
 
@@ -39,7 +39,7 @@ Sourced from the "100 Books on Korea" Google Sheet (author, title, publisher lin
 
 Two fields are derived rather than taken from the sheet:
 
-- **`publisher`** — mapped from the link's domain. 25 presses across all 95 books.
+- **`publisher`** — mapped from the link's domain. 26 presses across all 101 books.
 - **`category`** — a topical theme, assigned by hand so the list can be filtered.
   These are rough shelving calls, not the publishers' own categories. Change any
   of them by editing `books.js`.
