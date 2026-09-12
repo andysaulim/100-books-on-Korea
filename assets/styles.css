@@ -163,8 +163,8 @@ button { background: none; border: 0; cursor: pointer; }
 .hero-sub {
   max-width: 34rem;
   margin: clamp(1.1rem, 2.5vw, 1.6rem) auto 0;
-  font-size: clamp(.95rem, 1.4vw, 1.1rem);
-  line-height: 1.55;
+  font-size: clamp(1rem, 1.4vw, 1.125rem);
+  line-height: 1.7;
   color: var(--quiet);
   text-wrap: pretty;
 }
@@ -615,8 +615,8 @@ button { background: none; border: 0; cursor: pointer; }
 }
 .bookwin-text {
   margin: 1.1rem 0 0;
-  font-size: .95rem;
-  line-height: 1.6;
+  font-size: 1.0625rem;   /* 17px, the reading size; the chrome stays at 16 */
+  line-height: 1.7;
   color: var(--quiet);
   text-wrap: pretty;
 }
