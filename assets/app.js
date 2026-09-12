@@ -128,7 +128,19 @@
      own artwork. */
   function coverSources(b) {
     var out = [];
-    if (b.cover) out.push({ url: b.cover, min: ANY });
+    var local = b.cover && !/^https?:/i.test(b.cover);
+
+    /* Your own artwork always wins. */
+    if (local) out.push({ url: b.cover, min: ANY });
+
+    /* Google before Open Library, which is a change of order that matters.
+       Open Library's cover API allows 100 requests per IP per 5 minutes
+       when looking up BY IDENTIFIER, and answers 403 past that. This shelf
+       is 101 books, so asking Open Library by ISBN first meant a single
+       page load sat on the limit and a reload went straight through it —
+       which is why covers were vanishing in batches rather than one by
+       one. Google carries no comparable limit, so it goes first and Open
+       Library now only sees the handful Google has nothing for. */
     if (b.isbn) {
       var ids = [b.isbn];
       var i10 = isbn10(b.isbn);
@@ -136,7 +148,31 @@
       ids.forEach(function (id) { out.push({ url: googleCover(id, 0), min: BIG }); });
       ids.forEach(function (id) { out.push({ url: googleCover(id, 1), min: ANY }); });
     }
+
+    if (b.cover && !local) out.push({ url: b.cover, min: ANY });
     return out;
+  }
+
+  /* Even below a rate limit, a hundred simultaneous image requests is a
+     burst any host may shed. Covers are fetched a few at a time instead;
+     the shelf still fills top-down because that is the order they queue in. */
+  var MAX_IN_FLIGHT = 6;
+  var inFlight = 0;
+  var waiting = [];
+
+  function queueLoad(run) {
+    waiting.push(run);
+    pump();
+  }
+
+  function pump() {
+    while (inFlight < MAX_IN_FLIGHT && waiting.length) {
+      inFlight++;
+      waiting.shift()(function done() {
+        inFlight--;
+        pump();
+      });
+    }
   }
 
   /* "Stephan Haggard and Marcus Noland" -> "Stephan Haggard". */
@@ -241,11 +277,17 @@
     var i = 0;
     var searched = false;
     var cur = null;
+    var release = null;
+
+    function settle() {
+      if (release) { var r = release; release = null; r(); }
+    }
 
     function giveUp() {
       img.remove();
       face.appendChild(fallbackNode(b));
       b._noCover = true;
+      settle();
     }
 
     function next() {
@@ -265,11 +307,18 @@
          bar starts at the width a 188px book deserves and drops to the
          bare guard once only the small renderings are left. */
       if (img.naturalWidth < cur.min || img.naturalHeight < ANY) next();
-      else b._noCover = false;
+      else { b._noCover = false; settle(); }
     });
 
     face.appendChild(img);
-    next();
+
+    /* One slot is held from the first attempt until this book settles,
+       either with art or with its stand-in, so the queue measures books
+       in flight rather than requests. */
+    queueLoad(function (done) {
+      release = done;
+      next();
+    });
   }
 
   /* Which books ended up with no art, for filling gaps by hand. */

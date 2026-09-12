@@ -209,7 +209,7 @@ window.BOOKS = [
     "publisher": "Macmillan",
     "source": "us.macmillan.com",
     "isbn": "9781429906999",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781429906999-L.jpg?default=false",
+    "cover": "assets/covers/under-the-loving-care.jpg",
     "blurb": "Martin's enormous history of the Kim dynasty, built on decades of reporting and interviews. It is long, but it is the reference volume for how the family built and kept a hereditary state."
   },
   {
@@ -401,7 +401,7 @@ window.BOOKS = [
     "publisher": "Macmillan",
     "source": "us.macmillan.com",
     "isbn": "9781250045119",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781250045119-L.jpg?default=false",
+    "cover": "assets/covers/the-birth-of-korean-cool.jpg",
     "blurb": "Hong's early, breezy account of how a country decided to manufacture cultural influence and largely succeeded. Written before the Korean Wave was a given, which is what makes it interesting now."
   },
   {
@@ -641,7 +641,7 @@ window.BOOKS = [
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
     "isbn": "9780008541408",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780008541408-L.jpg?default=false",
+    "cover": "assets/covers/the-hard-road-out.jpg",
     "blurb": "Park escaped North Korea twice, was trafficked into rural China in between, and eventually resettled in Britain. Written with Seh-Lynn Chai, a South Korean who had to confront her own assumptions to hear it."
   },
   {

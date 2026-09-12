@@ -70,10 +70,11 @@ Open Library holds art for a good share of these ISBNs but nothing like all of
 them, so `loadCover()` in `assets/app.js` walks a chain and takes the first source
 that returns a real image at a usable size:
 
-1. the book's `cover` field — an Open Library URL by ISBN-13, or a local path
-   such as `assets/covers/nothing-to-envy.jpg` for your own artwork
+1. a local path in the book's `cover` field, such as
+   `assets/covers/nothing-to-envy.jpg` — your own artwork always wins
 2. Google Books by ISBN-13, then by ISBN-10, at the large rendering
 3. the same two at Google's default small rendering
+3a. Open Library by ISBN, if the `cover` field holds one
 4. Open Library's search API, by title and first author, then by the title with
    its subtitle stripped
 5. Google's volumes API, which matches the work rather than one exact ISBN and so
