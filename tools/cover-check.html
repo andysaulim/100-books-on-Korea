@@ -97,18 +97,29 @@
   var copyBtn = document.getElementById('copy');
 
   /* Mirrors loadCover() in assets/app.js — keep the two in step. */
+  var BIG = 200, ANY = 50;
   var LABEL = {
-    ol:     'Open Library (ISBN)',
-    g13:    'Google Books (ISBN-13)',
-    g10:    'Google Books (ISBN-10)',
-    search: 'Open Library (title search)',
-    none:   'MISSING'
+    ol:      'Open Library (ISBN)',
+    g13:     'Google Books (ISBN-13, large)',
+    g10:     'Google Books (ISBN-10, large)',
+    g13s:    'Google Books (ISBN-13, small)',
+    g10s:    'Google Books (ISBN-10, small)',
+    local:   'local file',
+    olsearch:'Open Library (title search)',
+    gbsearch:'Google Books (title search)',
+    none:    'MISSING'
+  };
+  /* Why a book ended with nothing, so a rerun diagnoses rather than just counts. */
+  var WHY = {
+    noisbn:  'no ISBN to look up',
+    nomatch: 'searches ran but no result matched the title',
+    neterr:  'the search requests failed (offline, or blocked by the browser)'
   };
 
   function norm(s) {
-    return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
-      .replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
-      .replace(/[‐-―]/g, '-').toLowerCase();
+    return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"')
+      .replace(/[\u2010-\u2015]/g, '-').toLowerCase();
   }
 
   function isbn10(i13) {
@@ -119,72 +130,128 @@
     return core + (c === 10 ? 'X' : String(c));
   }
 
-  function googleCover(isbn) {
+  function googleCover(isbn, zoom) {
     return 'https://books.google.com/books/content?vid=ISBN' + isbn +
-           '&printsec=frontcover&img=1&zoom=1';
+           '&printsec=frontcover&img=1&zoom=' + zoom;
+  }
+
+  function googleIdCover(id, zoom) {
+    return 'https://books.google.com/books/content?id=' + encodeURIComponent(id) +
+           '&printsec=frontcover&img=1&zoom=' + zoom;
   }
 
   function firstAuthor(a) {
     return (a || '').split(/\s+(?:and|&|with)\s+|,\s*/)[0].trim();
   }
 
-  /* Resolves to the URL if it loads at a usable size, else null. */
-  function tryImage(url) {
+  function titleOnly(t) {
+    return (t || '').split(/\s*[:\u2014\u2013]\s+/)[0].trim();
+  }
+
+  function titlesAgree(want, got) {
+    if (!want || !got) return false;
+    want = norm(want); got = norm(got);
+    return want.indexOf(got) === 0 || got.indexOf(want) === 0;
+  }
+
+  /* Resolves to the URL if it loads at least `min` wide, else null. */
+  function tryImage(url, min) {
     return new Promise(function (resolve) {
       var img = new Image();
       img.referrerPolicy = 'no-referrer';
       img.onload = function () {
-        resolve(img.naturalWidth >= 50 && img.naturalHeight >= 50 ? url : null);
+        resolve(img.naturalWidth >= min && img.naturalHeight >= ANY ? url : null);
       };
       img.onerror = function () { resolve(null); };
       img.src = url;
     });
   }
 
-  function searchCover(b) {
-    var url = 'https://openlibrary.org/search.json?limit=3&fields=title,cover_i' +
-              '&title=' + encodeURIComponent(b.title) +
-              '&author=' + encodeURIComponent(firstAuthor(b.author));
-    return fetch(url)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) {
-        if (!j || !j.docs) return null;
-        var want = norm(b.title);
-        for (var i = 0; i < j.docs.length; i++) {
-          var d = j.docs[i];
-          if (!d.cover_i || !d.title) continue;
-          var got = norm(d.title);
-          if (want.indexOf(got) === 0 || got.indexOf(want) === 0) {
-            return 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-L.jpg';
-          }
-        }
-        return null;
+  var netFailed = false;
+  var SEARCH_TIMEOUT = 6000;
+  function getJSON(url) {
+    var timedOut = false;
+    return Promise.race([
+      fetch(url).then(function (r) { return r.ok ? r.json() : null; }),
+      new Promise(function (resolve) {
+        setTimeout(function () { timedOut = true; netFailed = true; resolve(null); }, SEARCH_TIMEOUT);
       })
-      .catch(function () { return null; });
+    ]).catch(function () { netFailed = true; return null; });
+  }
+
+  function olSearch(b, title) {
+    var url = 'https://openlibrary.org/search.json?limit=5&fields=title,cover_i' +
+              '&title=' + encodeURIComponent(title) +
+              '&author=' + encodeURIComponent(firstAuthor(b.author));
+    return getJSON(url).then(function (j) {
+      var docs = (j && j.docs) || [];
+      for (var i = 0; i < docs.length; i++) {
+        if (docs[i].cover_i && titlesAgree(b.title, docs[i].title)) {
+          return [['olsearch', 'https://covers.openlibrary.org/b/id/' + docs[i].cover_i + '-L.jpg', ANY]];
+        }
+      }
+      return [];
+    });
+  }
+
+  function gbSearch(b) {
+    var q = 'intitle:"' + titleOnly(b.title) + '" inauthor:"' + firstAuthor(b.author) + '"';
+    var url = 'https://www.googleapis.com/books/v1/volumes?maxResults=5&country=US&q=' +
+              encodeURIComponent(q);
+    return getJSON(url).then(function (j) {
+      var items = (j && j.items) || [];
+      for (var i = 0; i < items.length; i++) {
+        var v = items[i].volumeInfo || {};
+        if (items[i].id && titlesAgree(b.title, v.title)) {
+          return [['gbsearch', googleIdCover(items[i].id, 0), BIG],
+                  ['gbsearch', googleIdCover(items[i].id, 1), ANY]];
+        }
+      }
+      return [];
+    });
   }
 
   function resolve(b) {
+    netFailed = false;
     var steps = [];
-    if (b.cover) steps.push(['ol', b.cover]);
+    if (b.cover) steps.push([/^https?:/.test(b.cover) ? 'ol' : 'local', b.cover, ANY]);
     if (b.isbn) {
-      steps.push(['g13', googleCover(b.isbn)]);
       var i10 = isbn10(b.isbn);
-      if (i10) steps.push(['g10', googleCover(i10)]);
+      steps.push(['g13', googleCover(b.isbn, 0), BIG]);
+      if (i10) steps.push(['g10', googleCover(i10, 0), BIG]);
+      steps.push(['g13s', googleCover(b.isbn, 1), ANY]);
+      if (i10) steps.push(['g10s', googleCover(i10, 1), ANY]);
     }
 
+    var searched = false;
     var i = 0;
     function step() {
-      if (i >= steps.length) {
-        return searchCover(b).then(function (url) {
-          if (!url) return { via: 'none', url: null };
-          return tryImage(url).then(function (good) {
-            return good ? { via: 'search', url: good } : { via: 'none', url: null };
-          });
+      if (i < steps.length) {
+        var s = steps[i++];
+        return tryImage(s[1], s[2]).then(function (good) {
+          return good ? { via: s[0], url: good } : step();
         });
       }
-      var s = steps[i++];
-      return tryImage(s[1]).then(function (good) {
-        return good ? { via: s[0], url: good } : step();
+      if (searched) {
+        return Promise.resolve({ via: 'none', url: null,
+          why: netFailed ? 'neterr' : (b.isbn ? 'nomatch' : 'noisbn') });
+      }
+      searched = true;
+      var bare = titleOnly(b.title);
+      var searches = [function () { return olSearch(b, b.title); }];
+      if (bare && bare !== b.title) searches.push(function () { return olSearch(b, bare); });
+      searches.push(function () { return gbSearch(b); });
+
+      var k = 0;
+      function nextSearch() {
+        if (k >= searches.length) return Promise.resolve([]);
+        return searches[k++]().then(function (found) {
+          return found.length ? found : nextSearch();
+        });
+      }
+      return nextSearch().then(function (found) {
+        steps = steps.concat(found);
+        return step();
       });
     }
     return step();
@@ -210,7 +277,8 @@
   function run() {
     runBtn.disabled = true;
     copyBtn.disabled = true;
-    var counts = { ol: 0, g13: 0, g10: 0, search: 0, none: 0 };
+    var counts = { ol: 0, local: 0, g13: 0, g10: 0, g13s: 0, g10s: 0,
+                   olsearch: 0, gbsearch: 0, none: 0 };
     var missing = [];
     var done = 0;
     prog.value = 0;
@@ -222,12 +290,13 @@
       chain = chain.then(function () {
         return resolve(b).then(function (res) {
           counts[res.via]++;
-          if (res.via === 'none') missing.push((n + 1) + '. ' + b.author + ' — ' + b.title + '  [' + (b.isbn || 'no isbn') + ']');
+          if (res.via === 'none') missing.push((n + 1) + '. ' + b.author + ' — ' + b.title +
+            '  [' + (b.isbn || 'no isbn') + ']  ' + (WHY[res.why] || ''));
 
           var tr = document.getElementById('r' + n);
           var cell = tr.querySelector('.src');
           cell.className = 'src ' + (res.via === 'none' ? 'bad' : 'ok');
-          cell.textContent = LABEL[res.via];
+          cell.textContent = LABEL[res.via] + (res.via === 'none' && res.why ? ' — ' + WHY[res.why] : '');
           if (res.via === 'none') tr.classList.add('bad');
           if (res.url) tr.querySelector('.thumb').src = res.url;
 
@@ -236,8 +305,9 @@
           tally.innerHTML =
             '<span>checked <b>' + done + '</b>/' + books.length + '</span>' +
             '<span>Open Library by ISBN <b>' + counts.ol + '</b></span>' +
-            '<span>Google Books <b>' + (counts.g13 + counts.g10) + '</b></span>' +
-            '<span>Open Library by title <b>' + counts.search + '</b></span>' +
+            '<span>local file <b>' + counts.local + '</b></span>' +
+            '<span>Google Books by ISBN <b>' + (counts.g13 + counts.g10 + counts.g13s + counts.g10s) + '</b></span>' +
+            '<span>by title search <b>' + (counts.olsearch + counts.gbsearch) + '</b></span>' +
             '<span>still missing <b>' + counts.none + '</b></span>';
           out.value = missing.join('\n');
         });

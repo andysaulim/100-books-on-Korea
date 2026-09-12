@@ -104,22 +104,37 @@
     return core + (check === 10 ? 'X' : String(check));
   }
 
-  function googleCover(isbn) {
+  /* Books are drawn 188px wide, so Google's default zoom=1 rendering —
+     about 128px — was being upscaled. Each ISBN is now asked for the
+     large rendering first, and the minimum width a candidate must meet
+     stays high while a better source is still in play, dropping to the
+     bare size guard once only the small renderings are left. */
+  var BIG = 200, ANY = 50;
+
+  function googleCover(isbn, zoom) {
     return 'https://books.google.com/books/content?vid=ISBN' + isbn +
-           '&printsec=frontcover&img=1&zoom=1';
+           '&printsec=frontcover&img=1&zoom=' + zoom;
+  }
+
+  function googleIdCover(id, zoom) {
+    return 'https://books.google.com/books/content?id=' + encodeURIComponent(id) +
+           '&printsec=frontcover&img=1&zoom=' + zoom;
   }
 
   /* Open Library holds art for a good share of these ISBNs but nothing
      like all of them, so a miss falls through to Google Books before
-     the typographic stand-in. `cover` stays the first candidate, which
-     is also the hook for pointing a book at your own artwork. */
+     the searches and then the typographic stand-in. `cover` stays the
+     first candidate, which is also the hook for pointing a book at your
+     own artwork. */
   function coverSources(b) {
     var out = [];
-    if (b.cover) out.push(b.cover);
+    if (b.cover) out.push({ url: b.cover, min: ANY });
     if (b.isbn) {
-      out.push(googleCover(b.isbn));
+      var ids = [b.isbn];
       var i10 = isbn10(b.isbn);
-      if (i10) out.push(googleCover(i10));
+      if (i10) ids.push(i10);
+      ids.forEach(function (id) { out.push({ url: googleCover(id, 0), min: BIG }); });
+      ids.forEach(function (id) { out.push({ url: googleCover(id, 1), min: ANY }); });
     }
     return out;
   }
@@ -129,35 +144,87 @@
     return (a || '').split(/\s+(?:and|&|with)\s+|,\s*/)[0].trim();
   }
 
-  /* Open Library carries plenty of works it holds no ISBN-level cover
-     for, so when every ISBN attempt misses, ask its search API for the
-     work by title and author and use the cover id that comes back. Only
-     the books that got this far ever issue the request. */
-  function searchCover(b) {
-    if (!window.fetch) return Promise.resolve(null);
-    var url = 'https://openlibrary.org/search.json?limit=3&fields=title,cover_i' +
-              '&title=' + encodeURIComponent(b.title) +
-              '&author=' + encodeURIComponent(firstAuthor(b.author));
+  /* "The Cleanest Race: How North Koreans..." -> "The Cleanest Race".
+     Catalogues often hold the work under its bare title. */
+  function titleOnly(t) {
+    return (t || '').split(/\s*[:\u2014\u2013]\s+/)[0].trim();
+  }
 
-    return fetch(url)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) {
-        if (!j || !j.docs) return null;
-        var want = norm(b.title);
-        for (var i = 0; i < j.docs.length; i++) {
-          var d = j.docs[i];
-          if (!d.cover_i || !d.title) continue;
-          /* Guard against the search handing back a different book:
-             one title has to be a prefix of the other, which tolerates
-             a missing subtitle but not a different work. */
-          var got = norm(d.title);
-          if (want.indexOf(got) === 0 || got.indexOf(want) === 0) {
-            return 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-L.jpg';
-          }
+  /* One title has to be a prefix of the other, which tolerates a missing
+     subtitle but not a different work. Without this a near-miss in a
+     search result would put another book's art on the shelf. */
+  function titlesAgree(want, got) {
+    if (!want || !got) return false;
+    want = norm(want); got = norm(got);
+    return want.indexOf(got) === 0 || got.indexOf(want) === 0;
+  }
+
+  /* A search host that hangs rather than refusing would otherwise leave
+     the book with neither art nor its stand-in, so give up after a few
+     seconds and let the chain fall through. */
+  var SEARCH_TIMEOUT = 6000;
+
+  function getJSON(url) {
+    if (!window.fetch) return Promise.resolve(null);
+    return Promise.race([
+      fetch(url).then(function (r) { return r.ok ? r.json() : null; }),
+      new Promise(function (resolve) { setTimeout(function () { resolve(null); }, SEARCH_TIMEOUT); })
+    ]).catch(function () { return null; });
+  }
+
+  /* Open Library carries plenty of works it holds no ISBN-level cover
+     for, so ask its search API for the work itself. */
+  function olSearch(b, title) {
+    var url = 'https://openlibrary.org/search.json?limit=5&fields=title,cover_i' +
+              '&title=' + encodeURIComponent(title) +
+              '&author=' + encodeURIComponent(firstAuthor(b.author));
+    return getJSON(url).then(function (j) {
+      var docs = (j && j.docs) || [];
+      for (var i = 0; i < docs.length; i++) {
+        if (docs[i].cover_i && titlesAgree(b.title, docs[i].title)) {
+          return [{ url: 'https://covers.openlibrary.org/b/id/' + docs[i].cover_i + '-L.jpg', min: ANY }];
         }
-        return null;
-      })
-      .catch(function () { return null; });
+      }
+      return [];
+    });
+  }
+
+  /* The last resort, and the one that actually rescues the handful the
+     rest miss: Google's volumes API matches the work rather than one
+     exact ISBN, so it holds art for editions the ISBN endpoint has
+     nothing for. The volume id it returns is then rendered large. */
+  function gbSearch(b) {
+    var q = 'intitle:"' + titleOnly(b.title) + '" inauthor:"' + firstAuthor(b.author) + '"';
+    var url = 'https://www.googleapis.com/books/v1/volumes?maxResults=5&country=US&q=' +
+              encodeURIComponent(q);
+    return getJSON(url).then(function (j) {
+      var items = (j && j.items) || [];
+      for (var i = 0; i < items.length; i++) {
+        var v = items[i].volumeInfo || {};
+        if (items[i].id && titlesAgree(b.title, v.title)) {
+          return [{ url: googleIdCover(items[i].id, 0), min: BIG },
+                  { url: googleIdCover(items[i].id, 1), min: ANY }];
+        }
+      }
+      return [];
+    });
+  }
+
+  /* Tried in order, and only by the books every ISBN attempt missed. */
+  function searchCovers(b) {
+    var bare = titleOnly(b.title);
+    var steps = [function () { return olSearch(b, b.title); }];
+    if (bare && bare !== b.title) steps.push(function () { return olSearch(b, bare); });
+    steps.push(function () { return gbSearch(b); });
+
+    var i = 0;
+    function step() {
+      if (i >= steps.length) return Promise.resolve([]);
+      return steps[i++]().then(function (found) {
+        return found && found.length ? found : step();
+      });
+    }
+    return step();
   }
 
   function loadCover(face, b) {
@@ -173,6 +240,7 @@
 
     var i = 0;
     var searched = false;
+    var cur = null;
 
     function giveUp() {
       img.remove();
@@ -181,11 +249,11 @@
     }
 
     function next() {
-      if (i < srcs.length) { img.src = srcs[i++]; return; }
+      if (i < srcs.length) { cur = srcs[i++]; img.src = cur.url; return; }
       if (searched) { giveUp(); return; }
       searched = true;
-      searchCover(b).then(function (url) {
-        if (url) { srcs.push(url); next(); }
+      searchCovers(b).then(function (found) {
+        if (found && found.length) { srcs = srcs.concat(found); next(); }
         else giveUp();
       });
     }
@@ -193,8 +261,10 @@
     img.addEventListener('error', next);
     img.addEventListener('load', function () {
       /* A source with no art for an ISBN may answer 200 with a 1x1 or a
-         "no cover" placeholder rather than 404, so judge it by size. */
-      if (img.naturalWidth < 50 || img.naturalHeight < 50) next();
+         "no cover" placeholder rather than 404, so judge it by size. The
+         bar starts at the width a 188px book deserves and drops to the
+         bare guard once only the small renderings are left. */
+      if (img.naturalWidth < cur.min || img.naturalHeight < ANY) next();
       else b._noCover = false;
     });
 

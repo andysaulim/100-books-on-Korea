@@ -32,7 +32,7 @@
     "publisher": "Oxford University Press",
     "source": "global.oup.com",
     "isbn": "9780199390038",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780199390038-L.jpg?default=false",
+    "cover": "assets/covers/the-real-north-korea.jpg",
     "blurb": "Lankov, who studied in Pyongyang, argues the regime is neither irrational nor suicidal but coldly competent at survival. The book is bracing precisely because it takes the leadership's incentives seriously and follows them to uncomfortable conclusions about what outside pressure can and cannot achieve."
   },
   {
@@ -44,7 +44,7 @@
     "publisher": "Cambridge University Press",
     "source": "cambridge.org",
     "isbn": "9781107002470",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781107002470-L.jpg?default=false",
+    "cover": "assets/covers/activists-alliances.jpg",
     "blurb": "Yeo asks why anti-base movements succeed in some allied states and stall in others, and finds the answer in the domestic security consensus each movement has to argue against. Comparative, and unusually attentive to the activists' own strategic thinking."
   },
   {
@@ -101,10 +101,10 @@
     "title": "The Cleanest Race: How North Koreans See Themselves and Why It Matters",
     "url": "https://www.barnesandnoble.com/w/the-cleanest-race-b-r-myers/1100410201",
     "category": "North Korea: Regime & Leadership",
-    "publisher": "Barnes & Noble",
+    "publisher": "Melville House",
     "source": "barnesandnoble.com",
     "isbn": "9781933633916",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781933633916-L.jpg?default=false",
+    "cover": "assets/covers/the-cleanest-race.jpg",
     "blurb": "Myers reads North Korean domestic propaganda on its own terms and concludes the state's real ideology is not communism but a paranoid race-based nationalism closer to wartime Japan. Short, argumentative, and one of the few books that changes how you read everything else about the country."
   },
   {
@@ -128,7 +128,7 @@
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780385523912",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780385523912-L.jpg?default=false",
+    "cover": "assets/covers/nothing-to-envy.jpg",
     "blurb": "Demick follows six residents of Chongjin through the famine years, reconstructing their lives from interviews after they escaped. It remains the best book for grasping what the collapse of the 1990s actually did to people, and it reads like a novel."
   },
   {
@@ -166,18 +166,6 @@
     "isbn": "9780143108023",
     "cover": "https://covers.openlibrary.org/b/isbn/9780143108023-L.jpg?default=false",
     "blurb": "Harden braids two lives from the same years: Kim Il Sung consolidating power, and a young North Korean pilot who flew a MiG to the South. The pairing makes the founding of the state legible through the people who had to live inside it or run."
-  },
-  {
-    "id": "critically-capitalist-the-spirit-of-asset-capitalism-in-sout",
-    "author": "Bohyeong Kim",
-    "title": "Critically Capitalist: The Spirit of Asset Capitalism in South Korea",
-    "url": "https://press.umich.edu/Books/C/Critically-Capitalist3",
-    "category": "South Korea: Society & Economy",
-    "publisher": "University of Michigan Press",
-    "source": "press.umich.edu",
-    "isbn": "9780472057269",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780472057269-L.jpg?default=false",
-    "blurb": "Kim's ethnography follows amateur stock traders, property hunters and money coaches, and finds them criticising capitalism in the same breath as they chase assets. A sharp account of how financial striving became a form of dissent about Korean development."
   },
   {
     "id": "the-japan-south-korea-identity-clash-east-asian-security-and",
@@ -312,18 +300,6 @@
     "blurb": "Zur shows how writing for children became a place where colonial and postcolonial Korea worked out what kind of nation it wanted. The child, she argues, was the figure through which modernity was imagined and disciplined."
   },
   {
-    "id": "korea-s-online-gaming-empire",
-    "author": "Dal Yong Jin",
-    "title": "Korea's Online Gaming Empire",
-    "url": "https://mitpress.mit.edu/9780262014762/koreas-online-gaming-empire/",
-    "category": "Culture & the Korean Wave",
-    "publisher": "MIT Press",
-    "source": "mitpress.mit.edu",
-    "isbn": "9780262014762",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780262014762-L.jpg?default=false",
-    "blurb": "Jin explains how South Korea turned PC rooms, broadband policy and StarCraft into the first mass e-sports culture. Written before e-sports went global, it reads now as an account of where the whole thing started."
-  },
-  {
     "id": "north-korea-confidential",
     "author": "Daniel Tudor and James Pearson",
     "title": "North Korea Confidential",
@@ -346,18 +322,6 @@
     "isbn": "9780231161367",
     "cover": "https://covers.openlibrary.org/b/isbn/9780231161367-L.jpg?default=false",
     "blurb": "Chubb examines how South Korean activists on both left and right shaped what could be said about the North, and therefore what governments could do. A reminder that Seoul's North Korea policy has a domestic constituency."
-  },
-  {
-    "id": "east-asia-before-the-west-five-centuries-of-trade-and-tribut",
-    "author": "David C. Kang",
-    "title": "East Asia Before the West: Five Centuries of Trade and Tribute",
-    "url": "https://cup.columbia.edu/book/east-asia-before-the-west/9780231153188",
-    "category": "History & Empire",
-    "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu",
-    "isbn": "9780231153188",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231153188-L.jpg?default=false",
-    "blurb": "Kang argues that the tribute system delivered centuries of relative peace among East Asian states, and that Western international relations theory misreads the region by assuming it could not. Contested, and worth reading for the argument."
   },
   {
     "id": "the-coldest-winter-america-and-the-korean-war",
@@ -440,8 +404,20 @@
     "publisher": "Penguin",
     "source": "penguin.co.uk",
     "isbn": "9780241554272",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780241554272-L.jpg?default=false",
+    "cover": "assets/covers/the-lazarus-heist.jpg",
     "blurb": "White's account of North Korea's state hacking operation, from the Sony breach to bank thefts and cryptocurrency raids. It makes the case that the regime's most effective weapons programme may be the one on the network."
+  },
+  {
+    "id": "samsung-rising",
+    "author": "Geoffrey Cain",
+    "title": "Samsung Rising: The Inside Story of the South Korean Giant That Set Out to Beat Apple and Conquer Tech",
+    "url": "https://www.penguinrandomhouse.com/books/537977/samsung-rising-by-geoffrey-cain/",
+    "category": "South Korea: Society & Economy",
+    "publisher": "Penguin Random House",
+    "source": "penguinrandomhouse.com",
+    "isbn": "9780593236703",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780593236703-L.jpg?default=false",
+    "blurb": "Cain covered Samsung from Seoul for the Economist, the Wall Street Journal and Time, and this is an unauthorised corporate biography: the sugar-and-fertiliser conglomerate that bet everything on memory chips, the chairman who had employees pile up and burn 150,000 defective phones, and the succession and bribery cases that ran all the way into the Blue House. The clearest account in English of how one family firm came to carry a national economy."
   },
   {
     "id": "south-korea-s-democracy-in-crisis-the-threats-of-illiberalis",
@@ -636,6 +612,18 @@
     "blurb": "Cho shows that the industrial complexes and universities the dictatorship built to secure itself became the infrastructure of the movement that brought it down. Development as a double-edged sword, argued with original protest data."
   },
   {
+    "id": "korean-messiah",
+    "author": "Jonathan Cheng",
+    "title": "Korean Messiah: Kim Il Sung and the Christian Roots of North Korea's Personality Cult",
+    "url": "https://www.penguinrandomhouse.com/books/558235/korean-messiah-by-jonathan-cheng/",
+    "category": "North Korea: Regime & Leadership",
+    "publisher": "Penguin Random House",
+    "source": "penguinrandomhouse.com",
+    "isbn": "9781524733490",
+    "cover": "https://covers.openlibrary.org/b/isbn/9781524733490-L.jpg?default=false",
+    "blurb": "Cheng, the Wall Street Journal's former Korea bureau chief, traces the Kim cult back to the American Presbyterian missionaries who made Pyongyang the “Jerusalem of the East” and to Kim Il Sung's own devoutly Christian parents. The claim is that Kimilsungism borrowed its grammar from the faith it displaced — the confession, the hymn, the personal saviour — which makes the regime's endurance look less like Stalinism than like a church. Longlisted for the 2026 Cundill History Prize."
+  },
+  {
     "id": "under-the-same-sky-from-starvation-in-north-korea-to-salvati",
     "author": "Joseph Kim",
     "title": "Under the Same Sky: From Starvation in North Korea to Salvation in America",
@@ -816,18 +804,6 @@
     "blurb": "Pacheco Pardo's brisk narrative of how a ruined country became a cultural and economic power. The most approachable recent one-volume account of the South Korean ascent."
   },
   {
-    "id": "south-korea-s-grand-strategy-making-its-own-destiny",
-    "author": "Ramon Pacheco Pardo",
-    "title": "South Korea's Grand Strategy: Making Its Own Destiny",
-    "url": "https://cup.columbia.edu/book/south-koreas-grand-strategy/9780231203234",
-    "category": "Alliances & Regional Order",
-    "publisher": "Columbia University Press",
-    "source": "cup.columbia.edu",
-    "isbn": "9780231203234",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231203234-L.jpg?default=false",
-    "blurb": "Pacheco Pardo argues South Korea has developed a grand strategy of its own rather than simply reacting to Washington, Beijing and Tokyo. A corrective to treating Seoul as a dependent variable."
-  },
-  {
     "id": "patterns-of-impunity-human-rights-in-north-korea-and-the-rol",
     "author": "Robert R. King",
     "title": "Patterns of Impunity: Human Rights in North Korea and the Role of the U.S. Special Envoy",
@@ -838,18 +814,6 @@
     "isbn": "9781931368629",
     "cover": "https://covers.openlibrary.org/b/isbn/9781931368629-L.jpg?default=false",
     "blurb": "King served as US special envoy for North Korean human rights and writes from inside the job. Valuable for what it shows about the machinery, and the limits, of human rights diplomacy."
-  },
-  {
-    "id": "the-invitation-only-zone-the-true-story-of-north-korea-s-abd",
-    "author": "Robert S. Boynton",
-    "title": "The Invitation-Only Zone: The True Story of North Korea's Abduction Project",
-    "url": "https://us.macmillan.com/books/9780374536725/theinvitationonlyzone/",
-    "category": "Escape & Human Rights",
-    "publisher": "Macmillan",
-    "source": "us.macmillan.com",
-    "isbn": "9780374536725",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780374536725-L.jpg?default=false",
-    "blurb": "Boynton investigates North Korea's abduction of Japanese citizens, and what the programme reveals about the regime's thinking. Reported with real curiosity about both countries rather than only outrage."
   },
   {
     "id": "north-korea-kidnapped-my-daughter",
@@ -872,7 +836,7 @@
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231171359",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231171359-L.jpg?default=false",
+    "cover": "assets/covers/marching-through-suffering.jpg",
     "blurb": "Fahy analyses how North Koreans talk about the famine — the euphemisms, silences and self-blame in their own testimony. A careful study of what survivors can and cannot say."
   },
   {
@@ -994,18 +958,6 @@
     "isbn": "9780231140010",
     "cover": "https://covers.openlibrary.org/b/isbn/9780231140010-L.jpg?default=false",
     "blurb": "Haggard and Noland's forensic account of the 1990s famine: how the food system failed, how aid was diverted, and how markets grew in the vacuum. The standard work, and the origin of much later analysis of the North Korean economy."
-  },
-  {
-    "id": "hard-target-sanctions-inducements-and-the-case-of-north-kore",
-    "author": "Stephan Haggard and Marcus Noland",
-    "title": "Hard Target: Sanctions, Inducements, and the Case of North Korea",
-    "url": "https://www.sup.org/books/asian-studies/hard-target",
-    "category": "North Korea: Nuclear & Security",
-    "publisher": "Stanford University Press",
-    "source": "sup.org",
-    "isbn": "9781503600362",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781503600362-L.jpg?default=false",
-    "blurb": "Haggard and Noland assess what economic pressure and inducement have actually achieved with North Korea, and conclude that the regime's grip on foreign economic activity blunts both. Sobering for anyone expecting sanctions to be decisive."
   },
   {
     "id": "witness-to-transformation-refugee-insights-into-north-korea",
@@ -1174,18 +1126,6 @@
     "isbn": "9780300278705",
     "cover": "https://covers.openlibrary.org/b/isbn/9780300278705-L.jpg?default=false",
     "blurb": "Cha and Pacheco Pardo write the two Koreas as one story rather than two, from division to the present. The most current single-volume history covering both states together."
-  },
-  {
-    "id": "rethinking-the-korean-war-a-new-diplomatic-and-strategic-his",
-    "author": "William Stueck",
-    "title": "Rethinking the Korean War: A New Diplomatic and Strategic History",
-    "url": "https://press.princeton.edu/books/paperback/9780691118475/rethinking-the-korean-war",
-    "category": "Korean War",
-    "publisher": "Princeton University Press",
-    "source": "press.princeton.edu",
-    "isbn": "9780691118475",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780691118475-L.jpg?default=false",
-    "blurb": "Stueck reframes the war as an international conflict with global consequences rather than a local civil war. The scholarly counterweight to Cumings, and the standard diplomatic history."
   },
   {
     "id": "a-misunderstood-friendship-mao-zedong-kim-il-sung-and-sino-n",

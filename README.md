@@ -15,7 +15,7 @@ The palette is the house green with the Korean flag's red as the accent,
 deepened from `#cd2e3a` to `#b32530` so it clears WCAG AA on the green ground —
 every text style on the page is checked against its painted background.
 
-**All 100 books carry an ISBN, a cover, and a one-paragraph description.** Covers
+**All 95 books carry an ISBN and a one-paragraph description.** The list is being rebuilt toward 100; see *Filling the last slots* below. Covers
 resolve through a chain of sources rather than a single one, because Open Library
 alone leaves a lot of gaps. See *Covers* below.
 
@@ -39,7 +39,7 @@ Sourced from the "100 Books on Korea" Google Sheet (author, title, publisher lin
 
 Two fields are derived rather than taken from the sheet:
 
-- **`publisher`** — mapped from the link's domain. 24 presses across all 100 books.
+- **`publisher`** — mapped from the link's domain. 25 presses across all 95 books.
 - **`category`** — a topical theme, assigned by hand so the list can be filtered.
   These are rough shelving calls, not the publishers' own categories. Change any
   of them by editing `books.js`.
@@ -68,19 +68,27 @@ One correction was made to the source data: `Brad Glossermana nd Scott A. Snyder
 
 Open Library holds art for a good share of these ISBNs but nothing like all of
 them, so `loadCover()` in `assets/app.js` walks a chain and takes the first source
-that returns a real image:
+that returns a real image at a usable size:
 
-1. the book's `cover` field — Open Library by ISBN-13, and the hook for your own
-   artwork (see below)
-2. Google Books, by ISBN-13
-3. Google Books, by ISBN-10 — some editions are indexed only under the 10-digit
-   form, which is derived from the 13 for `978` prefixes
-4. a generated typographic cover, tinted by theme
+1. the book's `cover` field — an Open Library URL by ISBN-13, or a local path
+   such as `assets/covers/nothing-to-envy.jpg` for your own artwork
+2. Google Books by ISBN-13, then by ISBN-10, at the large rendering
+3. the same two at Google's default small rendering
+4. Open Library's search API, by title and first author, then by the title with
+   its subtitle stripped
+5. Google's volumes API, which matches the work rather than one exact ISBN and so
+   holds art for editions the ISBN endpoint has nothing for
+6. a generated typographic cover, tinted by theme
 
-A source with no art for an ISBN sometimes answers `200` with a 1x1 or a "no
-cover" placeholder rather than a `404`, so the loader also rejects anything under
-50px square rather than trusting the status code. A hit on step 1 means steps 2
-and 3 are never requested.
+Two guards keep this honest. A source with no art sometimes answers `200` with a
+1x1 or a "no cover" placeholder rather than a `404`, so a candidate is judged by
+its pixels, not its status code — and because a book is drawn 188px wide, the
+large renderings must come back at least 200px before the chain will settle for a
+small one. And a search result is only accepted when one title is a prefix of the
+other, so a near-miss cannot put a different book's jacket on the shelf. A hit on
+step 1 means nothing later is ever requested; the searches in steps 4 and 5 give
+up after six seconds, so a host that hangs rather than refusing still falls
+through to the stand-in.
 
 To see which books ended up with no art at all, open the console on the live page
 and run:
@@ -89,8 +97,17 @@ and run:
 missingCovers()
 ```
 
-To supply your own artwork for any of them, set `cover` on that book to any URL
-or local path; it is tried first and does not have to point at Open Library.
+`tools/cover-check.html` does the same across the whole list in a real browser and
+reports which source each cover came from, and why the misses missed.
+
+## Filling the last slots
+
+A handful of books have no art at any source. Each one's `cover` points at a file
+in `assets/covers/`, which is empty until you put the jacket there —
+`assets/covers/README.md` lists the exact filenames. A path with no file behind it
+simply 404s and the chain carries on, so nothing breaks in the meantime.
+`python3 build.py` inlines whatever is present as a data URI, so local artwork
+travels with `dist/books.html`.
 
 ## Editing the list
 
