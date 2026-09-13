@@ -221,7 +221,7 @@ window.BOOKS = [
     "publisher": "W. W. Norton",
     "source": "wwnorton.com",
     "isbn": "9780393327021",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780393327021-L.jpg?default=false",
+    "cover": "assets/covers/koreas-place-in-the-sun.jpg",
     "blurb": "Cumings's single-volume modern history, opinionated and beautifully written, insisting Korea be understood on its own terms rather than as an object of great-power policy. The standard starting point, and the one people argue with."
   },
   {
@@ -293,7 +293,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781953861146",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781953861146-L.jpg?default=false",
+    "cover": "assets/covers/whale.jpg",
     "blurb": "A sprawling, grotesque, funny novel that follows three characters through the violent modernisation of postwar Korea. Shortlisted for the International Booker, and unlike anything else on this shelf in register."
   },
   {
@@ -341,7 +341,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231161367",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231161367-L.jpg?default=false",
+    "cover": "assets/covers/contentious-activism.jpg",
     "blurb": "Chubb examines how South Korean activists on both left and right shaped what could be said about the North, and therefore what governments could do. A reminder that Seoul's North Korea policy has a domestic constituency."
   },
   {
@@ -931,18 +931,6 @@ window.BOOKS = [
     "isbn": "9780231185493",
     "cover": "https://covers.openlibrary.org/b/isbn/9780231185493-L.jpg?default=false",
     "blurb": "Snyder frames South Korean foreign policy as a long oscillation between autonomy and alliance, and asks where US–China rivalry leaves that choice. The clearest statement of the strategic dilemma facing Seoul."
-  },
-  {
-    "id": "korean-endgame-a-strategy-for-reunification-and-u-s-disengag",
-    "author": "Selig S. Harrison",
-    "title": "Korean Endgame: A Strategy for Reunification and U.S. Disengagement",
-    "url": "https://press.princeton.edu/books/paperback/9780691116266/korean-endgame",
-    "category": "Alliances & Regional Order",
-    "publisher": "Princeton University Press",
-    "source": "press.princeton.edu",
-    "isbn": "9780691116266",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780691116266-L.jpg?default=false",
-    "blurb": "Harrison's argument, from decades of reporting and access in Pyongyang, for phased US disengagement and Korean-led reunification. A minority position, argued at length by someone who had been in the room."
   },
   {
     "id": "civic-activism-in-south-korea",

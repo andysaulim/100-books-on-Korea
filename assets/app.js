@@ -32,7 +32,7 @@
   var SORTS = [
     { id: 'author',    label: 'Author A–Z' },
     { id: 'title',     label: 'Title A–Z' },
-    { id: 'category',  label: 'Theme' },
+    { id: 'category',  label: 'By theme' },
     { id: 'publisher', label: 'Publisher' }
   ];
 
@@ -58,7 +58,10 @@
     scrollTop: $('#scroll-top')
   };
 
-  var state = { q: '', category: 'All', publisher: 'All', sort: 'author' };
+  /* Theme is the default view. This is a hundred recommendations rather
+     than a catalogue, and grouped by subject it can be browsed; in one
+     alphabetical wall it can only be scrolled. */
+  var state = { q: '', category: 'All', publisher: 'All', sort: 'category' };
 
   var COMPARE = new Intl.Collator('en', { sensitivity: 'base' }).compare;
   var narrow = window.matchMedia('(max-width: 680px)');
@@ -452,7 +455,7 @@
   function primeReveal() {
     if (!shelfObserver) return;
     var reach = window.innerHeight * 1.5;
-    var lis = els.shelf.children;
+    var lis = els.shelf.querySelectorAll('.shelf > li');
     for (var i = 0; i < lis.length; i++) {
       var li = lis[i];
       li.style.setProperty('--enter-delay', (i % 6) * 55 + 'ms');
@@ -1021,12 +1024,53 @@
 
   /* --- render ----------------------------------------------------- */
 
+  function flatShelf(list) {
+    var ul = document.createElement('ul');
+    ul.className = 'shelf';
+    list.forEach(function (b) { ul.appendChild(tileNode(b)); });
+    return ul;
+  }
+
+  /* Sorting by theme used to produce one undifferentiated wall in theme
+     order, which is only useful if you already know where one theme ends.
+     The same sort now draws the divisions it implies: a heading and a count
+     per theme, each with its own shelf under it. */
+  function groupedShelf(list) {
+    var frag = document.createDocumentFragment();
+    var order = [];
+    var bucket = {};
+
+    list.forEach(function (b) {
+      if (!bucket[b.category]) { bucket[b.category] = []; order.push(b.category); }
+      bucket[b.category].push(b);
+    });
+    order.sort(COMPARE);
+
+    order.forEach(function (cat) {
+      var section = document.createElement('section');
+      section.className = 'group';
+
+      var h = document.createElement('h2');
+      h.className = 'group-head';
+      h.textContent = cat;
+
+      var n = document.createElement('span');
+      n.className = 'group-n';
+      n.textContent = bucket[cat].length;
+      h.appendChild(n);
+
+      section.appendChild(h);
+      section.appendChild(flatShelf(bucket[cat]));
+      frag.appendChild(section);
+    });
+    return frag;
+  }
+
   function render() {
     var list = visible();
 
-    var frag = document.createDocumentFragment();
-    list.forEach(function (b) { frag.appendChild(tileNode(b)); });
-    els.shelf.replaceChildren(frag);
+    els.shelf.replaceChildren(
+      state.sort === 'category' ? groupedShelf(list) : flatShelf(list));
     primeReveal();
     markTiles();
 

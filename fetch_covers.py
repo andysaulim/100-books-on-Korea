@@ -288,7 +288,13 @@ def main():
         if args.only and args.only.lower() not in (book["author"] + book["title"]).lower():
             continue
 
-        existing = sorted(COVERS.glob(slug(book) + ".*"))
+        # A cover already pinned by hand wins, whatever it is called. Some
+        # slots were named before this script existed and do not match the
+        # slug it would generate, and overwriting those would silently throw
+        # away artwork that was chosen deliberately.
+        declared = book.get("cover") or ""
+        pinned = (ROOT / declared) if declared.startswith("assets/covers/") else None
+        existing = [pinned] if pinned and pinned.is_file() else sorted(COVERS.glob(slug(book) + ".*"))
         if existing and not args.force:
             book["cover"] = f"assets/covers/{existing[0].name}"
             kept += 1

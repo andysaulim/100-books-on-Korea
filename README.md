@@ -15,7 +15,7 @@ The palette is the house green with the Korean flag's red as the accent,
 deepened from `#cd2e3a` to `#b32530` so it clears WCAG AA on the green ground —
 every text style on the page is checked against its painted background.
 
-**All 101 books carry an ISBN and a one-paragraph description.** The list is being rebuilt toward 100; see *Filling the last slots* below. Covers
+**All 100 books carry an ISBN and a one-paragraph description.** The list is  Covers
 resolve through a chain of sources rather than a single one, because Open Library
 alone leaves a lot of gaps. See *Covers* below.
 

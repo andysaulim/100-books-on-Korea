@@ -286,6 +286,34 @@ button { background: none; border: 0; cursor: pointer; }
 /* Fixed book-width tracks spread edge to edge, so the first column sits
    flush left and the last flush right. Generous row gap: an opened book
    needs room to swing without colliding with the row below. */
+/* The shelf is a container: one list when sorted flat, a run of themed
+   sections when sorted by theme. */
+.shelf-root { display: block; }
+
+.group + .group { margin-top: clamp(2.4rem, 4vw, 3.6rem); }
+
+.group-head {
+  display: flex;
+  align-items: baseline;
+  gap: .6rem;
+  margin: 0 0 1.4rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  letter-spacing: -.01em;
+  color: var(--deep);
+}
+.group-n {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: .8rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .shelf {
   list-style: none;
   margin: 0;
@@ -371,7 +399,13 @@ button { background: none; border: 0; cursor: pointer; }
 .b-image img {
   display: block;
   width: 100%; height: 100%;
-  object-fit: cover;
+  /* `cover` cropped any jacket that is not 2:3 — The Cleanest Race is nearly
+     square and lost the left edge of its own title. Jackets are the thing
+     being recommended, so none of one may be cut off. A squarer cover now
+     sits centred on the board, which is what a hardback with a smaller
+     jacket looks like anyway; a 2:3 cover fills the book exactly as before. */
+  object-fit: contain;
+  background: var(--card);
   border-radius: inherit;
 }
 
