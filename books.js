@@ -29,7 +29,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501738364",
-    "cover": null,
+    "cover": "assets/covers/sovereignty-experiments.jpg",
     "blurb": "Park follows Korean migrants across the Tumen and Yalu into Qing Manchuria and the Russian Far East, and shows three empires improvising rules of belonging around people who kept crossing anyway. Borders here are not lines inherited but claims tested, and the testing is done by the migrants."
   },
   {
@@ -197,7 +197,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231171717",
-    "cover": null,
+    "cover": "assets/covers/the-japan-south-korea-identity-clash.jpg",
     "blurb": "Glosserman and Snyder argue the recurring rupture between Seoul and Tokyo is not really about any single dispute but about two national identities that keep colliding. Useful for understanding why the relationship resets and then breaks again on schedule."
   },
   {
@@ -281,7 +281,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9781541768178",
-    "cover": null,
+    "cover": "assets/covers/ghost-flames.jpg",
     "blurb": "Hanley, who reported the No Gun Ri killings, tells the war through twenty people on all sides, moving between them chronologically. It restores the civilian experience to a war usually narrated from headquarters."
   },
   {
@@ -329,7 +329,7 @@ window.BOOKS = [
     "publisher": "Tuttle",
     "source": "tuttlepublishing.com",
     "isbn": "9780804852265",
-    "cover": null,
+    "cover": "assets/covers/north-korea-confidential.jpg",
     "blurb": "Tudor and Pearson assemble what daily life in North Korea actually looks like — private markets, smuggled media, fashion, bribery, the real price of things. Brisk, concrete, and the best corrective to the parade-ground image."
   },
   {
@@ -425,7 +425,7 @@ window.BOOKS = [
     "publisher": "Hurst",
     "source": "hurstpublishers.com",
     "isbn": "9781911723547",
-    "cover": null,
+    "cover": "assets/covers/accidental-tyrant.jpg",
     "blurb": "Tertitskiy works from Korean, Russian, Chinese and Japanese sources to replace the guerrilla legend with a working politician: a junior Soviet officer who was installed rather than risen, who then out-manoeuvred every faction that had a better claim, prised Pyongyang loose from Moscow, ran the economy into famine, and built the only hereditary succession communism ever produced. The title is the argument — almost nothing about the man was inevitable. A Financial Times best history book of 2025."
   },
   {
@@ -437,7 +437,7 @@ window.BOOKS = [
     "publisher": "Penguin",
     "source": "penguin.co.uk",
     "isbn": "9780241554272",
-    "cover": null,
+    "cover": "assets/covers/the-lazarus-heist.jpg",
     "blurb": "White's account of North Korea's state hacking operation, from the Sony breach to bank thefts and cryptocurrency raids. It makes the case that the regime's most effective weapons programme may be the one on the network."
   },
   {
@@ -473,7 +473,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501764943",
-    "cover": null,
+    "cover": "assets/covers/privilege-and-anxiety.jpg",
     "blurb": "Koo examines a middle class that got everything it was promised and is terrified of losing it — in housing, education and the scramble to reproduce its own status. The best sociological account of why Korean life feels like a competition."
   },
   {
@@ -641,7 +641,7 @@ window.BOOKS = [
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
     "isbn": "9780008541408",
-    "cover": null,
+    "cover": "assets/covers/the-hard-road-out.jpg",
     "blurb": "Park escaped North Korea twice, was trafficked into rural China in between, and eventually resettled in Britain. Written with Seh-Lynn Chai, a South Korean who had to confront her own assumptions to hear it."
   },
   {
@@ -653,7 +653,7 @@ window.BOOKS = [
     "publisher": "University of Michigan Press",
     "source": "press.umich.edu",
     "isbn": "9780472056606",
-    "cover": null,
+    "cover": "assets/covers/seeds-of-mobilization.jpg",
     "blurb": "Cho shows that the industrial complexes and universities the dictatorship built to secure itself became the infrastructure of the movement that brought it down. Development as a double-edged sword, argued with original protest data."
   },
   {
@@ -689,7 +689,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501777370",
-    "cover": null,
+    "cover": "assets/covers/border-of-water-and-ice.jpg",
     "blurb": "Seeley writes the environmental history of the Yalu — its timber, its ice, its floods — and shows how a river resisted the empire trying to administer it. An unusual and rewarding angle on Japanese rule."
   },
   {
@@ -761,7 +761,7 @@ window.BOOKS = [
     "publisher": "September Publishing",
     "source": "septemberpublishing.org",
     "isbn": "9781912836802",
-    "cover": null,
+    "cover": "assets/covers/north-korea.jpg",
     "blurb": "Miller lived in Pyongyang from 2017 to 2019 on her husband's diplomatic posting and photographed what she could: a bus queue, a wedding party, a beach, the edges of ordinary life that the guided tour is designed to keep out of frame. The pictures and the diary around them make the point no analysis quite can, that this is a country where people live rather than a subject."
   },
   {
@@ -773,7 +773,7 @@ window.BOOKS = [
     "publisher": "AmazonCrossing",
     "source": "barnesandnoble.com",
     "isbn": "9781542047197",
-    "cover": null,
+    "cover": "assets/covers/a-river-in-darkness.jpg",
     "blurb": "Ishikawa was born in Japan and taken to North Korea as a boy in the repatriation campaign, then spent decades trying to get back. Bleak and unconsoling, and valuable for documenting a chapter most accounts omit."
   },
   {
@@ -929,7 +929,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231185493",
-    "cover": null,
+    "cover": "assets/covers/south-korea-at-the-crossroads.jpg",
     "blurb": "Snyder frames South Korean foreign policy as a long oscillation between autonomy and alliance, and asks where US–China rivalry leaves that choice. The clearest statement of the strategic dilemma facing Seoul."
   },
   {
@@ -941,7 +941,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231211499",
-    "cover": null,
+    "cover": "assets/covers/civic-activism-in-south-korea.jpg",
     "blurb": "Moon and her contributors examine the NGOs, unions and citizens' groups that filled the space after democratisation. Useful for seeing how a movement culture turned into institutions, and what it lost doing so."
   },
   {
@@ -989,7 +989,7 @@ window.BOOKS = [
     "publisher": "Quadrille",
     "source": "barnesandnoble.com",
     "isbn": "9781837830879",
-    "cover": null,
+    "cover": "assets/covers/k-culture.jpg",
     "blurb": "An illustrated survey of the Korean Wave across music, film, television and food. A gift-shelf overview rather than analysis, and useful as an entry point."
   },
   {
@@ -1001,7 +1001,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231205474",
-    "cover": null,
+    "cover": "assets/covers/boundless-winds-of-empire.jpg",
     "blurb": "Wang shows early Chosŏn diplomats using rhetoric, ritual and scholarship to manage Ming China from a position of formal inferiority. A study of how a smaller state built room to manoeuvre out of language."
   },
   {
@@ -1025,7 +1025,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231140010",
-    "cover": null,
+    "cover": "assets/covers/famine-in-north-korea.jpg",
     "blurb": "Haggard and Noland's forensic account of the 1990s famine: how the food system failed, how aid was diverted, and how markets grew in the vacuum. The standard work, and the origin of much later analysis of the North Korean economy."
   },
   {
@@ -1097,7 +1097,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501705687",
-    "cover": null,
+    "cover": "assets/covers/everyday-life-in-the-north-korean-revolution-194.jpg",
     "blurb": "Kim uses captured North Korean archives to reconstruct village life in the years before the war — land reform, literacy drives, women's organisations. It shows a revolution that had genuine participants before it hardened."
   },
   {
@@ -1121,7 +1121,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231157995",
-    "cover": null,
+    "cover": "assets/covers/japan-south-korea-and-the-united-states-nuclear-.jpg",
     "blurb": "Roehrig examines what extended deterrence actually promises Seoul and Tokyo, and how much either capital believes it. The reference text for the credibility question now driving South Korea's nuclear debate."
   },
   {
@@ -1133,7 +1133,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231198868",
-    "cover": null,
+    "cover": "assets/covers/passcode-to-the-third-floor.jpg",
     "blurb": "Thae was North Korea's deputy ambassador in London before defecting, and writes from inside the diplomatic elite. Rare access to how the ruling circle talks to itself and manages the outside world."
   },
   {
@@ -1181,7 +1181,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231189231",
-    "cover": null,
+    "cover": "assets/covers/nuclear-north-korea.jpg",
     "blurb": "Cha and Kang debate each other in print — engagement against containment — chapter by chapter. Unusual and genuinely useful: you get both cases at full strength rather than a straw man."
   },
   {
@@ -1205,7 +1205,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231200554",
-    "cover": null,
+    "cover": "assets/covers/a-misunderstood-friendship.jpg",
     "blurb": "Shen and Xia use Chinese and Soviet archives to show the Sino-North Korean relationship as far more mistrustful than the 'lips and teeth' slogan suggests. It reframes Pyongyang's most important partnership as a long negotiation between wary allies."
   }
 ];
