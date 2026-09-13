@@ -390,6 +390,11 @@ def main():
 
     fetcher = Fetcher(placeholders)
     got = kept = 0
+    # sha of the bytes as downloaded, per book. shrink() re-encodes the file,
+    # so the hash on disk is not the hash usable() tests against; teaching the
+    # placeholder set a file hash blocks nothing, which is why every retry
+    # round downloaded the same picture again.
+    blob_digest = {}
     missing = []
 
     for n, book in enumerate(books, 1):
@@ -416,6 +421,7 @@ def main():
             blob = fetch()
             ok, note = usable(blob, placeholders, min_w)
             if ok:
+                blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
                 path = COVERS / (slug(book) + extension(blob))
                 path.write_bytes(blob)
                 smaller = shrink(path)
@@ -477,6 +483,11 @@ def main():
             break
 
         placeholders |= set(repeated)
+        for shared in repeated.values():
+            for book in shared:
+                if book["id"] in blob_digest:
+                    placeholders.add(blob_digest[book["id"]])
+
         for digest, shared in repeated.items():
             print(f"\n  round {round_no}: one image landed for {len(shared)} books; it is a placeholder:")
             for book in shared:
@@ -496,6 +507,7 @@ def main():
                 ok, note = usable(blob, placeholders, min_w)
                 if not ok:
                     continue
+                blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
                 path = COVERS / (slug(book) + extension(blob))
                 path.write_bytes(blob)
                 smaller = shrink(path)
