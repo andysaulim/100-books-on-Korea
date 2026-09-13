@@ -193,6 +193,38 @@ def bare_title(t):
     return re.split(r"\s*[:—–]\s+", t or "")[0].strip()
 
 
+def publisher_cover(url):
+    """The jacket from the book's own publisher page, via og:image.
+
+    Open Library and Google hold trade titles well and academic monographs
+    badly: of the first run's misses, ten were Stanford, nine Columbia, four
+    Cornell, while Penguin Random House had eighteen of nineteen. But every
+    book here already links to its publisher, and publishers put the cover
+    in their page's Open Graph tags. It is also the most authoritative
+    source available, being the actual jacket of the actual edition linked,
+    which is what an ISBN lookup keeps getting wrong.
+    """
+    if not url:
+        return None
+    page = get(url, timeout=20)
+    if not page:
+        return None
+    try:
+        html = page.decode("utf-8", "replace")
+    except Exception:
+        return None
+
+    for pattern in (
+        r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']',
+        r'<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)',
+    ):
+        m = re.search(pattern, html, re.I)
+        if m:
+            return urllib.parse.urljoin(url, m.group(1).replace("&amp;", "&"))
+    return None
+
+
 class Fetcher:
     def __init__(self, placeholders):
         self.placeholders = placeholders
@@ -213,6 +245,13 @@ class Fetcher:
         the limit forces Google first; running once, spaced out, we can afford
         the source that carries the actual edition's jacket more often.
         """
+        # The publisher's own page first: it is the jacket of the edition
+        # this entry actually links to, which no ISBN lookup can promise.
+        og = publisher_cover(book.get("url"))
+        if og:
+            yield (f"publisher page ({book.get('source', 'og:image')})",
+                   lambda og=og: get(og), MIN_WIDTH)
+
         isbn = book.get("isbn")
         if isbn:
             yield ("Open Library, ISBN",

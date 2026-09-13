@@ -57,7 +57,16 @@ jobs:
         id: fetch
         run: |
           set -o pipefail
-          python3 fetch_covers.py ${{ github.event.inputs.force == 'true' && '--force' || '' }} 2>&1 | tee fetch.log
+          # workflow_dispatch cannot be used here (the workflow is not on the
+          # default branch), so a push says whether to re-fetch by putting
+          # [force-covers] in its commit message.
+          FORCE=""
+          if [ "${{ github.event.inputs.force }}" = "true" ] || \
+             git log -1 --pretty=%B | grep -q '\[force-covers\]'; then
+            FORCE="--force"
+            echo "re-fetching every cover"
+          fi
+          python3 fetch_covers.py $FORCE 2>&1 | tee fetch.log
         # fetch_covers.py exits 1 when any book ends with no cover, which is
         # information rather than a failure — the log says which ones.
         continue-on-error: true
