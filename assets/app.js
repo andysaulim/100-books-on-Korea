@@ -70,6 +70,26 @@
   /* Drop leading articles so "The Vegetarian" files under V. */
   function titleKey(t) { return t.replace(/^(the|a|an)\s+/i, '').toLowerCase(); }
 
+  /* A shelf is ordered by surname: Bruce Cumings belongs under C, not B.
+
+     Korean names on this list are written family name first, and their
+     given name is usually the hyphenated half — Cheon Myeong-kwan, Hwang
+     Bo-reum, Jang Jin-sung. So a hyphen in the last word means the first
+     word is the family name; otherwise the last word is. Everything after
+     the first author is ignored, since that is what decides the position.
+
+     Han Kang and Baek Sehee are family-name-first with no hyphen to go
+     on, and nothing in the string says so — those carry sort_name in the
+     data rather than being guessed at. */
+  function surname(b) {
+    if (b.sort_name) return b.sort_name;
+    var name = (b.author || '').split(/\s+(?:and|&|with)\s+|,\s*/)[0].trim();
+    var parts = name.split(/\s+/).filter(Boolean);
+    if (!parts.length) return '';
+    if (parts.length > 1 && /[-\u2010-\u2015]/.test(parts[parts.length - 1])) return parts[0];
+    return parts[parts.length - 1];
+  }
+
   /* Fold accents, curly quotes and dashes so "Choson" finds "Chosŏn"
      and a typed hyphen matches an en dash. */
   function norm(s) {
@@ -386,16 +406,20 @@
     var LAST = '￿';
     var by = {
       author: function (a, b) {
-        return COMPARE(a.author, b.author) || COMPARE(titleKey(a.title), titleKey(b.title));
+        return COMPARE(surname(a), surname(b))
+            || COMPARE(a.author, b.author)
+            || COMPARE(titleKey(a.title), titleKey(b.title));
       },
       title: function (a, b) {
         return COMPARE(titleKey(a.title), titleKey(b.title));
       },
       category: function (a, b) {
-        return COMPARE(a.category, b.category) || COMPARE(a.author, b.author);
+        return COMPARE(a.category, b.category)
+            || COMPARE(surname(a), surname(b));
       },
       publisher: function (a, b) {
-        return COMPARE(a.publisher || LAST, b.publisher || LAST) || COMPARE(a.author, b.author);
+        return COMPARE(a.publisher || LAST, b.publisher || LAST)
+            || COMPARE(surname(a), surname(b));
       }
     };
 

@@ -156,6 +156,30 @@ def amazon_cover(i10, size="LZZZZZZZ"):
     return f"https://m.media-amazon.com/images/P/{i10}.01.{size}.jpg"
 
 
+REJECTED = ROOT / "covers-rejected.txt"
+
+
+def rejected_digests():
+    """Pictures that are real jackets but the wrong one, refused by hand.
+
+    Some covers pass every automatic rule and are still wrong: a proof
+    jacket stamped ADVANCE REFERENCE COPY FOR JOURNALISTS with the
+    publicist's phone number on it, or simply an edition nobody wants.
+    Recording the sha256 here retires that picture for good, and the
+    chain moves on to the next source instead of fetching it back.
+
+    One digest per line; anything after # is a note.
+    """
+    out = set()
+    if not REJECTED.is_file():
+        return out
+    for line in REJECTED.read_text(encoding="utf-8").splitlines():
+        digest = line.split("#")[0].strip().lower()
+        if len(digest) == 64 and all(c in "0123456789abcdef" for c in digest):
+            out.add(digest)
+    return out
+
+
 def learn_placeholders():
     """Google's "image not available" picture, fetched on purpose.
 
@@ -317,6 +341,13 @@ class Fetcher:
         the limit forces Google first; running once, spaced out, we can afford
         the source that carries the actual edition's jacket more often.
         """
+        # A cover chosen by hand wins outright. Paste the image's own URL
+        # into the book's cover_url and nothing else is consulted unless
+        # that URL fails the usual rules.
+        pinned = book.get("cover_url")
+        if pinned:
+            yield ("pinned by hand", lambda u=pinned: get(u), 100)
+
         # The publisher's own page first: it is the jacket of the edition
         # this entry actually links to, which no ISBN lookup can promise.
         og = publisher_cover(book.get("url"))
@@ -450,6 +481,27 @@ def ident(book):
     return re.sub(r"[^a-z0-9]+", "-", book["id"].lower()).strip("-")[:48]
 
 
+def save_cover(book, blob, refused):
+    """Write a candidate, downscale it, and hand back (path, note).
+
+    Returns None when the finished picture is one refused by hand.
+    shrink() re-encodes, so the file's digest is not the download's:
+    usable() judges the bytes that arrived, this judges what lands on
+    disk. Checking only one of them is how a rejected cover came back.
+    """
+    path = COVERS / (slug(book) + extension(blob))
+    path.write_bytes(blob)
+    note = ""
+    smaller = shrink(path)
+    if smaller:
+        path, before, after = smaller
+        note = f", resized to {MAX_WIDTH}px, {before // 1024}KB -> {after // 1024}KB"
+    if hashlib.sha256(path.read_bytes()).hexdigest() in refused:
+        path.unlink(missing_ok=True)
+        return None
+    return path, note
+
+
 def slug(book):
     return _SLUGS.get(book["id"]) or ident(book)
 
@@ -486,6 +538,10 @@ def main():
 
     print("learning Google's placeholder so it can be rejected...", flush=True)
     placeholders = learn_placeholders()
+    refused = rejected_digests()
+    if refused:
+        print(f"  {len(refused)} picture(s) refused by hand in covers-rejected.txt")
+    placeholders |= refused
     print(f"  {len(placeholders)} placeholder digest(s) recorded"
           if placeholders else
           "  WARNING: could not reach Google; placeholders cannot be detected")
@@ -523,15 +579,14 @@ def main():
             blob = fetch()
             ok, note = usable(blob, placeholders, min_w)
             if ok:
+                kept_file = save_cover(book, blob, refused)
+                if not kept_file:
+                    print(f"          {why}: refused by hand in covers-rejected.txt")
+                    continue
+                path, extra = kept_file
                 blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
-                path = COVERS / (slug(book) + extension(blob))
-                path.write_bytes(blob)
-                smaller = shrink(path)
-                if smaller:
-                    path, before, after = smaller
-                    note += f", resized to {MAX_WIDTH}px, {before // 1024}KB -> {after // 1024}KB"
                 book["cover"] = f"assets/covers/{path.name}"
-                print(f"          {why} -> {path.name} ({note})")
+                print(f"          {why} -> {path.name} ({note}{extra})")
                 saved = path
                 got += 1
                 break
@@ -574,12 +629,11 @@ def main():
                 ok, note = usable(blob, placeholders, min_w)
                 if not ok:
                     continue
+                kept_file = save_cover(book, blob, refused)
+                if not kept_file:
+                    continue
+                path = kept_file[0]
                 blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
-                path = COVERS / (slug(book) + extension(blob))
-                path.write_bytes(blob)
-                smaller = shrink(path)
-                if smaller:
-                    path = smaller[0]
                 book["cover"] = f"assets/covers/{path.name}"
                 label = f"{book['author']} — {bare_title(book['title'])}"
                 if label in missing:
@@ -617,13 +671,16 @@ def main():
             digest = hashlib.sha256(blob).hexdigest()
             if digest in set(blob_digest.values()):
                 continue          # another book already took this picture
+            was = f.read_bytes()          # so a refusal costs nothing
+            kept_file = save_cover(book, blob, refused)
+            if not kept_file:
+                if not f.is_file():
+                    f.write_bytes(was)
+                continue
+            path = kept_file[0]
+            if f != path:
+                f.unlink(missing_ok=True)
             blob_digest[book["id"]] = digest
-            f.unlink(missing_ok=True)
-            path = COVERS / (slug(book) + extension(blob))
-            path.write_bytes(blob)
-            smaller = shrink(path)
-            if smaller:
-                path = smaller[0]
             book["cover"] = f"assets/covers/{path.name}"
             print(f"  {bare_title(book['title'])[:34]:34} {have}px -> {bigger[0]}px ({why})")
             upgraded += 1
@@ -699,13 +756,12 @@ def main():
                 ok, note = usable(blob, placeholders, min_w)
                 if not ok:
                     continue
+                kept_file = save_cover(book, blob, refused)
+                if not kept_file:
+                    continue
+                path, extra = kept_file
+                note += extra
                 blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
-                path = COVERS / (slug(book) + extension(blob))
-                path.write_bytes(blob)
-                smaller = shrink(path)
-                if smaller:
-                    path, before, after = smaller
-                    note += f", resized, {before // 1024}KB -> {after // 1024}KB"
                 book["cover"] = f"assets/covers/{path.name}"
                 label = f"{book['author']} — {bare_title(book['title'])}"
                 if label in missing:

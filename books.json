@@ -116,7 +116,7 @@
     "publisher": "Melville House",
     "source": "barnesandnoble.com",
     "isbn": "9781933633916",
-    "cover": "assets/covers/the-cleanest-race.jpg",
+    "cover": null,
     "blurb": "Myers reads North Korean domestic propaganda on its own terms and concludes the state's real ideology is not communism but a paranoid race-based nationalism closer to wartime Japan. Short, argumentative, and one of the few books that changes how you read everything else about the country."
   },
   {
@@ -129,7 +129,8 @@
     "source": "bloomsbury.com",
     "isbn": "9781639732043",
     "cover": "assets/covers/i-want-to-die-but-i-want-to-eat-tteokbokki.jpg",
-    "blurb": "Baek transcribes her sessions with a psychiatrist over treatment for dysthymia, leaving in the circling and the self-doubt. Its enormous popularity in Korea and abroad says something about how much room there was for a book that treats low-grade despair as ordinary."
+    "blurb": "Baek transcribes her sessions with a psychiatrist over treatment for dysthymia, leaving in the circling and the self-doubt. Its enormous popularity in Korea and abroad says something about how much room there was for a book that treats low-grade despair as ordinary.",
+    "sort_name": "Baek"
   },
   {
     "id": "nothing-to-envy-ordinary-lives-in-north-korea",
@@ -284,7 +285,7 @@
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781953861146",
-    "cover": "assets/covers/whale.jpg",
+    "cover": null,
     "blurb": "A sprawling, grotesque, funny novel that follows three characters through the violent modernisation of postwar Korea. Shortlisted for the International Booker, and unlike anything else on this shelf in register."
   },
   {
@@ -489,7 +490,8 @@
     "source": "penguinrandomhouse.com",
     "isbn": "9781101906118",
     "cover": "assets/covers/the-vegetarian.jpg",
-    "blurb": "Han's novel begins with a woman who simply stops eating meat and follows the violence her refusal provokes in everyone around her. Winner of the International Booker, and the book that opened Korean fiction to a wide English readership."
+    "blurb": "Han's novel begins with a woman who simply stops eating meat and follows the violence her refusal provokes in everyone around her. Winner of the International Booker, and the book that opened Korean fiction to a wide English readership.",
+    "sort_name": "Han"
   },
   {
     "id": "flowers-of-fire",
