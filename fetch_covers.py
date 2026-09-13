@@ -46,6 +46,7 @@ COVERS = ROOT / "assets" / "covers"
 UA = {"User-Agent": "100-books-on-korea/1.0 (personal reading list; contact via andysaulim.com)"}
 
 MIN_WIDTH = 200          # a book is drawn 188px wide; anything less is upscaled
+MAX_WIDTH = 500          # ...and anything much wider is bytes nobody sees
 MIN_BYTES = 6000         # placeholders and spacers are tiny
 OL_SPACING = 3.1         # 100 requests / 5 minutes, with room to spare
 
@@ -144,6 +145,15 @@ def learn_placeholders():
         blob = get(google_isbn("9780000000002", zoom))
         if blob:
             seen.add(hashlib.sha256(blob).hexdigest())
+
+    # Open Library has one too, served when a cover id or ISBN has no image
+    # and `default=false` was not asked for. The first run of this script
+    # saved it 39 times before anyone noticed.
+    for url in ("https://covers.openlibrary.org/b/id/1-L.jpg",
+                "https://covers.openlibrary.org/b/isbn/9780000000002-L.jpg"):
+        blob = get(url)
+        if blob:
+            seen.add(hashlib.sha256(blob).hexdigest())
     return seen
 
 
@@ -236,7 +246,7 @@ class Fetcher:
                     cid = d["cover_i"]
                     # by cover id, which Open Library does not rate limit
                     yield (f"Open Library, search (cover {cid})",
-                           lambda cid=cid: get(f"https://covers.openlibrary.org/b/id/{cid}-L.jpg"),
+                           lambda cid=cid: get(f"https://covers.openlibrary.org/b/id/{cid}-L.jpg?default=false"),
                            MIN_WIDTH)
                     break
 
@@ -257,6 +267,35 @@ class Fetcher:
                     yield (f"Google, search ({vol})",
                            lambda vol=vol: get(google_id(vol, 1)), 100)
                     break
+
+
+def shrink(path):
+    """Downscale an oversized jacket in place, if Pillow is available.
+
+    Covers come back at anything up to 2000px. A book is drawn 188px wide,
+    so past about 500 the extra pixels are bytes nobody will ever see — and
+    build.py inlines every one of them as a data URI, where the whole set
+    arrived at 8.7MB. Without Pillow this is a no-op and the file is kept
+    as downloaded, which is worse but not wrong.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    try:
+        with Image.open(path) as im:
+            if im.width <= MAX_WIDTH:
+                return None
+            before = path.stat().st_size
+            h = round(im.height * MAX_WIDTH / im.width)
+            im = im.convert("RGB").resize((MAX_WIDTH, h), Image.LANCZOS)
+            out = path.with_suffix(".jpg")
+            im.save(out, "JPEG", quality=82, optimize=True, progressive=True)
+        if out != path:
+            path.unlink()
+        return out, before, out.stat().st_size
+    except Exception:
+        return None
 
 
 def slug(book):
@@ -322,6 +361,10 @@ def main():
             if ok:
                 path = COVERS / (slug(book) + extension(blob))
                 path.write_bytes(blob)
+                smaller = shrink(path)
+                if smaller:
+                    path, before, after = smaller
+                    note += f", resized to {MAX_WIDTH}px, {before // 1024}KB -> {after // 1024}KB"
                 book["cover"] = f"assets/covers/{path.name}"
                 print(f"          {why} -> {path.name} ({note})")
                 saved = path
@@ -332,6 +375,50 @@ def main():
         if not saved:
             missing.append(label)
             print("          nothing usable; keeping the typographic stand-in")
+
+    # Jackets already on disk from an earlier run are skipped above, so
+    # they never pass through shrink(). Sweep them here.
+    saved = 0
+    for book in books:
+        cover = book.get("cover") or ""
+        if not cover.startswith("assets/covers/"):
+            continue
+        f = ROOT / cover
+        if not f.is_file():
+            continue
+        smaller = shrink(f)
+        if smaller:
+            newpath, before, after = smaller
+            book["cover"] = f"assets/covers/{newpath.name}"
+            saved += before - after
+    if saved:
+        print(f"\n  downscaled oversized jackets, saving {saved // 1024}KB")
+
+    # Two books do not share a jacket. Any image that landed for more than
+    # one of them is a placeholder, whatever it looks like and whichever
+    # host served it — a guard that needs no prior knowledge of the picture,
+    # which is what the digest list alone lacked.
+    by_digest = {}
+    for book in books:
+        cover = book.get("cover") or ""
+        if not cover.startswith("assets/covers/"):
+            continue
+        f = ROOT / cover
+        if f.is_file():
+            by_digest.setdefault(hashlib.sha256(f.read_bytes()).hexdigest(), []).append(book)
+
+    repeated = {d: bs for d, bs in by_digest.items() if len(bs) > 1}
+    for digest, shared in repeated.items():
+        print(f"\n  the same image landed for {len(shared)} books; treating it as a placeholder:")
+        for book in shared:
+            f = ROOT / book["cover"]
+            print(f"    - {book['author']} — {bare_title(book['title'])[:44]}")
+            f.unlink(missing_ok=True)
+            book["cover"] = None
+            label = f"{book['author']} — {bare_title(book['title'])}"
+            if label not in missing:
+                missing.append(label)
+            got = max(0, got - 1)
 
     (ROOT / "books.json").write_text(
         json.dumps(books, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

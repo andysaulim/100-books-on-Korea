@@ -50,6 +50,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Pillow, so oversized jackets can be downscaled
+        run: python3 -m pip install --quiet Pillow
+
       - name: Download the covers
         id: fetch
         run: |
