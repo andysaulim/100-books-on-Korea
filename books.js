@@ -761,7 +761,7 @@ window.BOOKS = [
     "publisher": "September Publishing",
     "source": "septemberpublishing.org",
     "isbn": "9781912836802",
-    "cover": "assets/covers/north-korea.jpg",
+    "cover": null,
     "blurb": "Miller lived in Pyongyang from 2017 to 2019 on her husband's diplomatic posting and photographed what she could: a bus queue, a wedding party, a beach, the edges of ordinary life that the guided tour is designed to keep out of frame. The pictures and the diary around them make the point no analysis quite can, that this is a country where people live rather than a subject."
   },
   {
@@ -1193,7 +1193,7 @@ window.BOOKS = [
     "publisher": "Yale University Press",
     "source": "yalebooks.yale.edu",
     "isbn": "9780300278705",
-    "cover": null,
+    "cover": "assets/covers/korea.jpg",
     "blurb": "Cha and Pacheco Pardo write the two Koreas as one story rather than two, from division to the present. The most current single-volume history covering both states together."
   },
   {
