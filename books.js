@@ -17,7 +17,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231141772",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231141772-L.jpg?default=false",
+    "cover": "assets/covers/troubled-apologies-among-japan-korea-and-the-uni.jpg",
     "blurb": "Dudden treats the apology itself as a political act, tracing how expressions of regret between Tokyo, Seoul and Washington have been drafted, hedged, withdrawn and re-read. The result is less a catalogue of grievances than an anatomy of why the region's apologies so rarely settle anything."
   },
   {
@@ -29,7 +29,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501738364",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781501738364-L.jpg?default=false",
+    "cover": "assets/covers/sovereignty-experiments.png",
     "blurb": "Park follows Korean migrants across the Tumen and Yalu into Qing Manchuria and the Russian Far East, and shows three empires improvising rules of belonging around people who kept crossing anyway. Borders here are not lines inherited but claims tested, and the testing is done by the migrants."
   },
   {
@@ -53,7 +53,7 @@ window.BOOKS = [
     "publisher": "Cambridge University Press",
     "source": "cambridge.org",
     "isbn": "9781107002470",
-    "cover": "assets/covers/activists-alliances.jpg",
+    "cover": "assets/covers/activists-alliances-and-anti-u-s-base-protests.jpg",
     "blurb": "Yeo asks why anti-base movements succeed in some allied states and stall in others, and finds the answer in the domestic security consensus each movement has to argue against. Comparative, and unusually attentive to the activists' own strategic thinking."
   },
   {
@@ -65,7 +65,7 @@ window.BOOKS = [
     "publisher": "Hurst",
     "source": "hurstpublishers.com",
     "isbn": "9781787383074",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781787383074-L.jpg?default=false",
+    "cover": "assets/covers/kim-jong-un-and-the-bomb.jpg",
     "blurb": "Panda reconstructs how North Korea went from a marginal proliferation worry to a state credibly able to threaten the American homeland. Strong on the technical detail of the arsenal, and equally on the deterrence logic that makes disarmament a far harder sell than policy debate usually admits."
   },
   {
@@ -77,7 +77,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9781541742505",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781541742505-L.jpg?default=false",
+    "cover": "assets/covers/the-great-successor.jpg",
     "blurb": "Fifield, who covered the peninsula for years, assembles the life of a leader who was widely written off as a placeholder and was not. Reported from defectors, classmates and officials, it is the most human-scale portrait of Kim Jong Un available."
   },
   {
@@ -89,7 +89,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780593476093",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780593476093-L.jpg?default=false",
+    "cover": "assets/covers/nuclear-war.jpg",
     "blurb": "Jacobsen runs the clock minute by minute from a North Korean bolt-from-the-blue launch to the end of the northern hemisphere, built from interviews with the people who hold the actual procedures. It is on this shelf because of how the scenario opens: the book is an argument about launch-on-warning and six-minute decisions, and Pyongyang is the plausible first move that makes the rest of it run."
   },
   {
@@ -101,7 +101,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9780804795326",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780804795326-L.jpg?default=false",
+    "cover": "assets/covers/to-save-the-children-of-korea.jpg",
     "blurb": "Oh traces the birth of international adoption to the aftermath of the Korean War, where Christian humanitarianism, Cold War politics and race made Korean children uniquely adoptable to American families. It explains how an emergency response hardened into a global system."
   },
   {
@@ -113,7 +113,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9780786732616",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780786732616-L.jpg?default=false",
+    "cover": "assets/covers/operation-broken-reed.jpg",
     "blurb": "Boyd's account of a covert intelligence mission behind North Korean lines, told from his father's service record and declassified material. Read it as a participant-adjacent war story rather than settled history; its claims have been contested."
   },
   {
@@ -137,7 +137,7 @@ window.BOOKS = [
     "publisher": "Bloomsbury",
     "source": "bloomsbury.com",
     "isbn": "9781639732043",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781639732043-L.jpg?default=false",
+    "cover": "assets/covers/i-want-to-die-but-i-want-to-eat-tteokbokki.png",
     "blurb": "Baek transcribes her sessions with a psychiatrist over treatment for dysthymia, leaving in the circling and the self-doubt. Its enormous popularity in Korea and abroad says something about how much room there was for a book that treats low-grade despair as ordinary."
   },
   {
@@ -161,7 +161,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503627635",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781503627635-L.jpg?default=false",
+    "cover": "assets/covers/guns-guerillas-and-the-great-leader.png",
     "blurb": "Young recovers North Korea's forgotten career as a Third World patron, sending arms, instructors and construction crews across Africa, the Middle East and Latin America. It reframes a state usually described as hermetic as an ambitious, if overreaching, global actor."
   },
   {
@@ -173,7 +173,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780143122913",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780143122913-L.jpg?default=false",
+    "cover": "assets/covers/escape-from-camp-14.jpg",
     "blurb": "Harden tells the story of Shin Dong-hyuk, born inside a political prison camp and later escaped. Parts of the account were revised after Shin corrected his own testimony, which the book's later editions address; it remains a central text on the camp system."
   },
   {
@@ -185,7 +185,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780143108023",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780143108023-L.jpg?default=false",
+    "cover": "assets/covers/the-great-leader-and-the-fighter-pilot.jpg",
     "blurb": "Harden braids two lives from the same years: Kim Il Sung consolidating power, and a young North Korean pilot who flew a MiG to the South. The pairing makes the founding of the state legible through the people who had to live inside it or run."
   },
   {
@@ -197,7 +197,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231171717",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231171717-L.jpg?default=false",
+    "cover": "assets/covers/the-japan-south-korea-identity-clash.png",
     "blurb": "Glosserman and Snyder argue the recurring rupture between Seoul and Tokyo is not really about any single dispute but about two national identities that keep colliding. Useful for understanding why the relationship resets and then breaks again on schedule."
   },
   {
@@ -209,7 +209,7 @@ window.BOOKS = [
     "publisher": "Macmillan",
     "source": "us.macmillan.com",
     "isbn": "9781429906999",
-    "cover": "assets/covers/under-the-loving-care.jpg",
+    "cover": "assets/covers/under-the-loving-care-of-the-fatherly-leader.png",
     "blurb": "Martin's enormous history of the Kim dynasty, built on decades of reporting and interviews. It is long, but it is the reference volume for how the family built and kept a hereditary state."
   },
   {
@@ -221,7 +221,7 @@ window.BOOKS = [
     "publisher": "W. W. Norton",
     "source": "wwnorton.com",
     "isbn": "9780393327021",
-    "cover": "assets/covers/koreas-place-in-the-sun.jpg",
+    "cover": "assets/covers/korea-s-place-in-the-sun.jpg",
     "blurb": "Cumings's single-volume modern history, opinionated and beautifully written, insisting Korea be understood on its own terms rather than as an object of great-power policy. The standard starting point, and the one people argue with."
   },
   {
@@ -233,7 +233,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780812978964",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780812978964-L.jpg?default=false",
+    "cover": "assets/covers/the-korean-war.jpg",
     "blurb": "Cumings's short revisionist account, more concerned with how the war is remembered and what it did to civilians than with battlefield chronology. Read alongside a conventional military history rather than instead of one."
   },
   {
@@ -245,7 +245,7 @@ window.BOOKS = [
     "publisher": "Rowman & Littlefield",
     "source": "rowman.com",
     "isbn": "9781538193853",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781538193853-L.jpg?default=false",
+    "cover": "assets/covers/suffering-and-smiling.jpg",
     "blurb": "Chung, an anthropologist with unusual field access, looks at how ordinary North Koreans manage daily life under scarcity and surveillance. The value is in the texture: what people do, not what the state says they do."
   },
   {
@@ -257,7 +257,7 @@ window.BOOKS = [
     "publisher": "Harvard University Press",
     "source": "hup.harvard.edu",
     "isbn": "9780674072312",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780674072312-L.jpg?default=false",
+    "cover": "assets/covers/the-park-chung-hee-era.png",
     "blurb": "A large edited volume on the years that made the South Korean economy and its dictatorship at once. Chapters disagree with each other, which is the point — it is the best single place to see the scholarly argument over Park laid out."
   },
   {
@@ -269,7 +269,7 @@ window.BOOKS = [
     "publisher": "Cambridge University Press",
     "source": "cambridge.org",
     "isbn": "9781107183797",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781107183797-L.jpg?default=false",
+    "cover": "assets/covers/unveiling-the-north-korean-economy.jpg",
     "blurb": "Kim rebuilds North Korean macroeconomic data and pairs it with surveys of refugees and of Chinese firms trading across the border. The most rigorous attempt to put numbers on an economy that publishes almost none."
   },
   {
@@ -281,7 +281,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9781541768178",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781541768178-L.jpg?default=false",
+    "cover": "assets/covers/ghost-flames.png",
     "blurb": "Hanley, who reported the No Gun Ri killings, tells the war through twenty people on all sides, moving between them chronologically. It restores the civilian experience to a war usually narrated from headquarters."
   },
   {
@@ -305,7 +305,7 @@ window.BOOKS = [
     "publisher": "Simon & Schuster",
     "source": "simonandschuster.co.uk",
     "isbn": "9781471184307",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781471184307-L.jpg?default=false",
+    "cover": "assets/covers/kim-jiyoung-born-1982.jpg",
     "blurb": "Cho's flatly narrated novel about an ordinary Korean woman's life became a lightning rod in Korea's gender debate. Its power is the deadpan accumulation of small, documented indignities rather than any single dramatic turn."
   },
   {
@@ -317,7 +317,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503601680",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781503601680-L.jpg?default=false",
+    "cover": "assets/covers/figuring-korean-futures.png",
     "blurb": "Zur shows how writing for children became a place where colonial and postcolonial Korea worked out what kind of nation it wanted. The child, she argues, was the figure through which modernity was imagined and disciplined."
   },
   {
@@ -329,7 +329,7 @@ window.BOOKS = [
     "publisher": "Tuttle",
     "source": "tuttlepublishing.com",
     "isbn": "9780804852265",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780804852265-L.jpg?default=false",
+    "cover": "assets/covers/north-korea-confidential.png",
     "blurb": "Tudor and Pearson assemble what daily life in North Korea actually looks like — private markets, smuggled media, fashion, bribery, the real price of things. Brisk, concrete, and the best corrective to the parade-ground image."
   },
   {
@@ -341,7 +341,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231161367",
-    "cover": "assets/covers/contentious-activism.jpg",
+    "cover": "assets/covers/contentious-activism-and-inter-korean-relations.jpg",
     "blurb": "Chubb examines how South Korean activists on both left and right shaped what could be said about the North, and therefore what governments could do. A reminder that Seoul's North Korea policy has a domestic constituency."
   },
   {
@@ -353,7 +353,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9781401389642",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781401389642-L.jpg?default=false",
+    "cover": "assets/covers/the-coldest-winter.jpg",
     "blurb": "Halberstam's last book, a narrative history centred on the Chinese intervention and the collision between MacArthur and Washington. Journalistic, character-driven, and the most readable American account of the war."
   },
   {
@@ -365,7 +365,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9780465031238",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780465031238-L.jpg?default=false",
+    "cover": "assets/covers/the-two-koreas.jpg",
     "blurb": "Oberdorfer's history of the peninsula since the 1970s, updated with Robert Carlin, drawing on the diplomacy both men watched at close range. If you read one book on how the two Koreas and Washington actually negotiated, this is it."
   },
   {
@@ -377,7 +377,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780593184189",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780593184189-L.jpg?default=false",
+    "cover": "assets/covers/flawless.jpg",
     "blurb": "Hu, formerly NPR's Seoul bureau chief, reports on the K-beauty industry and what living inside it did to her own sense of appearance. Part memoir, part investigation of an export industry built on impossible standards."
   },
   {
@@ -389,7 +389,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503629844",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781503629844-L.jpg?default=false",
+    "cover": "assets/covers/korea.jpg",
     "blurb": "Park's accessible single-volume history from antiquity to the present, unusually attentive to daily life, ethnic minorities, LGBTQ history and the North. A good modern alternative to the older survey texts."
   },
   {
@@ -413,7 +413,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780593129487",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780593129487-L.jpg?default=false",
+    "cover": "assets/covers/if-i-had-your-face.jpg",
     "blurb": "Cha's novel follows four young women sharing a Seoul apartment building, through plastic surgery, room salons and precarious work. It is about what beauty costs when it is the most liquid asset you have."
   },
   {
@@ -425,7 +425,7 @@ window.BOOKS = [
     "publisher": "Hurst",
     "source": "hurstpublishers.com",
     "isbn": "9781911723547",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781911723547-L.jpg?default=false",
+    "cover": "assets/covers/accidental-tyrant.png",
     "blurb": "Tertitskiy works from Korean, Russian, Chinese and Japanese sources to replace the guerrilla legend with a working politician: a junior Soviet officer who was installed rather than risen, who then out-manoeuvred every faction that had a better claim, prised Pyongyang loose from Moscow, ran the economy into famine, and built the only hereditary succession communism ever produced. The title is the argument — almost nothing about the man was inevitable. A Financial Times best history book of 2025."
   },
   {
@@ -437,7 +437,7 @@ window.BOOKS = [
     "publisher": "Penguin",
     "source": "penguin.co.uk",
     "isbn": "9780241554272",
-    "cover": "assets/covers/the-lazarus-heist.jpg",
+    "cover": "assets/covers/the-lazarus-heist.png",
     "blurb": "White's account of North Korea's state hacking operation, from the Sony breach to bank thefts and cryptocurrency raids. It makes the case that the regime's most effective weapons programme may be the one on the network."
   },
   {
@@ -449,7 +449,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780593236703",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780593236703-L.jpg?default=false",
+    "cover": "assets/covers/samsung-rising.jpg",
     "blurb": "Cain covered Samsung from Seoul for the Economist, the Wall Street Journal and Time, and this is an unauthorised corporate biography: the sugar-and-fertiliser conglomerate that bet everything on memory chips, the chairman who had employees pile up and burn 150,000 defective phones, and the succession and bribery cases that ran all the way into the Blue House. The clearest account in English of how one family firm came to carry a national economy."
   },
   {
@@ -461,7 +461,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781538177815",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781538177815-L.jpg?default=false",
+    "cover": "assets/covers/south-korea-s-democracy-in-crisis.png",
     "blurb": "An edited volume on polarisation, populism and illiberal drift in a democracy usually held up as a success story. Prescient given what followed, and unsparing about both camps."
   },
   {
@@ -473,7 +473,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501764943",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781501764943-L.jpg?default=false",
+    "cover": "assets/covers/privilege-and-anxiety.png",
     "blurb": "Koo examines a middle class that got everything it was promised and is terrified of losing it — in housing, education and the scramble to reproduce its own status. The best sociological account of why Korean life feels like a competition."
   },
   {
@@ -485,7 +485,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781101971215",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781101971215-L.jpg?default=false",
+    "cover": "assets/covers/on-desperate-ground.jpg",
     "blurb": "Sides's narrative of the Chosin Reservoir campaign and the Marines' fighting withdrawal in appalling cold. Pure battle history, superbly paced."
   },
   {
@@ -497,7 +497,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781101906118",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781101906118-L.jpg?default=false",
+    "cover": "assets/covers/the-vegetarian.jpg",
     "blurb": "Han's novel begins with a woman who simply stops eating meat and follows the violence her refusal provokes in everyone around her. Winner of the International Booker, and the book that opened Korean fiction to a wide English readership."
   },
   {
@@ -509,7 +509,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781637742419",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781637742419-L.jpg?default=false",
+    "cover": "assets/covers/flowers-of-fire.jpg",
     "blurb": "Jung, a longtime wire correspondent, reports the rise of South Korea's feminist movement through the spycam protests, #MeToo cases and the backlash. Journalism written close to the people who took the risks."
   },
   {
@@ -521,7 +521,7 @@ window.BOOKS = [
     "publisher": "Bloomsbury",
     "source": "bloomsbury.com",
     "isbn": "9781639732425",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781639732425-L.jpg?default=false",
+    "cover": "assets/covers/welcome-to-the-hyunam-dong-bookshop.png",
     "blurb": "A gentle novel about a woman who quits her career to open a neighbourhood bookshop and the people who drift into it. The flagship of Korea's healing-fiction wave, and a deliberate rest from the rest of this shelf."
   },
   {
@@ -533,7 +533,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781788737142",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781788737142-L.jpg?default=false",
+    "cover": "assets/covers/gwangju-uprising.jpg",
     "blurb": "The classic eyewitness compilation of the 1980 Gwangju uprising and its suppression, newly translated, with a preface by Hwang Sok-yong. It circulated underground for years; it is the founding document of South Korea's democratic memory."
   },
   {
@@ -545,7 +545,7 @@ window.BOOKS = [
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
     "isbn": "9780007554843",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780007554843-L.jpg?default=false",
+    "cover": "assets/covers/the-girl-with-seven-names.jpg",
     "blurb": "Lee's memoir of leaving North Korea at seventeen, the decade of concealment in China that followed, and getting her family out. Strong on the part most escape narratives skip: what happens after the border."
   },
   {
@@ -557,7 +557,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9780804797627",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780804797627-L.jpg?default=false",
+    "cover": "assets/covers/contested-embrace.png",
     "blurb": "Kim asks who counts as Korean, following colonial-era migrants to Japan and China and the two postwar states' competing claims on them. A sharp study of citizenship as something states grant, withhold and weaponise."
   },
   {
@@ -569,7 +569,7 @@ window.BOOKS = [
     "publisher": "Macmillan",
     "source": "us.macmillan.com",
     "isbn": "9780312374310",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780312374310-L.jpg?default=false",
+    "cover": "assets/covers/a-corpse-in-the-koryo.jpg",
     "blurb": "The first Inspector O novel, written under a pseudonym by a former Western intelligence officer. The plot is a police procedural; the reason to read it is the atmosphere of working inside a system where no one can be told the truth."
   },
   {
@@ -581,7 +581,7 @@ window.BOOKS = [
     "publisher": "Simon & Schuster",
     "source": "simonandschuster.com",
     "isbn": "9781476766560",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781476766560-L.jpg?default=false",
+    "cover": "assets/covers/dear-leader.jpg",
     "blurb": "Jang wrote propaganda for Kim Jong Il's court before fleeing. The value is the vantage point — an insider's view of how the regime manufactures its own myth, followed by an escape narrative."
   },
   {
@@ -593,7 +593,7 @@ window.BOOKS = [
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
     "isbn": "9781328573919",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781328573919-L.jpg?default=false",
+    "cover": "assets/covers/the-2020-commission-report-on-the-north-korean-n.jpg",
     "blurb": "Lewis, a nonproliferation analyst, writes a speculative novel in the form of an official commission report into a nuclear exchange. It is fiction built entirely from real systems and real doctrine, which is what makes it frightening."
   },
   {
@@ -605,7 +605,7 @@ window.BOOKS = [
     "publisher": "Bloomsbury",
     "source": "bloomsbury.com",
     "isbn": "9781350568426",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781350568426-L.jpg?default=false",
+    "cover": "assets/covers/witness-to-north-korea.png",
     "blurb": "Sauvage ran the UN's operation in Pyongyang as resident coordinator, which meant negotiating access, moving aid and arguing with officials for three years. The result is one of the few accounts written from inside the machinery rather than from a tour bus or a defector's memory, and it is unusually candid about what aid can and cannot reach."
   },
   {
@@ -617,7 +617,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231179744",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231179744-L.jpg?default=false",
+    "cover": "assets/covers/china-s-hegemony.jpg",
     "blurb": "Lee asks why Korea and others accepted Chinese primacy for centuries, and argues the answer lies in legitimacy and domestic politics rather than raw coercion. Directly relevant to current arguments about what Chinese regional power would look like."
   },
   {
@@ -629,7 +629,7 @@ window.BOOKS = [
     "publisher": "Yale University Press",
     "source": "yalebooks.yale.edu",
     "isbn": "9780300217810",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780300217810-L.jpg?default=false",
+    "cover": "assets/covers/north-korea-s-hidden-revolution.jpg",
     "blurb": "Baek documents the smuggling of foreign films, dramas and news into North Korea, and argues that outside information is quietly eroding the state's monopoly on reality. Built on interviews with the people who moved the files."
   },
   {
@@ -641,7 +641,7 @@ window.BOOKS = [
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
     "isbn": "9780008541408",
-    "cover": "assets/covers/the-hard-road-out.jpg",
+    "cover": "assets/covers/the-hard-road-out.png",
     "blurb": "Park escaped North Korea twice, was trafficked into rural China in between, and eventually resettled in Britain. Written with Seh-Lynn Chai, a South Korean who had to confront her own assumptions to hear it."
   },
   {
@@ -653,7 +653,7 @@ window.BOOKS = [
     "publisher": "University of Michigan Press",
     "source": "press.umich.edu",
     "isbn": "9780472056606",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780472056606-L.jpg?default=false",
+    "cover": "assets/covers/seeds-of-mobilization.png",
     "blurb": "Cho shows that the industrial complexes and universities the dictatorship built to secure itself became the infrastructure of the movement that brought it down. Development as a double-edged sword, argued with original protest data."
   },
   {
@@ -665,7 +665,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781524733490",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781524733490-L.jpg?default=false",
+    "cover": "assets/covers/korean-messiah.jpg",
     "blurb": "Cheng, the Wall Street Journal's former Korea bureau chief, traces the Kim cult back to the American Presbyterian missionaries who made Pyongyang the “Jerusalem of the East” and to Kim Il Sung's own devoutly Christian parents. The claim is that Kimilsungism borrowed its grammar from the faith it displaced — the confession, the hymn, the personal saviour — which makes the regime's endurance look less like Stalinism than like a church. Longlisted for the 2026 Cundill History Prize."
   },
   {
@@ -677,7 +677,7 @@ window.BOOKS = [
     "publisher": "HarperCollins",
     "source": "harperacademic.com",
     "isbn": "9780544705272",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780544705272-L.jpg?default=false",
+    "cover": "assets/covers/under-the-same-sky.png",
     "blurb": "Kim's memoir of homelessness and hunger as a boy during the famine, escape into China, and resettlement in the United States. Unsentimental about how long the aftermath lasts."
   },
   {
@@ -689,7 +689,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501777370",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781501777370-L.jpg?default=false",
+    "cover": "assets/covers/border-of-water-and-ice.png",
     "blurb": "Seeley writes the environmental history of the Yalu — its timber, its ice, its floods — and shows how a river resisted the empire trying to administer it. An unusual and rewarding angle on Japanese rule."
   },
   {
@@ -701,7 +701,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781984819727",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781984819727-L.jpg?default=false",
+    "cover": "assets/covers/becoming-kim-jong-un.jpg",
     "blurb": "Pak, a former CIA analyst on North Korea, writes the leader as the intelligence community came to understand him. The interest is as much in how such assessments get made as in the conclusions."
   },
   {
@@ -713,7 +713,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501704901",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781501704901-L.jpg?default=false",
+    "cover": "assets/covers/a-most-enterprising-country.jpg",
     "blurb": "Hastings traces the networks — licit, illicit and in between — that connect North Korea to the world economy through brokers, shipping and shell companies. It explains why sanctions leak where they leak."
   },
   {
@@ -725,7 +725,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9780465004713",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780465004713-L.jpg?default=false",
+    "cover": "assets/covers/the-aquariums-of-pyongyang.jpg",
     "blurb": "Kang was sent to Yodok as a child and spent ten years there. The first major camp survivor testimony to reach the West, and still one of the most important."
   },
   {
@@ -737,7 +737,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780307739513",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780307739513-L.jpg?default=false",
+    "cover": "assets/covers/please-look-after-mom.jpg",
     "blurb": "Shin's novel opens with an elderly woman lost in Seoul Station and circles the family who failed to notice her disappearing long before. A bestseller in Korea and abroad, and quietly devastating on filial debt."
   },
   {
@@ -749,7 +749,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503647978",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781503647978-L.jpg?default=false",
+    "cover": "assets/covers/everything-but-the-bomb.png",
     "blurb": "South Korea could build a bomb and has repeatedly chosen not to, while carefully keeping the option open. Kim draws on Korean and English archives and interviews with Seoul's security establishment to explain that posture as deliberate hedging rather than indecision: the latency is the policy, and it is aimed as much at Washington's reliability as at Pyongyang's arsenal. The sharpest account of the question every debate about extended deterrence now runs into."
   },
   {
@@ -761,7 +761,7 @@ window.BOOKS = [
     "publisher": "September Publishing",
     "source": "septemberpublishing.org",
     "isbn": "9781912836802",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781912836802-L.jpg?default=false",
+    "cover": "assets/covers/north-korea.png",
     "blurb": "Miller lived in Pyongyang from 2017 to 2019 on her husband's diplomatic posting and photographed what she could: a bus queue, a wedding party, a beach, the edges of ordinary life that the guided tour is designed to keep out of frame. The pictures and the diary around them make the point no analysis quite can, that this is a country where people live rather than a subject."
   },
   {
@@ -773,7 +773,7 @@ window.BOOKS = [
     "publisher": "AmazonCrossing",
     "source": "barnesandnoble.com",
     "isbn": "9781542047197",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781542047197-L.jpg?default=false",
+    "cover": "assets/covers/a-river-in-darkness.png",
     "blurb": "Ishikawa was born in Japan and taken to North Korea as a boy in the repatriation campaign, then spent decades trying to get back. Bleak and unconsoling, and valuable for documenting a chapter most accounts omit."
   },
   {
@@ -785,7 +785,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9780306802676",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780306802676-L.jpg?default=false",
+    "cover": "assets/covers/the-korean-war.jpg",
     "blurb": "Ridgway commanded the Eighth Army after the Chinese intervention and then all UN forces. His account is a commander's own assessment of how a collapsing front was stabilised, with the judgements of someone who had to make them."
   },
   {
@@ -797,7 +797,7 @@ window.BOOKS = [
     "publisher": "Simon & Schuster",
     "source": "simonandschuster.com",
     "isbn": "9781501131905",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781501131905-L.jpg?default=false",
+    "cover": "assets/covers/the-korean-war.jpg",
     "blurb": "Hastings's one-volume narrative history, drawing on interviews with veterans from several of the combatant nations. The conventional starting point for the military and diplomatic story."
   },
   {
@@ -809,7 +809,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503631878",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781503631878-L.jpg?default=false",
+    "cover": "assets/covers/supercorporate.png",
     "blurb": "Prentice's ethnography inside a Korean conglomerate watches managers try to flatten hierarchy without losing status. A rare close-up of the white-collar world that so much Korean social anxiety is organised around."
   },
   {
@@ -821,7 +821,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780525657743",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780525657743-L.jpg?default=false",
+    "cover": "assets/covers/crying-in-h-mart.jpg",
     "blurb": "Zauner's memoir of her mother's illness and death, and of using Korean food to hold onto a half-inherited identity. It became a phenomenon because the grief is specific rather than universal."
   },
   {
@@ -833,7 +833,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9781455569496",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781455569496-L.jpg?default=false",
+    "cover": "assets/covers/pachinko.jpg",
     "blurb": "Lee's multigenerational novel follows a Korean family in Japan across most of the twentieth century, through occupation, war and permanent second-class status. The best-known fictional treatment of the Zainichi experience."
   },
   {
@@ -845,7 +845,7 @@ window.BOOKS = [
     "publisher": "Princeton University Press",
     "source": "press.princeton.edu",
     "isbn": "9780691210421",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780691210421-L.jpg?default=false",
+    "cover": "assets/covers/the-interrogation-rooms-of-the-korean-war.png",
     "blurb": "Kim relocates the war to the POW camps and interrogation rooms, where prisoners were made to choose sides and the choosing became the war's central political question. Original, archivally deep, and quietly furious."
   },
   {
@@ -857,7 +857,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9780801475733",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780801475733-L.jpg?default=false",
+    "cover": "assets/covers/the-making-of-minjung.jpg",
     "blurb": "Lee examines how South Korean intellectuals constructed 'the people' as a political subject, and what that construction included and left out. Essential for understanding the democratisation movement's own self-image."
   },
   {
@@ -869,7 +869,7 @@ window.BOOKS = [
     "publisher": "Harvard University Press",
     "source": "hup.harvard.edu",
     "isbn": "9780674293823",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780674293823-L.jpg?default=false",
+    "cover": "assets/covers/cornerstone-of-the-nation.png",
     "blurb": "Kwon works from newly declassified South Korean records to show that the arms build-up of the 1970s was not a sideline to the economic miracle but its engine. Park Chung Hee's drive to build weapons at home, launched as Nixon drew down American troops, pulled the chaebol into heavy and chemical industry and fused military and civilian production so completely that the two cannot be told apart. The result is a rereading of the developmental state in which security, not export policy, sets the agenda."
   },
   {
@@ -881,7 +881,7 @@ window.BOOKS = [
     "publisher": "Oxford University Press",
     "source": "global.oup.com",
     "isbn": "9780197764930",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780197764930-L.jpg?default=false",
+    "cover": "assets/covers/shrimp-to-whale.png",
     "blurb": "Pacheco Pardo's brisk narrative of how a ruined country became a cultural and economic power. The most approachable recent one-volume account of the South Korean ascent."
   },
   {
@@ -893,7 +893,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781931368629",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781931368629-L.jpg?default=false",
+    "cover": "assets/covers/patterns-of-impunity.png",
     "blurb": "King served as US special envoy for North Korean human rights and writes from inside the job. Valuable for what it shows about the machinery, and the limits, of human rights diplomacy."
   },
   {
@@ -905,7 +905,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9781934287446",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781934287446-L.jpg?default=false",
+    "cover": "assets/covers/north-korea-kidnapped-my-daughter.jpg",
     "blurb": "Yokota's account of her daughter Megumi, abducted from a Japanese street at thirteen, and the decades of campaigning that followed. The abductions as one family lived them."
   },
   {
@@ -929,7 +929,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231185493",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231185493-L.jpg?default=false",
+    "cover": "assets/covers/south-korea-at-the-crossroads.png",
     "blurb": "Snyder frames South Korean foreign policy as a long oscillation between autonomy and alliance, and asks where US–China rivalry leaves that choice. The clearest statement of the strategic dilemma facing Seoul."
   },
   {
@@ -941,7 +941,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231211499",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231211499-L.jpg?default=false",
+    "cover": "assets/covers/civic-activism-in-south-korea.png",
     "blurb": "Moon and her contributors examine the NGOs, unions and citizens' groups that filled the space after democratisation. Useful for seeing how a movement culture turned into institutions, and what it lost doing so."
   },
   {
@@ -953,7 +953,7 @@ window.BOOKS = [
     "publisher": "Cambridge University Press",
     "source": "cambridge.org",
     "isbn": "9781009197281",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781009197281-L.jpg?default=false",
+    "cover": "assets/covers/politics-of-the-north-korean-diaspora.png",
     "blurb": "Greitens traces the emergence of a globally dispersed North Korean émigré population and argues the home regime's authoritarian character shapes diaspora politics far from its borders. Short, and conceptually sharp."
   },
   {
@@ -965,7 +965,7 @@ window.BOOKS = [
     "publisher": "Harvard University Press",
     "source": "hup.harvard.edu",
     "isbn": "9780674983397",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780674983397-L.jpg?default=false",
+    "cover": "assets/covers/the-other-great-game.jpg",
     "blurb": "Jager retells the late nineteenth-century scramble over Korea as a contest that made modern East Asia, with Korea as the prize rather than the bystander. Sweeping diplomatic history, and a corrective to Korea's usual walk-on role."
   },
   {
@@ -977,7 +977,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503634459",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781503634459-L.jpg?default=false",
+    "cover": "assets/covers/hinge-points.png",
     "blurb": "Hecker, the nuclear scientist repeatedly invited to inspect North Korean facilities, walks through what he saw and the decision points where he believes the programme could have been slowed. Uniquely authoritative on the technical side, and pointed about American choices."
   },
   {
@@ -989,7 +989,7 @@ window.BOOKS = [
     "publisher": "Quadrille",
     "source": "barnesandnoble.com",
     "isbn": "9781837830879",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781837830879-L.jpg?default=false",
+    "cover": "assets/covers/k-culture.png",
     "blurb": "An illustrated survey of the Korean Wave across music, film, television and food. A gift-shelf overview rather than analysis, and useful as an entry point."
   },
   {
@@ -1001,7 +1001,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231205474",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231205474-L.jpg?default=false",
+    "cover": "assets/covers/boundless-winds-of-empire.png",
     "blurb": "Wang shows early Chosŏn diplomats using rhetoric, ritual and scholarship to manage Ming China from a position of formal inferiority. A study of how a smaller state built room to manoeuvre out of language."
   },
   {
@@ -1013,7 +1013,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9780306824135",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780306824135-L.jpg?default=false",
+    "cover": "assets/covers/a-christmas-far-from-home.jpg",
     "blurb": "Weintraub narrates the retreat from the Yalu over the winter of 1950, when the promise of being home by Christmas collapsed. Compact, and effective on the gap between headquarters optimism and the road south."
   },
   {
@@ -1025,7 +1025,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231140010",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231140010-L.jpg?default=false",
+    "cover": "assets/covers/famine-in-north-korea.png",
     "blurb": "Haggard and Noland's forensic account of the 1990s famine: how the food system failed, how aid was diverted, and how markets grew in the vacuum. The standard work, and the origin of much later analysis of the North Korean economy."
   },
   {
@@ -1037,7 +1037,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780881324389",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780881324389-L.jpg?default=false",
+    "cover": "assets/covers/witness-to-transformation.jpg",
     "blurb": "Built on large surveys of refugees in China and South Korea, this reconstructs the economy and social change from the testimony of people who lived it. Methodologically careful about what refugee samples can and cannot tell you."
   },
   {
@@ -1049,7 +1049,7 @@ window.BOOKS = [
     "publisher": "MIT Press",
     "source": "mitpress.mit.edu",
     "isbn": "9780262545143",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780262545143-L.jpg?default=false",
+    "cover": "assets/covers/constructing-student-mobility.jpg",
     "blurb": "Kim follows the pipeline between Seoul and Berkeley and shows how universities, agents and families jointly manufacture international student flows. A clear-eyed look at education as an export market."
   },
   {
@@ -1061,7 +1061,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503640870",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781503640870-L.jpg?default=false",
+    "cover": "assets/covers/millennial-north-korea.png",
     "blurb": "Kim reads North Korean state media against interviews with defectors to examine the generation raised after the famine, on smuggled dramas and market money. Argues that generation is where the state's grip is loosest."
   },
   {
@@ -1073,7 +1073,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780307720665",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780307720665-L.jpg?default=false",
+    "cover": "assets/covers/without-you-there-is-no-us.jpg",
     "blurb": "Kim taught English to the sons of the elite at a Pyongyang university while reporting undercover. The ethics of that are debated; what the book captures about the students' isolation is hard to get any other way."
   },
   {
@@ -1085,7 +1085,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9781541704121",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781541704121-L.jpg?default=false",
+    "cover": "assets/covers/the-sister.jpg",
     "blurb": "Lee's account of Kim Yo Jong's rise and her role in the regime's messaging and diplomacy. Written with a hard line on engagement, and clearest as a portrait of how power circulates inside the family."
   },
   {
@@ -1097,7 +1097,7 @@ window.BOOKS = [
     "publisher": "Cornell University Press",
     "source": "cornellpress.cornell.edu",
     "isbn": "9781501705687",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781501705687-L.jpg?default=false",
+    "cover": "assets/covers/everyday-life-in-the-north-korean-revolution-194.png",
     "blurb": "Kim uses captured North Korean archives to reconstruct village life in the years before the war — land reform, literacy drives, women's organisations. It shows a revolution that had genuine participants before it hardened."
   },
   {
@@ -1109,7 +1109,7 @@ window.BOOKS = [
     "publisher": "University of Nebraska Press",
     "source": "nebraskapress.unl.edu",
     "isbn": "9781574883343",
-    "cover": "https://covers.openlibrary.org/b/isbn/9781574883343-L.jpg?default=false",
+    "cover": "assets/covers/this-kind-of-war.jpg",
     "blurb": "Fehrenbach's 1963 account, still read in American military circles for its argument that wars are won by infantry on the ground rather than technology. Dated in places, and enduringly influential."
   },
   {
@@ -1121,7 +1121,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231157995",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231157995-L.jpg?default=false",
+    "cover": "assets/covers/japan-south-korea-and-the-united-states-nuclear-.png",
     "blurb": "Roehrig examines what extended deterrence actually promises Seoul and Tokyo, and how much either capital believes it. The reference text for the credibility question now driving South Korea's nuclear debate."
   },
   {
@@ -1133,7 +1133,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231198868",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231198868-L.jpg?default=false",
+    "cover": "assets/covers/passcode-to-the-third-floor.png",
     "blurb": "Thae was North Korea's deputy ambassador in London before defecting, and writes from inside the diplomatic elite. Rare access to how the ruling circle talks to itself and manages the outside world."
   },
   {
@@ -1145,7 +1145,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9780804731928",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780804731928-L.jpg?default=false",
+    "cover": "assets/covers/alignment-despite-antagonism.jpg",
     "blurb": "Cha's first book asks why Seoul and Tokyo cooperate at all given their history, and finds the answer in shared fear of American abandonment. The quasi-alliance argument that still frames how the triangle is analysed."
   },
   {
@@ -1157,7 +1157,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231558730",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231558730-L.jpg?default=false",
+    "cover": "assets/covers/the-black-box.jpg",
     "blurb": "Cha takes on the methodological problem at the heart of the field: how to study a country that releases almost no reliable data. Part critique of how North Korea analysis is done, part proposal for doing it better."
   },
   {
@@ -1169,7 +1169,7 @@ window.BOOKS = [
     "publisher": "HarperCollins",
     "source": "harpercollins.com",
     "isbn": "9780062906366",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780062906366-L.jpg?default=false",
+    "cover": "assets/covers/the-impossible-state.jpg",
     "blurb": "Cha's survey of North Korea's past and likely future, written with the authority of someone who negotiated with it. The updated edition is the standard one-volume introduction for the general reader."
   },
   {
@@ -1181,7 +1181,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231189231",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231189231-L.jpg?default=false",
+    "cover": "assets/covers/nuclear-north-korea.png",
     "blurb": "Cha and Kang debate each other in print — engagement against containment — chapter by chapter. Unusual and genuinely useful: you get both cases at full strength rather than a straw man."
   },
   {
@@ -1193,7 +1193,7 @@ window.BOOKS = [
     "publisher": "Yale University Press",
     "source": "yalebooks.yale.edu",
     "isbn": "9780300278705",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780300278705-L.jpg?default=false",
+    "cover": "assets/covers/korea.jpg",
     "blurb": "Cha and Pacheco Pardo write the two Koreas as one story rather than two, from division to the present. The most current single-volume history covering both states together."
   },
   {
@@ -1205,7 +1205,7 @@ window.BOOKS = [
     "publisher": "Columbia University Press",
     "source": "cup.columbia.edu",
     "isbn": "9780231200554",
-    "cover": "https://covers.openlibrary.org/b/isbn/9780231200554-L.jpg?default=false",
+    "cover": "assets/covers/a-misunderstood-friendship.png",
     "blurb": "Shen and Xia use Chinese and Soviet archives to show the Sino-North Korean relationship as far more mistrustful than the 'lips and teeth' slogan suggests. It reframes Pyongyang's most important partnership as a long negotiation between wary allies."
   }
 ];
