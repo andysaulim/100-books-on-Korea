@@ -1,0 +1,9 @@
+# Pictures that are real images of a real book and still the wrong cover.
+# fetch_covers.py refuses anything listed here, so the chain moves on to
+# the next source instead of fetching it back on the next run.
+#
+# sha256 of the file as it lands in assets/covers/ (post-downscale).
+#   sha256sum assets/covers/<name>.jpg
+
+69b631365fabc1645b371262c344a2eadbd45e610b6176ececccee601ba55184  # The Cleanest Race: an advance reference copy for journalists, publicist's phone number printed on it
+110e6a277a2ae2c02af3b0df26a2a97e002016cc8d95381d757961c2239bd1b4  # Whale: the Archipelago edition, asked for a different one

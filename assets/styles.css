@@ -1,20 +1,41 @@
 /* ---------------------------------------------------------------
    100 Books on Korea
+
+   A centred display title over a full-width wall of covers, with
+   filtering in four plain-text columns beneath it — the minchi.co
+   /books structure, in this site's own colours. A book opens as a
+   draggable floating window, so several can sit open at once.
+
+   Green is the house colour; the accent is the Korean flag's red,
+   deepened from #cd2e3a to clear WCAG AA on the green ground.
    --------------------------------------------------------------- */
 
 :root {
-  --paper:   #f5e9a6;
-  --ink:     #1b1b18;
-  --muted:   #8c8663;
-  --rule:    #cdc084;
-  --card:    #fffdf4;
-  --accent:  #b3321f;
+  --paper:   #e9efe2;
+  --paper-t: rgb(233 239 226 / .93);
+  --ink:     #17201a;
+  --deep:    #2c5440;   /* display green */
+  --quiet:   #47503f;   /* body copy */
+  --muted:   #5f6a55;   /* labels, counts — 4.87:1 on the paper */
+  --rule:    #cdd8c2;
+  --card:    #fbfdf8;
+  --accent:  #b32530;   /* 5.55:1 on the paper */
 
-  --serif: "EB Garamond", "Iowan Old Style", Georgia, "Times New Roman", serif;
-  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --serif:   "Source Serif 4", "Iowan Old Style", Georgia, "Times New Roman", serif;
 
-  --gutter: clamp(1rem, 3vw, 2.5rem);
-  --tile: 104px;   /* cover width the grid aims for */
+  --gutter: clamp(1rem, 4vw, 3.25rem);
+
+  /* Book size drives the shelf tracks; 2:3, as on the reference page. */
+  --bw: 188px;
+  --bh: 282px;
+
+  --ease-out:  cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-book: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-page: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+
+  --shadow-tile: 0 1px 2px rgb(23 32 26 / .17), 0 8px 18px -10px rgb(23 32 26 / .3);
+  --shadow-pop:  0 14px 38px -12px rgb(23 32 26 / .36);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -23,154 +44,217 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  padding-inline: var(--gutter);
-  background: var(--paper);
+  /* --bg is set from the hovered cover's average colour; see setAmbient(). */
+  background: var(--bg, var(--paper));
+  transition: background-color 480ms ease;
   color: var(--ink);
-  font-family: var(--sans);
-  font-size: 15px;
+  font-family: var(--serif);
+  font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
 img { max-width: 100%; }
 [hidden] { display: none !important; }
-
 a { color: inherit; }
 
-:where(a, button, input):focus-visible {
+button, select, input { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+
+:where(a, button, input, select):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .skip-link {
   position: absolute; left: -9999px; top: 0; z-index: 100;
   padding: .6rem 1rem;
-  background: var(--ink); color: var(--paper);
+  background: var(--ink);
+  color: var(--paper);
 }
 .skip-link:focus { left: 0; }
+/* Two of them, so the second does not sit on top of the first. */
+.skip-link + .skip-link:focus { left: 11rem; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: .01ms !important; }
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
 }
 
-/* --- Masthead --------------------------------------------------- */
+/* --- Masthead ---------------------------------------------------- */
 
-.masthead { padding-block: clamp(1.5rem, 4vw, 2.5rem) 0; }
-
-.name {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
-}
-.name a { text-decoration: none; }
-
-.nav {
+.site-head {
   display: flex;
-  gap: 1.1rem;
-  margin-top: .55rem;
-  font-size: .85rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .4rem 1.4rem;
+  padding: clamp(1.1rem, 2.5vw, 1.7rem) var(--gutter) 0;
 }
-.nav a {
-  color: var(--ink);
+
+.brand {
+  font-size: 1.05rem;
+  font-weight: 600;
   text-decoration: none;
-  opacity: .72;
+  letter-spacing: -.01em;
 }
-.nav a:hover { opacity: 1; }
-.nav a[aria-current="page"] {
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: .88rem;
+}
+.site-nav a { text-decoration: none; opacity: .66; }
+.site-nav a:hover { opacity: 1; }
+.site-nav a.active {
   opacity: 1;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-/* --- Intro ------------------------------------------------------ */
+/* --- Hero --------------------------------------------------------- */
 
-.intro {
-  max-width: 46ch;
-  margin-block: clamp(2.25rem, 6vw, 3.5rem) 0;
+.main { padding: 0 var(--gutter); }
+
+.hero {
+  max-width: 46rem;
+  margin-inline: auto;
+  padding-block: clamp(2.5rem, 7vw, 5rem) clamp(2rem, 5vw, 3.25rem);
+  text-align: center;
 }
-.intro h1 {
+
+.hero-eyebrow {
+  margin: 0 0 clamp(.9rem, 2vw, 1.3rem);
+  font-size: .76rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero-title {
   margin: 0;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(1.75rem, 4vw, 2.4rem);
-  line-height: 1.15;
-  letter-spacing: -.015em;
+  font-family: var(--display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(2.9rem, 10vw, 7rem);
+  line-height: .94;
+  letter-spacing: -.025em;
+  color: var(--deep);
+  text-wrap: balance;
+  font-variation-settings: "SOFT" 24, "WONK" 1;
 }
-.intro p {
-  margin: .7rem 0 0;
-  font-size: .9rem;
-  line-height: 1.55;
-  color: #4a4736;
+/* Two lines on a phone, one on anything wider. */
+.hero-break { display: block; height: 0; }
+@media (min-width: 560px) {
+  .hero-break { display: inline; height: auto; }
 }
 
-/* --- Filter columns --------------------------------------------- */
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: .4rem 1.1rem;
+  margin: clamp(1.1rem, 2.5vw, 1.5rem) 0 0;
+  font-size: .82rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.linkish {
+  padding: 0;
+  font-size: inherit;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.linkish:hover { color: var(--ink); }
+
+/* --- Filter columns ------------------------------------------------ */
 
 .filters {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.5rem clamp(1rem, 3vw, 2.5rem);
-  margin-block: clamp(2rem, 5vw, 3rem) clamp(1.75rem, 4vw, 2.5rem);
+  gap: 1.4rem clamp(1rem, 3vw, 2.5rem);
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.5rem);
+  padding-top: clamp(1.25rem, 3vw, 1.9rem);
+  border-top: 1px solid var(--rule);
 }
 
 .col-label {
   margin: 0 0 .5rem;
   padding-bottom: .5rem;
   border-bottom: 1px solid var(--rule);
-  font-size: .8rem;
+  font-size: .78rem;
   font-weight: 400;
   color: var(--muted);
 }
 .col-label label { cursor: pointer; }
 
-.opts {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+.opts { margin: 0; padding: 0; list-style: none; }
 .opts button {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
   width: 100%;
   padding: .1rem 0;
-  font: inherit;
-  font-size: .84rem;
+  font-size: .86rem;
   line-height: 1.45;
   text-align: left;
-  color: var(--ink);
-  background: none;
-  border: 0;
-  cursor: pointer;
-  opacity: .78;
+  color: var(--quiet);
 }
-.opts button:hover { opacity: 1; }
+.opts button:hover { color: var(--ink); }
 .opts button[aria-pressed="true"] {
-  opacity: 1;
+  color: var(--ink);
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
 }
 .opts .n {
-  margin-left: .35rem;
+  margin-left: auto;
   font-size: .72rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
-/* Publishers and Themes can run long; cap them so the grid stays high
-   on the page and the four columns keep roughly the same height. */
+/* Themes and publishers run long; cap them so the four columns stay
+   roughly level and the covers start high on the page. */
 .scroller {
-  max-height: 11.5rem;
+  max-height: 11rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--rule) transparent;
 }
+/* Set by markScrollers() while there is more below. Without it the cap
+   slices a row in half and the list reads as broken rather than scrollable. */
+.scroller.has-more {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.6rem), transparent);
+          mask-image: linear-gradient(to bottom, #000 calc(100% - 1.6rem), transparent);
+}
 
-.searchwrap { position: relative; display: flex; align-items: center; }
+.searchwrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 .searchwrap input {
   width: 100%;
   padding: .1rem 1.3rem .3rem 0;
-  font: inherit;
-  font-size: .84rem;
-  color: var(--ink);
+  font-size: .88rem;
   background: none;
   border: 0;
   border-bottom: 1px solid var(--rule);
@@ -184,187 +268,473 @@ a { color: inherit; }
   font-size: 1.05rem;
   line-height: 1;
   color: var(--muted);
-  background: none;
-  border: 0;
-  cursor: pointer;
 }
 .search-clear:hover { color: var(--ink); }
 
-.count {
-  margin: .9rem 0 0;
-  font-size: .76rem;
+.filters-reset {
+  margin-top: .9rem;
+  padding: .15rem .6rem;
+  font-size: .78rem;
   color: var(--muted);
-  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
 }
+.filters-reset:hover { color: var(--ink); border-color: var(--ink); }
 
-/* --- The wall of covers ----------------------------------------- */
+/* --- The shelf ------------------------------------------------------ */
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--tile), 1fr));
-  gap: clamp(.6rem, 1.4vw, 1.1rem);
+/* Fixed book-width tracks spread edge to edge, so the first column sits
+   flush left and the last flush right. Generous row gap: an opened book
+   needs room to swing without colliding with the row below. */
+.shelf {
+  list-style: none;
   margin: 0;
   padding: 0;
-  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--bw));
+  justify-content: space-between;
+  justify-items: start;
+  column-gap: 28px;
+  row-gap: 52px;
+  overflow: visible;
 }
 
-.tile { margin: 0; }
-
-.tile a {
+.book-cell {
   display: block;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  overflow: visible;
+  transition: scale 160ms var(--ease-out);
+}
+.book-cell:active { scale: .98; }
+.book-cell:focus-visible { outline: none; }
+.book-cell:focus-visible .b-image { outline: 2px solid var(--accent); outline-offset: 3px; }
+.book-cell.is-open .b-image { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* --- 3D book -----------------------------------------------------------
+   After CodePen filipz/VYwqwXN, the structure the reference page uses:
+   back cover, three paper pages, front cover, spine shading, light sweep.
+   ---------------------------------------------------------------------- */
+
+.book-scene {
   position: relative;
-  aspect-ratio: 2 / 3;
-  border-radius: 1px;
-  overflow: hidden;
-  background: var(--fallback-bg, #3a4258);
-  box-shadow: 0 1px 3px rgb(60 50 10 / .28), 0 6px 14px -8px rgb(60 50 10 / .3);
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-.tile a:hover,
-.tile a:focus-visible {
-  transform: translateY(-3px);
-  box-shadow: 0 2px 5px rgb(60 50 10 / .3), 0 14px 26px -10px rgb(60 50 10 / .42);
-}
-
-.tile img {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: var(--bw);
+  height: var(--bh);
 }
 
-/* Typographic stand-in, shown when there is no cover image or the
-   image fails to load. */
-.tile .fallback {
+.book-3d { position: absolute; inset: 0; }
+
+.b-back-cover {
+  position: absolute;
+  top: 2%; left: 2%;
+  width: 96%; height: 96%;
+  z-index: 1;
+  background: linear-gradient(90deg, #6e6a64 0%, #8a857e 55%, #7a756e 100%);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 1px 1px 4px rgb(0 0 0 / .18);
+}
+
+.b-inside {
+  position: absolute;
+  top: 3%; left: 5%;
+  width: 90%; height: 94%;
+  z-index: 2;
+}
+
+.b-page {
+  position: absolute;
+  top: 0; right: 0;
+  width: 98%; height: 100%;
+  background: #f7f4ee;
+  border: 1px solid rgb(0 0 0 / .12);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+  transform: translateX(0);
+  transition: transform 700ms var(--ease-page);
+}
+
+.b-image {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  border-radius: 2px 6px 6px 2px;
+  background: var(--fallback-bg, #3a4258);
+  box-shadow: 0 2px 6px rgb(0 0 0 / .08), 0 8px 14px rgb(0 0 0 / .06);
+  transform: perspective(2000px) translateX(0) rotateY(0deg) scaleX(1);
+  transform-origin: left center;
+  transition: transform 700ms var(--ease-book), box-shadow 700ms var(--ease-book);
+}
+.b-image img {
+  display: block;
+  width: 100%; height: 100%;
+  /* `cover` cropped any jacket that is not 2:3 — The Cleanest Race is nearly
+     square and lost the left edge of its own title. Jackets are the thing
+     being recommended, so none of one may be cut off. A squarer cover now
+     sits centred on the board, which is what a hardback with a smaller
+     jacket looks like anyway; a 2:3 cover fills the book exactly as before. */
+  object-fit: contain;
+  background: var(--card);
+  border-radius: inherit;
+}
+
+/* Promote only the book being hovered, never all hundred at once. */
+.book-cell:hover .b-image { will-change: transform; }
+
+.b-effect {
+  position: absolute;
+  top: 0; left: 0;
+  width: 9%; height: 100%;
+  margin-left: 7.3%;
+  z-index: 4;
+  border-left: 2px solid rgb(0 0 0 / .06);
+  background: linear-gradient(90deg, rgb(255 255 255 / .2), rgb(255 255 255 / 0));
+  pointer-events: none;
+  transition: margin-left 700ms var(--ease-book);
+}
+
+.b-light {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: 2px 6px 6px 2px;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0), rgb(255 255 255 / .5));
+  opacity: .08;
+  transform: perspective(2000px) rotateY(0deg);
+  transform-origin: left center;
+  pointer-events: none;
+  transition: opacity 700ms var(--ease-book), transform 700ms var(--ease-book);
+}
+
+/* Open: the front cover swings on its spine and the pages fan out. */
+@media (hover: hover) and (pointer: fine) {
+  .book-cell:hover .b-image,
+  .book-cell:focus-visible .b-image {
+    transform: perspective(2000px) translateX(calc(var(--bw) * -0.027)) rotateY(-12deg) scaleX(.96);
+    box-shadow:
+      10px 10px 20px rgb(0 0 0 / .25),
+      20px 20px 40px rgb(0 0 0 / .2),
+      40px 40px 60px rgb(0 0 0 / .15);
+  }
+  .book-cell:hover .b-light,
+  .book-cell:focus-visible .b-light {
+    opacity: .1;
+    transform: perspective(2000px) rotateY(-12deg);
+  }
+  .book-cell:hover .b-effect,
+  .book-cell:focus-visible .b-effect { margin-left: 4.5%; }
+
+  .book-cell:hover .b-page:nth-child(1),
+  .book-cell:focus-visible .b-page:nth-child(1) { transform: translateX(calc(var(--bw) * 0.018)); }
+  .book-cell:hover .b-page:nth-child(2),
+  .book-cell:focus-visible .b-page:nth-child(2) { transform: translateX(calc(var(--bw) * 0.009)); }
+}
+
+/* Typographic stand-in, used when no source has art for this book. It
+   sits inside the front cover so it swings with the rest. */
+.b-image .fallback {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: .55rem .5rem .5rem .6rem;
-  background: linear-gradient(150deg,
-    color-mix(in srgb, var(--fallback-bg) 92%, #000 8%),
-    color-mix(in srgb, var(--fallback-bg) 68%, #10131a 32%));
+  padding: 1.1rem .9rem .95rem 1.2rem;
+  text-align: left;
+  background: linear-gradient(155deg,
+    color-mix(in srgb, var(--fallback-bg) 94%, #fff 6%),
+    color-mix(in srgb, var(--fallback-bg) 64%, #10131a 36%));
 }
-.tile .fallback::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: .28rem;
-  background: linear-gradient(90deg, rgb(0 0 0 / .34), rgb(0 0 0 / .05));
-}
-.tile .fb-title {
-  font-family: var(--serif);
-  font-size: .72rem;
-  font-weight: 500;
-  line-height: 1.18;
+.b-image .fb-title {
+  font-size: .95rem;
+  font-weight: 600;
+  line-height: 1.2;
   color: #fff;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 8;
+  -webkit-line-clamp: 7;
   -webkit-box-orient: vertical;
 }
-.tile .fb-author {
+.b-image .fb-author {
   margin-top: auto;
-  padding-top: .4rem;
-  font-size: .53rem;
-  letter-spacing: .07em;
+  padding-top: .5rem;
+  font-size: .64rem;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  color: rgb(255 255 255 / .78);
+  color: rgb(255 255 255 / .8);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
-/* --- Hover detail card ------------------------------------------ */
-
-.peek {
-  position: fixed;
-  z-index: 50;
-  width: 17rem;
-  max-width: calc(100vw - 2rem);
-  padding: .85rem .95rem 1rem;
-  background: var(--card);
-  border: 1px solid var(--rule);
-  box-shadow: 0 10px 30px -10px rgb(60 50 10 / .45);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .13s ease;
-}
-.peek.on { opacity: 1; }
-.peek.interactive { pointer-events: auto; }
-
-.peek-theme {
-  margin: 0 0 .4rem;
-  font-size: .62rem;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.peek-title {
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 1.05rem;
-  line-height: 1.22;
-  text-wrap: pretty;
-}
-.peek-author {
-  margin: .3rem 0 0;
-  font-size: .82rem;
-}
-.peek-pub {
-  margin: .45rem 0 0;
-  font-size: .72rem;
-  color: var(--muted);
-}
-.peek-link { margin: .7rem 0 0; }
-.peek-link a {
-  font-size: .75rem;
-  color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
-}
-
-/* --- Empty state / footer --------------------------------------- */
-
 .empty {
   padding: 4rem 0;
   text-align: center;
-  font-family: var(--serif);
   font-size: 1.1rem;
-  color: #4a4736;
+  color: var(--quiet);
 }
-.empty button {
+.filters-reset-inline {
   display: block;
   margin: .9rem auto 0;
   padding: .4rem 1rem;
-  font: inherit;
-  font-family: var(--sans);
-  font-size: .8rem;
+  font-size: .82rem;
   color: var(--paper);
   background: var(--ink);
-  border: 0;
-  cursor: pointer;
 }
 
-.foot {
+.footer {
   margin-top: clamp(3rem, 8vw, 5rem);
   padding-block: 1.5rem 3rem;
   border-top: 1px solid var(--rule);
-  font-size: .78rem;
+  font-size: .8rem;
   color: var(--muted);
 }
-.foot p { margin: 0 0 .3rem; }
+.footer p { margin: 0 0 .3rem; }
 
-/* --- Narrow screens --------------------------------------------- */
+/* --- Floating book windows ------------------------------------------
+   The striped drop shadow is three layers: ::before paints an offset
+   hatch, ::after the solid face, and the content sits above both. The
+   window must stay overflow:visible or the stripe gets clipped.
+   Adapted from a Temani Afif answer on Stack Overflow (CC BY-SA 4.0).
+   -------------------------------------------------------------------- */
 
-@media (max-width: 760px) {
-  :root { --tile: 84px; }
+.book-windows {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.bookwin {
+  position: absolute;
+  width: min(40rem, calc(100vw - 2rem));
+  isolation: isolate;
+  background: transparent;
+  border: 0;
+  overflow: visible;
+  pointer-events: auto;
+  --face: var(--card);
+  --stripe: 6px;
+  cursor: grab;
+}
+.bookwin:active { cursor: grabbing; }
+.bookwin button, .bookwin a { cursor: pointer; }
+.bookwin .bookwin-text { cursor: auto; }
+.bookwin.is-about { --face: #e4ecdc; width: min(24rem, calc(100vw - 2rem)); }
+
+.bookwin::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: var(--stripe);
+  left: var(--stripe);
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(-45deg,
+    var(--ink) 0 1.5px, transparent 1.5px 4px);
+  pointer-events: none;
+}
+.bookwin::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: var(--face);
+  border: 1px solid var(--ink);
+  pointer-events: none;
+}
+.bookwin > * { position: relative; z-index: 2; }
+
+.bookwin-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .55rem .55rem 0;
+  touch-action: none;
+}
+
+.bookwin-nav { display: flex; gap: .1rem; }
+
+.winbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--ink);
+  opacity: .55;
+}
+.winbtn:hover { opacity: 1; }
+.winbtn svg { display: block; width: 1.1rem; height: 1.1rem; }
+
+.bookwin-body {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: .35rem 1.5rem 1.5rem;
+  align-items: start;
+}
+.bookwin.is-about .bookwin-body { display: block; }
+
+.bookwin-cover { width: 168px; }
+/* In the window the book is shown closed and flat — the layers that
+   stick out belong on the shelf. */
+.bookwin-cover .book-scene { --bw: 168px; --bh: 252px; }
+.bookwin-cover .b-back-cover,
+.bookwin-cover .b-inside { display: none; }
+.bookwin-cover .b-image {
+  transition: none;
+  box-shadow: 0 4px 10px rgb(0 0 0 / .18), 0 14px 28px rgb(0 0 0 / .14);
+}
+
+.bookwin-author {
+  margin: 0 0 .35rem;
+  font-size: .88rem;
+  color: var(--muted);
+}
+.bookwin-title {
+  margin: 0;
+  font-family: var(--display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: 1.6rem;
+  line-height: 1.18;
+  letter-spacing: -.015em;
+  color: var(--deep);
+  text-wrap: balance;
+}
+.bookwin-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .2rem 1rem;
+  margin: .7rem 0 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  font-size: .86rem;
+  color: var(--muted);
+}
+.bookwin-text {
+  margin: 1.1rem 0 0;
+  font-size: 1.0625rem;   /* 17px, the reading size; the chrome stays at 16 */
+  line-height: 1.7;
+  color: var(--quiet);
+  text-wrap: pretty;
+}
+.bookwin-text + .bookwin-text { margin-top: .7rem; }
+.bookwin-link { margin: 1.1rem 0 0; }
+.bookwin-link a {
+  font-size: .88rem;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+/* --- Back to top ----------------------------------------------------- */
+
+.scroll-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  box-shadow: var(--shadow-pop);
+  opacity: 0;
+  transition: opacity .16s ease;
+}
+.scroll-top.is-visible { opacity: 1; }
+
+/* --- Narrow screens --------------------------------------------------- */
+
+@media (max-width: 860px) {
   .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .scroller { max-height: 9rem; }
 }
 
-@media (max-width: 420px) {
-  :root { --tile: 76px; }
-  .filters { grid-template-columns: 1fr; gap: 1.15rem; }
-  .scroller { max-height: 7.5rem; }
+@media (max-width: 560px) {
+  .filters { grid-template-columns: 1fr; gap: 1.1rem; }
+
+  /* Stacked vertically, twelve themes and twenty-six publishers put two
+     full screens of chrome above the first cover. On a phone they become
+     one swipeable row each, so the books start where the filters end. */
+  .filters .col:has(.scroller) { min-width: 0; }
+  .scroller {
+    max-height: none;
+    display: flex;
+    gap: .1rem 1.1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroller::-webkit-scrollbar { display: none; }
+  .scroller li { flex: 0 0 auto; }
+  .scroller button { width: auto; white-space: nowrap; padding: .25rem 0; }
+  /* The tally would double the width of every chip. */
+  .scroller .n { display: none; }
+  .scroller.has-more {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  }
+
+  /* Dragging a window with one thumb is no use; centre them instead. */
+  .bookwin {
+    left: 50% !important;
+    top: auto !important;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    width: min(24rem, calc(100vw - 1.5rem));
+  }
+  .bookwin-bar { cursor: default; }
+}
+
+/* --- motion ------------------------------------------------------- */
+
+/* Books rise into place as you reach them, a beat apart across each row,
+   which also turns a filter change into a re-shelving rather than a cut.
+   `transform: none` at rest so the 3D hover inside is unaffected. */
+.shelf li {
+  transition: opacity 620ms var(--ease-book), transform 620ms var(--ease-book);
+  transition-delay: var(--enter-delay, 0ms);
+}
+.shelf li.is-out { opacity: 0; transform: translateY(18px) scale(.985); }
+.shelf li.is-in  { opacity: 1; transform: none; }
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.hero-eyebrow { animation: rise-in 640ms var(--ease-book) both; }
+.hero-title   { animation: rise-in 760ms var(--ease-book) 70ms both; }
+.hero-meta    { animation: rise-in 700ms var(--ease-book) 220ms both; }
+.filters      { animation: rise-in 700ms var(--ease-book) 280ms both; }
+
+/* A filter click should read as the shelf answering, so the count ticks. */
+@keyframes count-tick {
+  50% { color: var(--accent); }
+}
+#shelf-count.is-changed { animation: count-tick 520ms ease; }
+
+/* Everything above is decoration. Anyone who has asked their system for
+   less motion gets the page fully formed and still. */
+@media (prefers-reduced-motion: reduce) {
+  .shelf li,
+  .hero-eyebrow, .hero-title, .hero-meta, .filters,
+  #shelf-count.is-changed {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

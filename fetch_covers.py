@@ -1,0 +1,799 @@
+#!/usr/bin/env python3
+"""Download every cover once, into assets/covers/, and point the data at them.
+
+    python3 fetch_covers.py
+    python3 fetch_covers.py --force        # re-fetch books that already have a file
+    python3 fetch_covers.py --only demick  # just the books matching a string
+
+Why this exists
+---------------
+Resolving covers in the browser has two failures that cannot be fixed there:
+
+1. Open Library's cover API allows 100 requests per IP per 5 minutes when
+   looking up by identifier, and answers 403 past that. A 101-book shelf sits
+   on that limit every single load.
+
+2. When Google has no art for a volume it does not 404 — it returns a real
+   image that reads "image not available". In a browser those bytes are
+   cross-origin, so the page cannot look at them and has no way to tell that
+   picture from a cover. It renders the placeholder.
+
+Downloading fixes both. Here we can space the requests out, and we can look
+at the bytes: this script learns Google's placeholder by deliberately asking
+for a nonsense ISBN, then rejects anything that comes back matching it.
+
+Afterwards every cover is a local file, the page makes no cover requests at
+all, and `python3 build.py` bakes them into dist/books.html.
+
+Needs nothing but Python and a network that can reach the cover hosts.
+"""
+
+import argparse
+import hashlib
+import io
+import json
+import pathlib
+import re
+import struct
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
+ROOT = pathlib.Path(__file__).parent
+COVERS = ROOT / "assets" / "covers"
+
+UA = {"User-Agent": "100-books-on-korea/1.0 (personal reading list; contact via andysaulim.com)"}
+
+MIN_WIDTH = 200          # a book is drawn 188px wide; anything less is upscaled
+MAX_WIDTH = 500          # ...and anything much wider is bytes nobody sees
+# Late steps in the chain settle for a small jacket rather than come home
+# empty. Anything under this is worth walking the chain again for, to see
+# whether the same cover exists somewhere at full size.
+UPGRADE_BELOW = 300
+
+# A jacket is portrait. Measured across the covers that did come back right,
+# they sit between 0.60 and 0.75 wide-to-tall. What sat outside that were
+# publisher Open Graph cards at 1200x630 (ratio 1.91) and square logos —
+# twenty-two of them, each a real image of the wrong thing entirely.
+MIN_BYTES = 6000         # placeholders and spacers are tiny
+RATIO = (0.50, 0.85)     # wide-to-tall bounds for something shaped like a book
+OL_SPACING = 3.1         # 100 requests / 5 minutes, with room to spare
+
+
+# --- reading image size without an image library ------------------------
+
+def png_size(b):
+    if b[:8] != b"\x89PNG\r\n\x1a\n":
+        return None
+    w, h = struct.unpack(">II", b[16:24])
+    return w, h
+
+
+def jpeg_size(b):
+    """Walk the JPEG segments to the frame header that carries the size."""
+    if b[:2] != b"\xff\xd8":
+        return None
+    i = 2
+    while i < len(b) - 9:
+        if b[i] != 0xFF:
+            i += 1
+            continue
+        marker = b[i + 1]
+        # SOF0..SOF15, skipping the four that are not frame headers
+        if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+            h, w = struct.unpack(">HH", b[i + 5:i + 9])
+            return w, h
+        if marker in (0xD8, 0xD9) or 0xD0 <= marker <= 0xD7:
+            i += 2
+            continue
+        seg = struct.unpack(">H", b[i + 2:i + 4])[0]
+        i += 2 + seg
+    return None
+
+
+def gif_size(b):
+    if b[:6] not in (b"GIF87a", b"GIF89a"):
+        return None
+    return struct.unpack("<HH", b[6:10])
+
+
+def image_size(b):
+    for fn in (png_size, jpeg_size, gif_size):
+        got = fn(b)
+        if got:
+            return got
+    return None
+
+
+def extension(b):
+    if b[:8] == b"\x89PNG\r\n\x1a\n":
+        return ".png"
+    if b[:6] in (b"GIF87a", b"GIF89a"):
+        return ".gif"
+    return ".jpg"
+
+
+# --- fetching -----------------------------------------------------------
+
+def get(url, timeout=25):
+    try:
+        req = urllib.request.Request(url, headers=UA)
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.read()
+    except (urllib.error.URLError, urllib.error.HTTPError, OSError):
+        return None
+
+
+def isbn10(i13):
+    if not re.fullmatch(r"978\d{10}", i13 or ""):
+        return None
+    core = i13[3:12]
+    total = sum((10 - i) * int(core[i]) for i in range(9))
+    check = (11 - total % 11) % 11
+    return core + ("X" if check == 10 else str(check))
+
+
+def google_isbn(isbn, zoom):
+    return ("https://books.google.com/books/content"
+            f"?vid=ISBN{isbn}&printsec=frontcover&img=1&zoom={zoom}")
+
+
+def google_id(vol, zoom):
+    return ("https://books.google.com/books/content"
+            f"?id={urllib.parse.quote(vol)}&printsec=frontcover&img=1&zoom={zoom}")
+
+
+def amazon_cover(i10, size="LZZZZZZZ"):
+    """Amazon's cover CDN, keyed on ISBN-10.
+
+    Reached last but it matters: its academic coverage is far better than
+    Open Library's or Google's, which is where the Stanford and Columbia
+    monographs on this shelf kept falling through. A miss returns a 1x1
+    GIF, which the size guard already rejects.
+    """
+    return f"https://m.media-amazon.com/images/P/{i10}.01.{size}.jpg"
+
+
+REJECTED = ROOT / "covers-rejected.txt"
+
+
+def rejected_digests():
+    """Pictures that are real jackets but the wrong one, refused by hand.
+
+    Some covers pass every automatic rule and are still wrong: a proof
+    jacket stamped ADVANCE REFERENCE COPY FOR JOURNALISTS with the
+    publicist's phone number on it, or simply an edition nobody wants.
+    Recording the sha256 here retires that picture for good, and the
+    chain moves on to the next source instead of fetching it back.
+
+    One digest per line; anything after # is a note.
+    """
+    out = set()
+    if not REJECTED.is_file():
+        return out
+    for line in REJECTED.read_text(encoding="utf-8").splitlines():
+        digest = line.split("#")[0].strip().lower()
+        if len(digest) == 64 and all(c in "0123456789abcdef" for c in digest):
+            out.add(digest)
+    return out
+
+
+def learn_placeholders():
+    """Google's "image not available" picture, fetched on purpose.
+
+    Asking for an ISBN that cannot exist gets the placeholder and nothing
+    else, so its digest is a reliable thing to reject later.
+    """
+    seen = set()
+    for zoom in (0, 1, 2):
+        blob = get(google_isbn("9780000000002", zoom))
+        if blob:
+            seen.add(hashlib.sha256(blob).hexdigest())
+
+    # Open Library has one too, served when a cover id or ISBN has no image
+    # and `default=false` was not asked for. The first run of this script
+    # saved it 39 times before anyone noticed.
+    for url in ("https://covers.openlibrary.org/b/id/1-L.jpg",
+                "https://covers.openlibrary.org/b/isbn/9780000000002-L.jpg"):
+        blob = get(url)
+        if blob:
+            seen.add(hashlib.sha256(blob).hexdigest())
+    return seen
+
+
+# A jacket is designed to be seen across a room: it carries either colour
+# or large, dark type. A scanned title page, a page of body text, and
+# Google's "image not available" are all the same thing by this measure —
+# a white field with a little fine print, which all but disappears once
+# the picture is reduced to thumbnail size. Measured across the hundred
+# covers on the shelf, the five that were not jackets all scored under
+# 0.01 and 0.01 here; the closest real jacket scored 0.013 and 0.134.
+FLAT_COLOUR = 0.01
+FLAT_INK = 0.03
+
+
+def too_blank(blob):
+    """Why this image is a page rather than a jacket, or None if it is one.
+
+    Returns None when Pillow is missing: the test is skipped rather than
+    guessed at, and the run prints a warning once.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    try:
+        im = Image.open(io.BytesIO(blob)).convert("RGB")
+        im.thumbnail((120, 120))
+        px = list(im.getdata())
+    except Exception:
+        return None
+    if not px:
+        return None
+    colour = ink = 0
+    for r, g, b in px:
+        if max(r, g, b) - min(r, g, b) > 26:
+            colour += 1
+        if (r * 299 + g * 587 + b * 114) // 1000 < 160:
+            ink += 1
+    colour /= len(px)
+    ink /= len(px)
+    if colour < FLAT_COLOUR and ink < FLAT_INK:
+        return (f"almost blank ({colour:.3f} colour, {ink:.3f} ink) — a title "
+                "page, an inside page, or a 'not available' placeholder")
+    return None
+
+
+def usable(blob, placeholders, min_width=MIN_WIDTH, shape=True):
+    """(ok, why-not) for a downloaded image.
+
+    shape=False drops the two rules that judge what the picture looks
+    like — its proportions and how much is on it. A cover chosen by hand
+    is authoritative, and real jackets do fall outside those bounds:
+    Lindsey Miller's is a landscape photo book, almost square at 0.90.
+    The rest still apply, so a pinned URL that 404s or returns a
+    placeholder is still refused rather than saved.
+    """
+    if not blob:
+        return False, "no response"
+    if hashlib.sha256(blob).hexdigest() in placeholders:
+        return False, "Google's 'image not available' placeholder"
+    if len(blob) < MIN_BYTES:
+        return False, f"only {len(blob)} bytes"
+    size = image_size(blob)
+    if not size:
+        return False, "not a recognisable image"
+    w, h = size
+    if w < min_width or h < 50:
+        return False, f"{w}x{h}, too small"
+    if shape:
+        ratio = w / h
+        if not RATIO[0] <= ratio <= RATIO[1]:
+            how = "landscape, likely an Open Graph card" if ratio > 1 else "the wrong shape"
+            return False, f"{w}x{h} ({ratio:.2f}), {how}"
+        blank = too_blank(blob)
+        if blank:
+            return False, blank
+    return True, f"{w}x{h}, {len(blob) // 1024}KB"
+
+
+# --- the chain, run once per book ---------------------------------------
+
+def norm(s):
+    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
+
+def titles_agree(want, got):
+    want, got = norm(want), norm(got)
+    return bool(want and got) and (want.startswith(got) or got.startswith(want))
+
+
+def first_author(a):
+    return re.split(r"\s+(?:and|&|with)\s+|,\s*", a or "")[0].strip()
+
+
+def bare_title(t):
+    return re.split(r"\s*[:—–]\s+", t or "")[0].strip()
+
+
+def publisher_cover(url):
+    """The jacket from the book's own publisher page, via og:image.
+
+    Open Library and Google hold trade titles well and academic monographs
+    badly: of the first run's misses, ten were Stanford, nine Columbia, four
+    Cornell, while Penguin Random House had eighteen of nineteen. But every
+    book here already links to its publisher, and publishers put the cover
+    in their page's Open Graph tags. It is also the most authoritative
+    source available, being the actual jacket of the actual edition linked,
+    which is what an ISBN lookup keeps getting wrong.
+    """
+    if not url:
+        return None
+    page = get(url, timeout=20)
+    if not page:
+        return None
+    try:
+        html = page.decode("utf-8", "replace")
+    except Exception:
+        return None
+
+    for pattern in (
+        r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']',
+        r'<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)',
+    ):
+        m = re.search(pattern, html, re.I)
+        if m:
+            return urllib.parse.urljoin(url, m.group(1).replace("&amp;", "&"))
+    return None
+
+
+class Fetcher:
+    def __init__(self, placeholders):
+        self.placeholders = placeholders
+        self.last_ol = 0.0
+
+    def open_library(self, url):
+        """Spaced out, because this is the endpoint with the 100/5min limit."""
+        wait = OL_SPACING - (time.time() - self.last_ol)
+        if wait > 0:
+            time.sleep(wait)
+        self.last_ol = time.time()
+        return get(url)
+
+    def candidates(self, book):
+        """Yield (label, blob-getter, min-width), best jacket fidelity first.
+
+        Open Library leads here, the opposite of the page's order. On the page
+        the limit forces Google first; running once, spaced out, we can afford
+        the source that carries the actual edition's jacket more often.
+        """
+        # A cover chosen by hand wins outright. Paste the image's own URL
+        # into the book's cover_url and nothing else is consulted unless
+        # that URL fails the usual rules.
+        pinned = book.get("cover_url")
+        if pinned:
+            yield ("pinned by hand", lambda u=pinned: get(u), 100, False)
+
+        # The publisher's own page first: it is the jacket of the edition
+        # this entry actually links to, which no ISBN lookup can promise.
+        og = publisher_cover(book.get("url"))
+        if og:
+            yield (f"publisher page ({book.get('source', 'og:image')})",
+                   lambda og=og: get(og), MIN_WIDTH, True)
+
+        isbn = book.get("isbn")
+        if isbn:
+            yield ("Open Library, ISBN",
+                   lambda: self.open_library(
+                       f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg?default=false"),
+                   MIN_WIDTH, True)
+            for i in [isbn, isbn10(isbn)]:
+                if i:
+                    yield (f"Google, ISBN {i}, large", lambda i=i: get(google_isbn(i, 0)), MIN_WIDTH, True)
+
+            # Amazon's large rendering comes before Google's small one. Both
+            # are real jackets, but Google's zoom=1 is 128px and the shelf
+            # draws covers at 188, so taking it first left a fifth of the
+            # books visibly soft while a 500px jacket sat one step further on.
+            i10 = isbn10(isbn)
+            if i10:
+                yield (f"Amazon, ISBN {i10} (LZZZZZZZ)",
+                       lambda i10=i10: get(amazon_cover(i10, "LZZZZZZZ")), MIN_WIDTH, True)
+
+            for i in [isbn, isbn10(isbn)]:
+                if i:
+                    yield (f"Google, ISBN {i}", lambda i=i: get(google_isbn(i, 1)), 100, True)
+
+            if i10:
+                yield (f"Amazon, ISBN {i10} (MZZZZZZZ)",
+                       lambda i10=i10: get(amazon_cover(i10, "MZZZZZZZ")), 120, True)
+
+        yield from self.by_search(book)
+
+    def by_search(self, book):
+        author = first_author(book.get("author"))
+
+        for title in filter(None, [book["title"], bare_title(book["title"])]):
+            url = ("https://openlibrary.org/search.json?limit=5&fields=title,cover_i"
+                   f"&title={urllib.parse.quote(title)}&author={urllib.parse.quote(author)}")
+            raw = get(url)
+            if not raw:
+                continue
+            try:
+                docs = json.loads(raw).get("docs", [])
+            except json.JSONDecodeError:
+                continue
+            for d in docs:
+                if d.get("cover_i") and titles_agree(book["title"], d.get("title")):
+                    cid = d["cover_i"]
+                    # by cover id, which Open Library does not rate limit
+                    yield (f"Open Library, search (cover {cid})",
+                           lambda cid=cid: get(f"https://covers.openlibrary.org/b/id/{cid}-L.jpg?default=false"),
+                           MIN_WIDTH, True)
+                    break
+
+        q = f'intitle:"{bare_title(book["title"])}" inauthor:"{author}"'
+        raw = get("https://www.googleapis.com/books/v1/volumes?maxResults=5&country=US&q="
+                  + urllib.parse.quote(q))
+        if raw:
+            try:
+                items = json.loads(raw).get("items", [])
+            except json.JSONDecodeError:
+                items = []
+            for it in items:
+                info = it.get("volumeInfo", {})
+                if it.get("id") and titles_agree(book["title"], info.get("title")):
+                    vol = it["id"]
+                    yield (f"Google, search ({vol}), large",
+                           lambda vol=vol: get(google_id(vol, 0)), MIN_WIDTH, True)
+                    yield (f"Google, search ({vol})",
+                           lambda vol=vol: get(google_id(vol, 1)), 100, True)
+                    break
+
+
+def shrink(path):
+    """Downscale an oversized jacket in place, if Pillow is available.
+
+    Covers come back at anything up to 2000px. A book is drawn 188px wide,
+    so past about 500 the extra pixels are bytes nobody will ever see — and
+    build.py inlines every one of them as a data URI, where the whole set
+    arrived at 8.7MB. Without Pillow this is a no-op and the file is kept
+    as downloaded, which is worse but not wrong.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    try:
+        with Image.open(path) as im:
+            if im.width <= MAX_WIDTH:
+                return None
+            before = path.stat().st_size
+            h = round(im.height * MAX_WIDTH / im.width)
+            im = im.convert("RGB").resize((MAX_WIDTH, h), Image.LANCZOS)
+            out = path.with_suffix(".jpg")
+            im.save(out, "JPEG", quality=82, optimize=True, progressive=True)
+        if out != path:
+            path.unlink()
+        return out, before, out.stat().st_size
+    except Exception:
+        return None
+
+
+_SLUGS = {}
+
+
+def assign_slugs(books):
+    """Work out one filename per book, before anything is downloaded.
+
+    The name comes from the title with its subtitle dropped, which reads well
+    but is not unique: Cumings's "The Korean War: A History" and Ridgway's
+    "The Korean War" both reduce to the-korean-war, so whichever was fetched
+    second overwrote the first and one book then showed the other's jacket.
+    When a name is claimed by more than one book, every one of them falls
+    back to its id instead, which is unique by construction.
+    """
+    _SLUGS.clear()
+    claimed = {}
+    for b in books:
+        base = re.sub(r"[^a-z0-9]+", "-", bare_title(b["title"]).lower()).strip("-")[:48]
+        claimed.setdefault(base, []).append(b)
+    for base, group in claimed.items():
+        for b in group:
+            _SLUGS[b["id"]] = base if base and len(group) == 1 else ident(b)
+
+
+def ident(book):
+    return re.sub(r"[^a-z0-9]+", "-", book["id"].lower()).strip("-")[:48]
+
+
+def save_cover(book, blob, refused):
+    """Write a candidate, downscale it, and hand back (path, note).
+
+    Returns None when the finished picture is one refused by hand.
+    shrink() re-encodes, so the file's digest is not the download's:
+    usable() judges the bytes that arrived, this judges what lands on
+    disk. Checking only one of them is how a rejected cover came back.
+    """
+    path = COVERS / (slug(book) + extension(blob))
+    path.write_bytes(blob)
+    note = ""
+    smaller = shrink(path)
+    if smaller:
+        path, before, after = smaller
+        note = f", resized to {MAX_WIDTH}px, {before // 1024}KB -> {after // 1024}KB"
+    if hashlib.sha256(path.read_bytes()).hexdigest() in refused:
+        path.unlink(missing_ok=True)
+        return None
+    return path, note
+
+
+def slug(book):
+    return _SLUGS.get(book["id"]) or ident(book)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--force", action="store_true",
+                    help="re-fetch books that already have a local file")
+    ap.add_argument("--only", help="only books whose author or title contains this")
+    args = ap.parse_args()
+
+    data = ROOT / "books.json"
+    if not data.is_file():
+        sys.exit(
+            "fetch_covers.py has to live in the repo, next to books.json.\n"
+            f"It is currently in {ROOT}, and there is no books.json there.\n\n"
+            "Get the repo and run it from inside:\n"
+            "  git clone https://github.com/andysaulim/100-books-on-Korea.git\n"
+            "  cd 100-books-on-Korea\n"
+            "  git checkout claude/tender-carson-ljopjj\n"
+            "  python3 fetch_covers.py"
+        )
+
+    books = json.loads(data.read_text(encoding="utf-8"))
+    assign_slugs(books)
+    COVERS.mkdir(parents=True, exist_ok=True)
+
+    try:
+        import PIL  # noqa: F401
+    except ImportError:
+        print("WARNING: Pillow is missing, so title pages and 'not available'\n"
+              "         placeholders cannot be told from jackets. Install it:\n"
+              "           python3 -m pip install Pillow", flush=True)
+
+    print("learning Google's placeholder so it can be rejected...", flush=True)
+    placeholders = learn_placeholders()
+    refused = rejected_digests()
+    if refused:
+        print(f"  {len(refused)} picture(s) refused by hand in covers-rejected.txt")
+    placeholders |= refused
+    print(f"  {len(placeholders)} placeholder digest(s) recorded"
+          if placeholders else
+          "  WARNING: could not reach Google; placeholders cannot be detected")
+
+    fetcher = Fetcher(placeholders)
+    got = kept = 0
+    # sha of the bytes as downloaded, per book. shrink() re-encodes the file,
+    # so the hash on disk is not the hash usable() tests against; teaching the
+    # placeholder set a file hash blocks nothing, which is why every retry
+    # round downloaded the same picture again.
+    blob_digest = {}
+    missing = []
+
+    for n, book in enumerate(books, 1):
+        if args.only and args.only.lower() not in (book["author"] + book["title"]).lower():
+            continue
+
+        # A cover already pinned by hand wins, whatever it is called. Some
+        # slots were named before this script existed and do not match the
+        # slug it would generate, and overwriting those would silently throw
+        # away artwork that was chosen deliberately.
+        declared = book.get("cover") or ""
+        pinned = (ROOT / declared) if declared.startswith("assets/covers/") else None
+        existing = [pinned] if pinned and pinned.is_file() else sorted(COVERS.glob(slug(book) + ".*"))
+        if existing and not args.force:
+            book["cover"] = f"assets/covers/{existing[0].name}"
+            kept += 1
+            continue
+
+        label = f"{book['author']} — {bare_title(book['title'])}"
+        print(f"[{n:3}/{len(books)}] {label[:64]}", flush=True)
+
+        saved = None
+        for why, fetch, min_w, shape in fetcher.candidates(book):
+            blob = fetch()
+            ok, note = usable(blob, placeholders, min_w, shape)
+            if ok:
+                kept_file = save_cover(book, blob, refused)
+                if not kept_file:
+                    print(f"          {why}: refused by hand in covers-rejected.txt")
+                    continue
+                path, extra = kept_file
+                blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
+                book["cover"] = f"assets/covers/{path.name}"
+                print(f"          {why} -> {path.name} ({note}{extra})")
+                saved = path
+                got += 1
+                break
+            print(f"          {why}: {note}")
+
+        if not saved:
+            missing.append(label)
+            print("          nothing usable; keeping the typographic stand-in")
+
+    # A cover saved by an earlier run was judged by whatever rules existed
+    # then. When a rule is added — the Open Graph card check was — nothing
+    # re-examines what is already on disk, and the bad ones simply survive
+    # because the book is skipped as "already had". Re-judge them here.
+    rejudged = 0
+    for book in books:
+        cover = book.get("cover") or ""
+        if not cover.startswith("assets/covers/"):
+            continue
+        f = ROOT / cover
+        if not f.is_file():
+            continue
+        ok, note = usable(f.read_bytes(), placeholders, 100)
+        if ok:
+            continue
+        print(f"  dropping {f.name}: {note}")
+        f.unlink(missing_ok=True)
+        book["cover"] = None
+        label = f"{book['author']} — {bare_title(book['title'])}"
+        if label not in missing:
+            missing.append(label)
+        kept = max(0, kept - 1)
+        rejudged += 1
+    if rejudged:
+        print(f"  {rejudged} existing covers failed the current rules; refetching")
+        for book in books:
+            if book.get("cover"):
+                continue
+            for why, fetch, min_w, shape in fetcher.candidates(book):
+                blob = fetch()
+                ok, note = usable(blob, placeholders, min_w, shape)
+                if not ok:
+                    continue
+                kept_file = save_cover(book, blob, refused)
+                if not kept_file:
+                    continue
+                path = kept_file[0]
+                blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
+                book["cover"] = f"assets/covers/{path.name}"
+                label = f"{book['author']} — {bare_title(book['title'])}"
+                if label in missing:
+                    missing.remove(label)
+                got += 1
+                print(f"    {bare_title(book['title'])[:34]:34} {why} ({note})")
+                break
+
+    # Late steps in the chain accept a small jacket, because a real 128px
+    # cover beats no cover at all. It is still 128px, and the shelf draws
+    # covers at 188, so those books sit on the page visibly soft. Walk the
+    # chain again for them and take anything meaningfully bigger. Nothing
+    # is thrown away first: the file on disk is replaced only once a better
+    # one has arrived and passed every rule.
+    upgraded = 0
+    for book in books:
+        cover = book.get("cover") or ""
+        if not cover.startswith("assets/covers/"):
+            continue
+        f = ROOT / cover
+        if not f.is_file():
+            continue
+        size = image_size(f.read_bytes())
+        if not size or size[0] >= UPGRADE_BELOW:
+            continue
+        have = size[0]
+        for why, fetch, _min_w, shape in fetcher.candidates(book):
+            blob = fetch()
+            ok, note = usable(blob, placeholders, UPGRADE_BELOW, shape)
+            if not ok:
+                continue
+            bigger = image_size(blob)
+            if not bigger or bigger[0] <= have:
+                continue
+            digest = hashlib.sha256(blob).hexdigest()
+            if digest in set(blob_digest.values()):
+                continue          # another book already took this picture
+            was = f.read_bytes()          # so a refusal costs nothing
+            kept_file = save_cover(book, blob, refused)
+            if not kept_file:
+                if not f.is_file():
+                    f.write_bytes(was)
+                continue
+            path = kept_file[0]
+            if f != path:
+                f.unlink(missing_ok=True)
+            blob_digest[book["id"]] = digest
+            book["cover"] = f"assets/covers/{path.name}"
+            print(f"  {bare_title(book['title'])[:34]:34} {have}px -> {bigger[0]}px ({why})")
+            upgraded += 1
+            break
+    if upgraded:
+        print(f"  {upgraded} small jackets replaced with larger ones")
+
+    # Jackets already on disk from an earlier run are skipped above, so
+    # they never pass through shrink(). Sweep them here.
+    saved = 0
+    for book in books:
+        cover = book.get("cover") or ""
+        if not cover.startswith("assets/covers/"):
+            continue
+        f = ROOT / cover
+        if not f.is_file():
+            continue
+        smaller = shrink(f)
+        if smaller:
+            newpath, before, after = smaller
+            book["cover"] = f"assets/covers/{newpath.name}"
+            saved += before - after
+    if saved:
+        print(f"\n  downscaled oversized jackets, saving {saved // 1024}KB")
+
+    # Two books do not share a jacket. Any image that landed for more than
+    # one of them is a placeholder, whatever it looks like and whichever
+    # host served it — a guard that needs no prior knowledge of the picture,
+    # which is what a list of known digests can never have.
+    #
+    # This has to repeat. Round one caught Google's zoom=0 filler; the retry
+    # then walked further down the chain and came back with a *different*
+    # repeated image for the same 17 books. Detecting, learning and retrying
+    # once is not enough, so it runs until a round finds no repeats.
+    for round_no in range(1, 6):
+        by_digest = {}
+        for book in books:
+            cover = book.get("cover") or ""
+            if not cover.startswith("assets/covers/"):
+                continue
+            f = ROOT / cover
+            if f.is_file():
+                by_digest.setdefault(hashlib.sha256(f.read_bytes()).hexdigest(), []).append(book)
+
+        repeated = {d: bs for d, bs in by_digest.items() if len(bs) > 1}
+        if not repeated:
+            if round_no > 1:
+                print(f"\n  round {round_no}: every cover is unique")
+            break
+
+        placeholders |= set(repeated)
+        for shared in repeated.values():
+            for book in shared:
+                if book["id"] in blob_digest:
+                    placeholders.add(blob_digest[book["id"]])
+
+        for digest, shared in repeated.items():
+            print(f"\n  round {round_no}: one image landed for {len(shared)} books; it is a placeholder:")
+            for book in shared:
+                print(f"    - {book['author']} — {bare_title(book['title'])[:44]}")
+                (ROOT / book["cover"]).unlink(missing_ok=True)
+                book["cover"] = None
+                label = f"{book['author']} — {bare_title(book['title'])}"
+                if label not in missing:
+                    missing.append(label)
+                got = max(0, got - 1)
+
+        retry = [b for b in books if not b.get("cover")]
+        print(f"\n  round {round_no}: retrying {len(retry)} with {len(placeholders)} placeholders known")
+        for book in retry:
+            for why, fetch, min_w, shape in fetcher.candidates(book):
+                blob = fetch()
+                ok, note = usable(blob, placeholders, min_w, shape)
+                if not ok:
+                    continue
+                kept_file = save_cover(book, blob, refused)
+                if not kept_file:
+                    continue
+                path, extra = kept_file
+                note += extra
+                blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
+                book["cover"] = f"assets/covers/{path.name}"
+                label = f"{book['author']} — {bare_title(book['title'])}"
+                if label in missing:
+                    missing.remove(label)
+                got += 1
+                print(f"    {bare_title(book['title'])[:34]:34} {why} -> {note}")
+                break
+
+    (ROOT / "books.json").write_text(
+        json.dumps(books, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    header = (ROOT / "books.js").read_text(encoding="utf-8").split("window.BOOKS = ")[0]
+    (ROOT / "books.js").write_text(
+        header + "window.BOOKS = " + json.dumps(books, indent=2, ensure_ascii=False) + ";\n",
+        encoding="utf-8")
+
+    print(f"\ndownloaded {got}, already had {kept}, still missing {len(missing)}")
+    for label in missing:
+        print(f"  - {label}")
+    print("\nbooks.json and books.js now point at the local files.")
+    print("Run `python3 build.py` to bake them into dist/books.html.")
+    return 1 if missing else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

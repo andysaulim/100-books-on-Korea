@@ -1,87 +1,104 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
 <title>Books — Andy Lim</title>
-<meta name="description" content="100 books on Korea — the war, the two states, the alliance, the culture, and the people. Browse by theme, publisher, or title.">
+<meta name="description" content="The hundred books on Korea I recommend most — the war and its long aftermath, two states built from the same country, the alliance, the culture, and the people. Browse the shelf by theme or publisher.">
 
-<meta property="og:type" content="website">
+<!-- build:meta — `python3 build.py --base <url>` rewrites these to absolute URLs -->
+<link rel="canonical" href="./">
 <meta property="og:title" content="100 Books on Korea">
-<meta property="og:description" content="100 books on Korea — the war, the two states, the alliance, the culture, and the people.">
+<meta property="og:description" content="The hundred books on Korea I recommend most — the war and its long aftermath, two states built from the same country, the alliance, the culture, and the people. Browse the shelf by theme or publisher.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="./">
+<meta property="og:image" content="assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Andy Lim">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="assets/og.png">
+<!-- /build:meta -->
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
 
-<a class="skip-link" href="#grid">Skip to the books</a>
+<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip-link" href="#shelf">Skip to the books</a>
 
-<header class="masthead">
-  <p class="name"><a href="/">Andy Lim</a></p>
-  <nav class="nav" aria-label="Sections">
-    <a href="/about">About</a>
-    <a href="/writings">Writings</a>
-    <a href="/books" aria-current="page">Books</a>
+<header class="site-head">
+  <a class="brand" href="/">Andy Lim</a>
+  <nav class="site-nav" aria-label="Site">
+    <a href="/">About</a>
+    <a href="/writings/">Writings</a>
+    <a href="./" class="active" aria-current="page">Books</a>
   </nav>
 </header>
 
-<section class="intro">
-  <h1>100 Books on Korea</h1>
-  <p>The war and its long aftermath, two states built from the same country, the
-     alliance, the culture, and the people. Every cover links to its publisher.</p>
-</section>
+<main class="main" id="main">
 
-<nav class="filters" aria-label="Filter and sort">
-  <div class="col">
-    <p class="col-label" id="lbl-sort">Sort</p>
-    <ul class="opts" role="group" aria-labelledby="lbl-sort" data-group="sort"></ul>
-  </div>
+  <header class="hero">
+    <p class="hero-eyebrow">Recommended by Andy Lim</p>
+    <h1 class="hero-title">100 Books<span class="hero-break"> </span>on Korea</h1>
+    <p class="hero-meta">
+      <span id="shelf-count" role="status">100 books</span>
+      <button type="button" class="linkish" data-about>About this shelf</button>
+    </p>
+  </header>
 
-  <div class="col">
-    <p class="col-label" id="lbl-theme">Themes</p>
-    <ul class="opts scroller" role="group" aria-labelledby="lbl-theme" data-group="category"></ul>
-  </div>
-
-  <div class="col">
-    <p class="col-label" id="lbl-pub">Publishers</p>
-    <ul class="opts scroller" role="group" aria-labelledby="lbl-pub" data-group="publisher"></ul>
-  </div>
-
-  <div class="col">
-    <p class="col-label"><label for="search">Search</label></p>
-    <div class="searchwrap">
-      <input id="search" type="search" placeholder="Title, author…" autocomplete="off" spellcheck="false">
-      <button type="button" class="search-clear" data-clear hidden aria-label="Clear search">&times;</button>
+  <nav class="filters" aria-label="Filter and sort">
+    <div class="col">
+      <p class="col-label" id="lbl-sort">Sort</p>
+      <ul class="opts" role="group" aria-labelledby="lbl-sort" data-group="sort"></ul>
     </div>
-    <p class="count" role="status" aria-live="polite"></p>
-  </div>
-</nav>
 
-<main>
-  <ol class="grid" id="grid"></ol>
+    <div class="col">
+      <p class="col-label" id="lbl-theme">Themes</p>
+      <ul class="opts scroller" role="group" aria-labelledby="lbl-theme" data-group="category"></ul>
+    </div>
+
+    <div class="col">
+      <p class="col-label" id="lbl-pub">Publishers</p>
+      <ul class="opts scroller" role="group" aria-labelledby="lbl-pub" data-group="publisher"></ul>
+    </div>
+
+    <div class="col">
+      <p class="col-label"><label for="search">Search</label></p>
+      <div class="searchwrap">
+        <input id="search" type="search" placeholder="Title, author…" autocomplete="off" spellcheck="false">
+        <button type="button" class="search-clear" data-clear hidden aria-label="Clear search">&times;</button>
+      </div>
+      <button type="button" class="filters-reset" id="filters-reset" hidden>Reset filters</button>
+    </div>
+  </nav>
+
+  <ul id="shelf" class="shelf"></ul>
+
   <p class="empty" id="empty" hidden>
     Nothing matches that.
-    <button type="button" data-reset>Clear filters</button>
+    <button type="button" class="filters-reset-inline" data-reset>Clear filters</button>
   </p>
+
+  <footer class="footer">
+    <p>© <span class="footer-year">2026</span> Andy Lim. Open a cover for the details and a link to its publisher.</p>
+    <p class="footer-note">Themes are my own shelving, not the publishers' categories.</p>
+  </footer>
+
 </main>
 
-<!-- Hover/tap detail card, positioned next to the hovered cover. -->
-<div class="peek" id="peek" role="dialog" aria-modal="false" aria-labelledby="peek-title" hidden>
-  <p class="peek-theme" id="peek-theme"></p>
-  <p class="peek-title" id="peek-title"></p>
-  <p class="peek-author" id="peek-author"></p>
-  <p class="peek-pub" id="peek-pub"></p>
-  <p class="peek-link"><a id="peek-url" href="#" target="_blank" rel="noopener noreferrer">View at publisher &rarr;</a></p>
-</div>
+<!-- Floating windows: books + about (multi-open, draggable) -->
+<div id="book-windows" class="book-windows"></div>
 
-<footer class="foot">
-  <p>Compiled by Andy Lim. Covers link to each book's publisher.</p>
-  <p class="foot-note">Themes are my own shelving, not the publishers' categories.</p>
-</footer>
+<button type="button" class="scroll-top" id="scroll-top" aria-label="Back to top" hidden>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5l0 14"></path><path d="M18 11l-6 -6"></path><path d="M6 11l6 -6"></path></svg>
+</button>
 
 <script src="books.js"></script>
 <script src="assets/app.js"></script>

@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Cover check — 100 Books on Korea</title>
+<style>
+  :root {
+    --paper: #e9efe2; --ink: #17201a; --muted: #5f6a55;
+    --rule: #cdd8c2; --card: #fbfdf8; --accent: #b32530; --quiet: #47503f;
+    --ok: #2c5440; --bad: #b32530;
+    --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem clamp(1rem, 4vw, 3rem) 4rem;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--serif); font-size: 16px; line-height: 1.5;
+  }
+  h1 { margin: 0 0 .4rem; font-size: 1.8rem; font-weight: 600; letter-spacing: -.015em; }
+  .lede { margin: 0 0 1.5rem; max-width: 62ch; color: var(--quiet); font-size: .95rem; }
+  button {
+    font: inherit; padding: .4rem 1rem; cursor: pointer;
+    color: var(--paper); background: var(--ink); border: 0; border-radius: 2px;
+  }
+  button.ghost { color: var(--muted); background: none; border: 1px solid var(--rule); }
+  button.ghost:hover { color: var(--ink); border-color: var(--ink); }
+  button[disabled] { opacity: .45; cursor: default; }
+  .bar { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin-bottom: 1.25rem; }
+  .tally { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: .9rem; color: var(--quiet); }
+  .tally b { font-variant-numeric: tabular-nums; }
+  progress { width: min(22rem, 100%); height: .5rem; }
+  .wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: .4rem .7rem .4rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  td.n { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.isbn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; color: var(--muted); white-space: nowrap; }
+  .src { font-size: .78rem; white-space: nowrap; }
+  .src.ok { color: var(--ok); }
+  .src.bad { color: var(--bad); font-weight: 600; }
+  .src.pending { color: var(--muted); }
+  tr.bad td { background: color-mix(in srgb, var(--bad) 6%, transparent); }
+  .thumb { width: 34px; height: 51px; object-fit: cover; background: var(--rule); border-radius: 1px; }
+  .out { width: 100%; min-height: 9rem; margin-top: .8rem; padding: .7rem;
+         font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem;
+         background: var(--card); border: 1px solid var(--rule); border-radius: 2px; }
+  details { margin-top: 1.75rem; }
+  summary { cursor: pointer; font-size: .9rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>Cover check</h1>
+<p class="lede">
+  Runs the shelf's own cover chain against all 100 books, in this browser, and
+  reports which source each cover came from. The shelf itself cannot be checked
+  from a sandbox because the cover hosts are unreachable there, so this page does
+  it where the requests actually work. Nothing is uploaded anywhere.
+</p>
+
+<div class="bar">
+  <button id="run">Run the check</button>
+  <button id="copy" class="ghost" disabled>Copy the missing list</button>
+  <progress id="prog" value="0" max="100"></progress>
+</div>
+
+<div class="tally" id="tally"></div>
+
+<div class="wrap">
+  <table>
+    <thead>
+      <tr><th></th><th>#</th><th>Book</th><th>ISBN</th><th>Cover from</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+
+<details>
+  <summary>Missing list, as text</summary>
+  <textarea class="out" id="out" readonly placeholder="Run the check first."></textarea>
+</details>
+
+<!--BOOKS-->
+
+<script>
+(function () {
+  'use strict';
+
+  var books = window.BOOKS || [];
+  var rows = document.getElementById('rows');
+  var prog = document.getElementById('prog');
+  var tally = document.getElementById('tally');
+  var out = document.getElementById('out');
+  var runBtn = document.getElementById('run');
+  var copyBtn = document.getElementById('copy');
+
+  /* Mirrors loadCover() in assets/app.js — keep the two in step. */
+  var BIG = 200, ANY = 50;
+  var LABEL = {
+    ol:      'Open Library (ISBN)',
+    g13:     'Google Books (ISBN-13, large)',
+    g10:     'Google Books (ISBN-10, large)',
+    g13s:    'Google Books (ISBN-13, small)',
+    g10s:    'Google Books (ISBN-10, small)',
+    local:   'local file',
+    olsearch:'Open Library (title search)',
+    gbsearch:'Google Books (title search)',
+    none:    'MISSING'
+  };
+  /* Why a book ended with nothing, so a rerun diagnoses rather than just counts. */
+  var WHY = {
+    noisbn:  'no ISBN to look up',
+    nomatch: 'searches ran but no result matched the title',
+    neterr:  'the search requests failed (offline, or blocked by the browser)'
+  };
+
+  function norm(s) {
+    return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"')
+      .replace(/[\u2010-\u2015]/g, '-').toLowerCase();
+  }
+
+  function isbn10(i13) {
+    if (!/^978\d{10}$/.test(i13)) return null;
+    var core = i13.slice(3, 12), sum = 0;
+    for (var i = 0; i < 9; i++) sum += (10 - i) * +core[i];
+    var c = (11 - (sum % 11)) % 11;
+    return core + (c === 10 ? 'X' : String(c));
+  }
+
+  function googleCover(isbn, zoom) {
+    return 'https://books.google.com/books/content?vid=ISBN' + isbn +
+           '&printsec=frontcover&img=1&zoom=' + zoom;
+  }
+
+  function googleIdCover(id, zoom) {
+    return 'https://books.google.com/books/content?id=' + encodeURIComponent(id) +
+           '&printsec=frontcover&img=1&zoom=' + zoom;
+  }
+
+  function firstAuthor(a) {
+    return (a || '').split(/\s+(?:and|&|with)\s+|,\s*/)[0].trim();
+  }
+
+  function titleOnly(t) {
+    return (t || '').split(/\s*[:\u2014\u2013]\s+/)[0].trim();
+  }
+
+  function titlesAgree(want, got) {
+    if (!want || !got) return false;
+    want = norm(want); got = norm(got);
+    return want.indexOf(got) === 0 || got.indexOf(want) === 0;
+  }
+
+  /* Resolves to the URL if it loads at least `min` wide, else null. */
+  function tryImage(url, min) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.referrerPolicy = 'no-referrer';
+      img.onload = function () {
+        resolve(img.naturalWidth >= min && img.naturalHeight >= ANY ? url : null);
+      };
+      img.onerror = function () { resolve(null); };
+      img.src = url;
+    });
+  }
+
+  var netFailed = false;
+  var SEARCH_TIMEOUT = 6000;
+  function getJSON(url) {
+    var timedOut = false;
+    return Promise.race([
+      fetch(url).then(function (r) { return r.ok ? r.json() : null; }),
+      new Promise(function (resolve) {
+        setTimeout(function () { timedOut = true; netFailed = true; resolve(null); }, SEARCH_TIMEOUT);
+      })
+    ]).catch(function () { netFailed = true; return null; });
+  }
+
+  function olSearch(b, title) {
+    var url = 'https://openlibrary.org/search.json?limit=5&fields=title,cover_i' +
+              '&title=' + encodeURIComponent(title) +
+              '&author=' + encodeURIComponent(firstAuthor(b.author));
+    return getJSON(url).then(function (j) {
+      var docs = (j && j.docs) || [];
+      for (var i = 0; i < docs.length; i++) {
+        if (docs[i].cover_i && titlesAgree(b.title, docs[i].title)) {
+          return [['olsearch', 'https://covers.openlibrary.org/b/id/' + docs[i].cover_i + '-L.jpg', ANY]];
+        }
+      }
+      return [];
+    });
+  }
+
+  function gbSearch(b) {
+    var q = 'intitle:"' + titleOnly(b.title) + '" inauthor:"' + firstAuthor(b.author) + '"';
+    var url = 'https://www.googleapis.com/books/v1/volumes?maxResults=5&country=US&q=' +
+              encodeURIComponent(q);
+    return getJSON(url).then(function (j) {
+      var items = (j && j.items) || [];
+      for (var i = 0; i < items.length; i++) {
+        var v = items[i].volumeInfo || {};
+        if (items[i].id && titlesAgree(b.title, v.title)) {
+          return [['gbsearch', googleIdCover(items[i].id, 0), BIG],
+                  ['gbsearch', googleIdCover(items[i].id, 1), ANY]];
+        }
+      }
+      return [];
+    });
+  }
+
+  function resolve(b) {
+    netFailed = false;
+    var steps = [];
+    if (b.cover) steps.push([/^https?:/.test(b.cover) ? 'ol' : 'local', b.cover, ANY]);
+    if (b.isbn) {
+      var i10 = isbn10(b.isbn);
+      steps.push(['g13', googleCover(b.isbn, 0), BIG]);
+      if (i10) steps.push(['g10', googleCover(i10, 0), BIG]);
+      steps.push(['g13s', googleCover(b.isbn, 1), ANY]);
+      if (i10) steps.push(['g10s', googleCover(i10, 1), ANY]);
+    }
+
+    var searched = false;
+    var i = 0;
+    function step() {
+      if (i < steps.length) {
+        var s = steps[i++];
+        return tryImage(s[1], s[2]).then(function (good) {
+          return good ? { via: s[0], url: good } : step();
+        });
+      }
+      if (searched) {
+        return Promise.resolve({ via: 'none', url: null,
+          why: netFailed ? 'neterr' : (b.isbn ? 'nomatch' : 'noisbn') });
+      }
+      searched = true;
+      var bare = titleOnly(b.title);
+      var searches = [function () { return olSearch(b, b.title); }];
+      if (bare && bare !== b.title) searches.push(function () { return olSearch(b, bare); });
+      searches.push(function () { return gbSearch(b); });
+
+      var k = 0;
+      function nextSearch() {
+        if (k >= searches.length) return Promise.resolve([]);
+        return searches[k++]().then(function (found) {
+          return found.length ? found : nextSearch();
+        });
+      }
+      return nextSearch().then(function (found) {
+        steps = steps.concat(found);
+        return step();
+      });
+    }
+    return step();
+  }
+
+  function render() {
+    rows.replaceChildren();
+    books.forEach(function (b, n) {
+      var tr = document.createElement('tr');
+      tr.id = 'r' + n;
+      tr.innerHTML =
+        '<td><img class="thumb" alt=""></td>' +
+        '<td class="n">' + (n + 1) + '</td>' +
+        '<td><strong></strong><br><span class="n"></span></td>' +
+        '<td class="isbn">' + (b.isbn || '—') + '</td>' +
+        '<td><span class="src pending">waiting…</span></td>';
+      tr.querySelector('strong').textContent = b.title;
+      tr.querySelector('td:nth-child(3) .n').textContent = b.author;
+      rows.appendChild(tr);
+    });
+  }
+
+  function run() {
+    runBtn.disabled = true;
+    copyBtn.disabled = true;
+    var counts = { ol: 0, local: 0, g13: 0, g10: 0, g13s: 0, g10s: 0,
+                   olsearch: 0, gbsearch: 0, none: 0 };
+    var missing = [];
+    var done = 0;
+    prog.value = 0;
+
+    /* Sequential rather than parallel: 100 books times up to four
+       requests is enough to get rate-limited if fired all at once. */
+    var chain = Promise.resolve();
+    books.forEach(function (b, n) {
+      chain = chain.then(function () {
+        return resolve(b).then(function (res) {
+          counts[res.via]++;
+          if (res.via === 'none') missing.push((n + 1) + '. ' + b.author + ' — ' + b.title +
+            '  [' + (b.isbn || 'no isbn') + ']  ' + (WHY[res.why] || ''));
+
+          var tr = document.getElementById('r' + n);
+          var cell = tr.querySelector('.src');
+          cell.className = 'src ' + (res.via === 'none' ? 'bad' : 'ok');
+          cell.textContent = LABEL[res.via] + (res.via === 'none' && res.why ? ' — ' + WHY[res.why] : '');
+          if (res.via === 'none') tr.classList.add('bad');
+          if (res.url) tr.querySelector('.thumb').src = res.url;
+
+          done++;
+          prog.value = done;
+          tally.innerHTML =
+            '<span>checked <b>' + done + '</b>/' + books.length + '</span>' +
+            '<span>Open Library by ISBN <b>' + counts.ol + '</b></span>' +
+            '<span>local file <b>' + counts.local + '</b></span>' +
+            '<span>Google Books by ISBN <b>' + (counts.g13 + counts.g10 + counts.g13s + counts.g10s) + '</b></span>' +
+            '<span>by title search <b>' + (counts.olsearch + counts.gbsearch) + '</b></span>' +
+            '<span>still missing <b>' + counts.none + '</b></span>';
+          out.value = missing.join('\n');
+        });
+      });
+    });
+
+    chain.then(function () {
+      runBtn.disabled = false;
+      runBtn.textContent = 'Run again';
+      copyBtn.disabled = missing.length === 0;
+      if (!missing.length) out.value = 'Every book resolved to a cover.';
+    });
+  }
+
+  copyBtn.addEventListener('click', function () {
+    out.select();
+    navigator.clipboard.writeText(out.value).then(function () {
+      copyBtn.textContent = 'Copied';
+      setTimeout(function () { copyBtn.textContent = 'Copy the missing list'; }, 1500);
+    }, function () { /* selection is the fallback */ });
+  });
+
+  runBtn.addEventListener('click', run);
+  prog.max = books.length;
+  render();
+})();
+</script>
+</body>
+</html>
