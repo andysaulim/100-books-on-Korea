@@ -30,6 +30,7 @@ Needs nothing but Python and a network that can reach the cover hosts.
 
 import argparse
 import hashlib
+import io
 import json
 import pathlib
 import re
@@ -174,6 +175,49 @@ def learn_placeholders():
     return seen
 
 
+# A jacket is designed to be seen across a room: it carries either colour
+# or large, dark type. A scanned title page, a page of body text, and
+# Google's "image not available" are all the same thing by this measure —
+# a white field with a little fine print, which all but disappears once
+# the picture is reduced to thumbnail size. Measured across the hundred
+# covers on the shelf, the five that were not jackets all scored under
+# 0.01 and 0.01 here; the closest real jacket scored 0.013 and 0.134.
+FLAT_COLOUR = 0.01
+FLAT_INK = 0.03
+
+
+def too_blank(blob):
+    """Why this image is a page rather than a jacket, or None if it is one.
+
+    Returns None when Pillow is missing: the test is skipped rather than
+    guessed at, and the run prints a warning once.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    try:
+        im = Image.open(io.BytesIO(blob)).convert("RGB")
+        im.thumbnail((120, 120))
+        px = list(im.getdata())
+    except Exception:
+        return None
+    if not px:
+        return None
+    colour = ink = 0
+    for r, g, b in px:
+        if max(r, g, b) - min(r, g, b) > 26:
+            colour += 1
+        if (r * 299 + g * 587 + b * 114) // 1000 < 160:
+            ink += 1
+    colour /= len(px)
+    ink /= len(px)
+    if colour < FLAT_COLOUR and ink < FLAT_INK:
+        return (f"almost blank ({colour:.3f} colour, {ink:.3f} ink) — a title "
+                "page, an inside page, or a 'not available' placeholder")
+    return None
+
+
 def usable(blob, placeholders, min_width=MIN_WIDTH):
     """(ok, why-not) for a downloaded image."""
     if not blob:
@@ -192,6 +236,9 @@ def usable(blob, placeholders, min_width=MIN_WIDTH):
     if not RATIO[0] <= ratio <= RATIO[1]:
         shape = "landscape, likely an Open Graph card" if ratio > 1 else "the wrong shape"
         return False, f"{w}x{h} ({ratio:.2f}), {shape}"
+    blank = too_blank(blob)
+    if blank:
+        return False, blank
     return True, f"{w}x{h}, {len(blob) // 1024}KB"
 
 
@@ -418,6 +465,13 @@ def main():
     books = json.loads(data.read_text(encoding="utf-8"))
     assign_slugs(books)
     COVERS.mkdir(parents=True, exist_ok=True)
+
+    try:
+        import PIL  # noqa: F401
+    except ImportError:
+        print("WARNING: Pillow is missing, so title pages and 'not available'\n"
+              "         placeholders cannot be told from jackets. Install it:\n"
+              "           python3 -m pip install Pillow", flush=True)
 
     print("learning Google's placeholder so it can be rejected...", flush=True)
     placeholders = learn_placeholders()
