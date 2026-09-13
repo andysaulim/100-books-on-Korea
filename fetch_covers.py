@@ -465,6 +465,14 @@ def main():
             by_digest.setdefault(hashlib.sha256(f.read_bytes()).hexdigest(), []).append(book)
 
     repeated = {d: bs for d, bs in by_digest.items() if len(bs) > 1}
+
+    # A repeated image is a placeholder nobody told us about — Google's
+    # zoom=0 rendering for an artless volume turned out to be one, and it is
+    # not the picture a nonsense ISBN returns, so the learned list missed it.
+    # Worse, accepting it ended the chain, so Amazon and the searches below
+    # were never reached. Teach it now and give those books another go.
+    placeholders |= set(repeated)
+
     for digest, shared in repeated.items():
         print(f"\n  the same image landed for {len(shared)} books; treating it as a placeholder:")
         for book in shared:
@@ -476,6 +484,30 @@ def main():
             if label not in missing:
                 missing.append(label)
             got = max(0, got - 1)
+
+    if repeated:
+        retry = [b for b in books if not b.get("cover")]
+        print(f"\n  trying {len(retry)} again, now that those placeholders are known")
+        for book in retry:
+            for why, fetch, min_w in fetcher.candidates(book):
+                blob = fetch()
+                ok, note = usable(blob, placeholders, min_w)
+                if not ok:
+                    print(f"    {bare_title(book['title'])[:36]:36} {why}: {note}")
+                    continue
+                path = COVERS / (slug(book) + extension(blob))
+                path.write_bytes(blob)
+                smaller = shrink(path)
+                if smaller:
+                    path, before, after = smaller
+                    note += f", resized, {before // 1024}KB -> {after // 1024}KB"
+                book["cover"] = f"assets/covers/{path.name}"
+                label = f"{book['author']} — {bare_title(book['title'])}"
+                if label in missing:
+                    missing.remove(label)
+                got += 1
+                print(f"    {bare_title(book['title'])[:36]:36} {why} -> {path.name} ({note})")
+                break
 
     (ROOT / "books.json").write_text(
         json.dumps(books, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
