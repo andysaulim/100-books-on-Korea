@@ -128,7 +128,7 @@
     "publisher": "Bloomsbury",
     "source": "bloomsbury.com",
     "isbn": "9781639732043",
-    "cover": null,
+    "cover": "assets/covers/i-want-to-die-but-i-want-to-eat-tteokbokki.jpg",
     "blurb": "Baek transcribes her sessions with a psychiatrist over treatment for dysthymia, leaving in the circling and the self-doubt. Its enormous popularity in Korea and abroad says something about how much room there was for a book that treats low-grade despair as ordinary."
   },
   {
@@ -152,7 +152,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503627635",
-    "cover": null,
+    "cover": "assets/covers/guns-guerillas-and-the-great-leader.jpg",
     "blurb": "Young recovers North Korea's forgotten career as a Third World patron, sending arms, instructors and construction crews across Africa, the Middle East and Latin America. It reframes a state usually described as hermetic as an ambitious, if overreaching, global actor."
   },
   {
@@ -224,7 +224,7 @@
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780812978964",
-    "cover": null,
+    "cover": "assets/covers/the-korean-war.jpg",
     "blurb": "Cumings's short revisionist account, more concerned with how the war is remembered and what it did to civilians than with battlefield chronology. Read alongside a conventional military history rather than instead of one."
   },
   {
@@ -248,7 +248,7 @@
     "publisher": "Harvard University Press",
     "source": "hup.harvard.edu",
     "isbn": "9780674072312",
-    "cover": null,
+    "cover": "assets/covers/the-park-chung-hee-era.jpg",
     "blurb": "A large edited volume on the years that made the South Korean economy and its dictatorship at once. Chapters disagree with each other, which is the point — it is the best single place to see the scholarly argument over Park laid out."
   },
   {
@@ -308,7 +308,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503601680",
-    "cover": null,
+    "cover": "assets/covers/figuring-korean-futures.jpg",
     "blurb": "Zur shows how writing for children became a place where colonial and postcolonial Korea worked out what kind of nation it wanted. The child, she argues, was the figure through which modernity was imagined and disciplined."
   },
   {
@@ -380,7 +380,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503629844",
-    "cover": null,
+    "cover": "assets/covers/korea.jpg",
     "blurb": "Park's accessible single-volume history from antiquity to the present, unusually attentive to daily life, ethnic minorities, LGBTQ history and the North. A good modern alternative to the older survey texts."
   },
   {
@@ -452,7 +452,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781538177815",
-    "cover": null,
+    "cover": "assets/covers/south-korea-s-democracy-in-crisis.jpg",
     "blurb": "An edited volume on polarisation, populism and illiberal drift in a democracy usually held up as a success story. Prescient given what followed, and unsparing about both camps."
   },
   {
@@ -512,7 +512,7 @@
     "publisher": "Bloomsbury",
     "source": "bloomsbury.com",
     "isbn": "9781639732425",
-    "cover": null,
+    "cover": "assets/covers/welcome-to-the-hyunam-dong-bookshop.jpg",
     "blurb": "A gentle novel about a woman who quits her career to open a neighbourhood bookshop and the people who drift into it. The flagship of Korea's healing-fiction wave, and a deliberate rest from the rest of this shelf."
   },
   {
@@ -548,7 +548,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9780804797627",
-    "cover": null,
+    "cover": "assets/covers/contested-embrace.jpg",
     "blurb": "Kim asks who counts as Korean, following colonial-era migrants to Japan and China and the two postwar states' competing claims on them. A sharp study of citizenship as something states grant, withhold and weaponise."
   },
   {
@@ -596,7 +596,7 @@
     "publisher": "Bloomsbury",
     "source": "bloomsbury.com",
     "isbn": "9781350568426",
-    "cover": null,
+    "cover": "assets/covers/witness-to-north-korea.jpg",
     "blurb": "Sauvage ran the UN's operation in Pyongyang as resident coordinator, which meant negotiating access, moving aid and arguing with officials for three years. The result is one of the few accounts written from inside the machinery rather than from a tour bus or a defector's memory, and it is unusually candid about what aid can and cannot reach."
   },
   {
@@ -668,7 +668,7 @@
     "publisher": "HarperCollins",
     "source": "harperacademic.com",
     "isbn": "9780544705272",
-    "cover": null,
+    "cover": "assets/covers/under-the-same-sky.jpg",
     "blurb": "Kim's memoir of homelessness and hunger as a boy during the famine, escape into China, and resettlement in the United States. Unsentimental about how long the aftermath lasts."
   },
   {
@@ -740,7 +740,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503647978",
-    "cover": null,
+    "cover": "assets/covers/everything-but-the-bomb.jpg",
     "blurb": "South Korea could build a bomb and has repeatedly chosen not to, while carefully keeping the option open. Kim draws on Korean and English archives and interviews with Seoul's security establishment to explain that posture as deliberate hedging rather than indecision: the latency is the policy, and it is aimed as much at Washington's reliability as at Pyongyang's arsenal. The sharpest account of the question every debate about extended deterrence now runs into."
   },
   {
@@ -776,7 +776,7 @@
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9780306802676",
-    "cover": null,
+    "cover": "assets/covers/the-korean-war.jpg",
     "blurb": "Ridgway commanded the Eighth Army after the Chinese intervention and then all UN forces. His account is a commander's own assessment of how a collapsing front was stabilised, with the judgements of someone who had to make them."
   },
   {
@@ -788,7 +788,7 @@
     "publisher": "Simon & Schuster",
     "source": "simonandschuster.com",
     "isbn": "9781501131905",
-    "cover": null,
+    "cover": "assets/covers/the-korean-war.jpg",
     "blurb": "Hastings's one-volume narrative history, drawing on interviews with veterans from several of the combatant nations. The conventional starting point for the military and diplomatic story."
   },
   {
@@ -800,7 +800,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503631878",
-    "cover": null,
+    "cover": "assets/covers/supercorporate.jpg",
     "blurb": "Prentice's ethnography inside a Korean conglomerate watches managers try to flatten hierarchy without losing status. A rare close-up of the white-collar world that so much Korean social anxiety is organised around."
   },
   {
@@ -860,7 +860,7 @@
     "publisher": "Harvard University Press",
     "source": "hup.harvard.edu",
     "isbn": "9780674293823",
-    "cover": null,
+    "cover": "assets/covers/cornerstone-of-the-nation.jpg",
     "blurb": "Kwon works from newly declassified South Korean records to show that the arms build-up of the 1970s was not a sideline to the economic miracle but its engine. Park Chung Hee's drive to build weapons at home, launched as Nixon drew down American troops, pulled the chaebol into heavy and chemical industry and fused military and civilian production so completely that the two cannot be told apart. The result is a rereading of the developmental state in which security, not export policy, sets the agenda."
   },
   {
@@ -872,7 +872,7 @@
     "publisher": "Oxford University Press",
     "source": "global.oup.com",
     "isbn": "9780197764930",
-    "cover": null,
+    "cover": "assets/covers/shrimp-to-whale.jpg",
     "blurb": "Pacheco Pardo's brisk narrative of how a ruined country became a cultural and economic power. The most approachable recent one-volume account of the South Korean ascent."
   },
   {
@@ -884,7 +884,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781931368629",
-    "cover": null,
+    "cover": "assets/covers/patterns-of-impunity.jpg",
     "blurb": "King served as US special envoy for North Korean human rights and writes from inside the job. Valuable for what it shows about the machinery, and the limits, of human rights diplomacy."
   },
   {
@@ -944,7 +944,7 @@
     "publisher": "Cambridge University Press",
     "source": "cambridge.org",
     "isbn": "9781009197281",
-    "cover": null,
+    "cover": "assets/covers/politics-of-the-north-korean-diaspora.jpg",
     "blurb": "Greitens traces the emergence of a globally dispersed North Korean émigré population and argues the home regime's authoritarian character shapes diaspora politics far from its borders. Short, and conceptually sharp."
   },
   {
@@ -968,7 +968,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503634459",
-    "cover": null,
+    "cover": "assets/covers/hinge-points.jpg",
     "blurb": "Hecker, the nuclear scientist repeatedly invited to inspect North Korean facilities, walks through what he saw and the decision points where he believes the programme could have been slowed. Uniquely authoritative on the technical side, and pointed about American choices."
   },
   {
@@ -1052,7 +1052,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503640870",
-    "cover": null,
+    "cover": "assets/covers/millennial-north-korea.jpg",
     "blurb": "Kim reads North Korean state media against interviews with defectors to examine the generation raised after the famine, on smuggled dramas and market money. Argues that generation is where the state's grip is loosest."
   },
   {
@@ -1184,7 +1184,7 @@
     "publisher": "Yale University Press",
     "source": "yalebooks.yale.edu",
     "isbn": "9780300278705",
-    "cover": null,
+    "cover": "assets/covers/korea.jpg",
     "blurb": "Cha and Pacheco Pardo write the two Koreas as one story rather than two, from division to the present. The most current single-volume history covering both states together."
   },
   {
