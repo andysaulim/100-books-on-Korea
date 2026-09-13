@@ -134,6 +134,17 @@ def google_id(vol, zoom):
             f"?id={urllib.parse.quote(vol)}&printsec=frontcover&img=1&zoom={zoom}")
 
 
+def amazon_cover(i10, size="LZZZZZZZ"):
+    """Amazon's cover CDN, keyed on ISBN-10.
+
+    Reached last but it matters: its academic coverage is far better than
+    Open Library's or Google's, which is where the Stanford and Columbia
+    monographs on this shelf kept falling through. A miss returns a 1x1
+    GIF, which the size guard already rejects.
+    """
+    return f"https://m.media-amazon.com/images/P/{i10}.01.{size}.jpg"
+
+
 def learn_placeholders():
     """Google's "image not available" picture, fetched on purpose.
 
@@ -264,6 +275,13 @@ class Fetcher:
             for i in [isbn, isbn10(isbn)]:
                 if i:
                     yield (f"Google, ISBN {i}", lambda i=i: get(google_isbn(i, 1)), 100)
+
+            i10 = isbn10(isbn)
+            if i10:
+                for size in ("LZZZZZZZ", "MZZZZZZZ"):
+                    yield (f"Amazon, ISBN {i10} ({size})",
+                           lambda i10=i10, size=size: get(amazon_cover(i10, size)),
+                           MIN_WIDTH if size == "LZZZZZZZ" else 120)
 
         yield from self.by_search(book)
 
