@@ -246,8 +246,16 @@ def too_blank(blob):
     return None
 
 
-def usable(blob, placeholders, min_width=MIN_WIDTH):
-    """(ok, why-not) for a downloaded image."""
+def usable(blob, placeholders, min_width=MIN_WIDTH, shape=True):
+    """(ok, why-not) for a downloaded image.
+
+    shape=False drops the two rules that judge what the picture looks
+    like — its proportions and how much is on it. A cover chosen by hand
+    is authoritative, and real jackets do fall outside those bounds:
+    Lindsey Miller's is a landscape photo book, almost square at 0.90.
+    The rest still apply, so a pinned URL that 404s or returns a
+    placeholder is still refused rather than saved.
+    """
     if not blob:
         return False, "no response"
     if hashlib.sha256(blob).hexdigest() in placeholders:
@@ -260,13 +268,14 @@ def usable(blob, placeholders, min_width=MIN_WIDTH):
     w, h = size
     if w < min_width or h < 50:
         return False, f"{w}x{h}, too small"
-    ratio = w / h
-    if not RATIO[0] <= ratio <= RATIO[1]:
-        shape = "landscape, likely an Open Graph card" if ratio > 1 else "the wrong shape"
-        return False, f"{w}x{h} ({ratio:.2f}), {shape}"
-    blank = too_blank(blob)
-    if blank:
-        return False, blank
+    if shape:
+        ratio = w / h
+        if not RATIO[0] <= ratio <= RATIO[1]:
+            how = "landscape, likely an Open Graph card" if ratio > 1 else "the wrong shape"
+            return False, f"{w}x{h} ({ratio:.2f}), {how}"
+        blank = too_blank(blob)
+        if blank:
+            return False, blank
     return True, f"{w}x{h}, {len(blob) // 1024}KB"
 
 
@@ -346,24 +355,24 @@ class Fetcher:
         # that URL fails the usual rules.
         pinned = book.get("cover_url")
         if pinned:
-            yield ("pinned by hand", lambda u=pinned: get(u), 100)
+            yield ("pinned by hand", lambda u=pinned: get(u), 100, False)
 
         # The publisher's own page first: it is the jacket of the edition
         # this entry actually links to, which no ISBN lookup can promise.
         og = publisher_cover(book.get("url"))
         if og:
             yield (f"publisher page ({book.get('source', 'og:image')})",
-                   lambda og=og: get(og), MIN_WIDTH)
+                   lambda og=og: get(og), MIN_WIDTH, True)
 
         isbn = book.get("isbn")
         if isbn:
             yield ("Open Library, ISBN",
                    lambda: self.open_library(
                        f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg?default=false"),
-                   MIN_WIDTH)
+                   MIN_WIDTH, True)
             for i in [isbn, isbn10(isbn)]:
                 if i:
-                    yield (f"Google, ISBN {i}, large", lambda i=i: get(google_isbn(i, 0)), MIN_WIDTH)
+                    yield (f"Google, ISBN {i}, large", lambda i=i: get(google_isbn(i, 0)), MIN_WIDTH, True)
 
             # Amazon's large rendering comes before Google's small one. Both
             # are real jackets, but Google's zoom=1 is 128px and the shelf
@@ -372,15 +381,15 @@ class Fetcher:
             i10 = isbn10(isbn)
             if i10:
                 yield (f"Amazon, ISBN {i10} (LZZZZZZZ)",
-                       lambda i10=i10: get(amazon_cover(i10, "LZZZZZZZ")), MIN_WIDTH)
+                       lambda i10=i10: get(amazon_cover(i10, "LZZZZZZZ")), MIN_WIDTH, True)
 
             for i in [isbn, isbn10(isbn)]:
                 if i:
-                    yield (f"Google, ISBN {i}", lambda i=i: get(google_isbn(i, 1)), 100)
+                    yield (f"Google, ISBN {i}", lambda i=i: get(google_isbn(i, 1)), 100, True)
 
             if i10:
                 yield (f"Amazon, ISBN {i10} (MZZZZZZZ)",
-                       lambda i10=i10: get(amazon_cover(i10, "MZZZZZZZ")), 120)
+                       lambda i10=i10: get(amazon_cover(i10, "MZZZZZZZ")), 120, True)
 
         yield from self.by_search(book)
 
@@ -403,7 +412,7 @@ class Fetcher:
                     # by cover id, which Open Library does not rate limit
                     yield (f"Open Library, search (cover {cid})",
                            lambda cid=cid: get(f"https://covers.openlibrary.org/b/id/{cid}-L.jpg?default=false"),
-                           MIN_WIDTH)
+                           MIN_WIDTH, True)
                     break
 
         q = f'intitle:"{bare_title(book["title"])}" inauthor:"{author}"'
@@ -419,9 +428,9 @@ class Fetcher:
                 if it.get("id") and titles_agree(book["title"], info.get("title")):
                     vol = it["id"]
                     yield (f"Google, search ({vol}), large",
-                           lambda vol=vol: get(google_id(vol, 0)), MIN_WIDTH)
+                           lambda vol=vol: get(google_id(vol, 0)), MIN_WIDTH, True)
                     yield (f"Google, search ({vol})",
-                           lambda vol=vol: get(google_id(vol, 1)), 100)
+                           lambda vol=vol: get(google_id(vol, 1)), 100, True)
                     break
 
 
@@ -575,9 +584,9 @@ def main():
         print(f"[{n:3}/{len(books)}] {label[:64]}", flush=True)
 
         saved = None
-        for why, fetch, min_w in fetcher.candidates(book):
+        for why, fetch, min_w, shape in fetcher.candidates(book):
             blob = fetch()
-            ok, note = usable(blob, placeholders, min_w)
+            ok, note = usable(blob, placeholders, min_w, shape)
             if ok:
                 kept_file = save_cover(book, blob, refused)
                 if not kept_file:
@@ -624,9 +633,9 @@ def main():
         for book in books:
             if book.get("cover"):
                 continue
-            for why, fetch, min_w in fetcher.candidates(book):
+            for why, fetch, min_w, shape in fetcher.candidates(book):
                 blob = fetch()
-                ok, note = usable(blob, placeholders, min_w)
+                ok, note = usable(blob, placeholders, min_w, shape)
                 if not ok:
                     continue
                 kept_file = save_cover(book, blob, refused)
@@ -660,9 +669,9 @@ def main():
         if not size or size[0] >= UPGRADE_BELOW:
             continue
         have = size[0]
-        for why, fetch, _min_w in fetcher.candidates(book):
+        for why, fetch, _min_w, shape in fetcher.candidates(book):
             blob = fetch()
-            ok, note = usable(blob, placeholders, UPGRADE_BELOW)
+            ok, note = usable(blob, placeholders, UPGRADE_BELOW, shape)
             if not ok:
                 continue
             bigger = image_size(blob)
@@ -751,9 +760,9 @@ def main():
         retry = [b for b in books if not b.get("cover")]
         print(f"\n  round {round_no}: retrying {len(retry)} with {len(placeholders)} placeholders known")
         for book in retry:
-            for why, fetch, min_w in fetcher.candidates(book):
+            for why, fetch, min_w, shape in fetcher.candidates(book):
                 blob = fetch()
-                ok, note = usable(blob, placeholders, min_w)
+                ok, note = usable(blob, placeholders, min_w, shape)
                 if not ok:
                     continue
                 kept_file = save_cover(book, blob, refused)
