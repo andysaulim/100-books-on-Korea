@@ -12,6 +12,20 @@ name: Fetch covers
 # by identifier, so fetch_covers.py deliberately spaces those out.
 
 on:
+  # workflow_dispatch alone is not enough: GitHub only offers it once the
+  # workflow exists on the repository's DEFAULT branch, which here is the
+  # pull request's base. Rather than push to a branch I was not asked to
+  # touch, the run is started by a push to this branch instead.
+  #
+  # This cannot loop. The job's own commit is made with GITHUB_TOKEN, and
+  # GitHub does not re-trigger workflows on those pushes; the paths filter
+  # below would not match its files in any case.
+  push:
+    branches:
+      - claude/tender-carson-ljopjj
+    paths:
+      - ".github/workflows/fetch-covers.yml"
+      - "fetch_covers.py"
   workflow_dispatch:
     inputs:
       force:
@@ -40,7 +54,7 @@ jobs:
         id: fetch
         run: |
           set -o pipefail
-          python3 fetch_covers.py ${{ inputs.force && '--force' || '' }} 2>&1 | tee fetch.log
+          python3 fetch_covers.py ${{ github.event.inputs.force == 'true' && '--force' || '' }} 2>&1 | tee fetch.log
         # fetch_covers.py exits 1 when any book ends with no cover, which is
         # information rather than a failure — the log says which ones.
         continue-on-error: true
