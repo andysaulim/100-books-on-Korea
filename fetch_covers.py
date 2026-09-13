@@ -454,46 +454,47 @@ def main():
     # Two books do not share a jacket. Any image that landed for more than
     # one of them is a placeholder, whatever it looks like and whichever
     # host served it — a guard that needs no prior knowledge of the picture,
-    # which is what the digest list alone lacked.
-    by_digest = {}
-    for book in books:
-        cover = book.get("cover") or ""
-        if not cover.startswith("assets/covers/"):
-            continue
-        f = ROOT / cover
-        if f.is_file():
-            by_digest.setdefault(hashlib.sha256(f.read_bytes()).hexdigest(), []).append(book)
+    # which is what a list of known digests can never have.
+    #
+    # This has to repeat. Round one caught Google's zoom=0 filler; the retry
+    # then walked further down the chain and came back with a *different*
+    # repeated image for the same 17 books. Detecting, learning and retrying
+    # once is not enough, so it runs until a round finds no repeats.
+    for round_no in range(1, 6):
+        by_digest = {}
+        for book in books:
+            cover = book.get("cover") or ""
+            if not cover.startswith("assets/covers/"):
+                continue
+            f = ROOT / cover
+            if f.is_file():
+                by_digest.setdefault(hashlib.sha256(f.read_bytes()).hexdigest(), []).append(book)
 
-    repeated = {d: bs for d, bs in by_digest.items() if len(bs) > 1}
+        repeated = {d: bs for d, bs in by_digest.items() if len(bs) > 1}
+        if not repeated:
+            if round_no > 1:
+                print(f"\n  round {round_no}: every cover is unique")
+            break
 
-    # A repeated image is a placeholder nobody told us about — Google's
-    # zoom=0 rendering for an artless volume turned out to be one, and it is
-    # not the picture a nonsense ISBN returns, so the learned list missed it.
-    # Worse, accepting it ended the chain, so Amazon and the searches below
-    # were never reached. Teach it now and give those books another go.
-    placeholders |= set(repeated)
+        placeholders |= set(repeated)
+        for digest, shared in repeated.items():
+            print(f"\n  round {round_no}: one image landed for {len(shared)} books; it is a placeholder:")
+            for book in shared:
+                print(f"    - {book['author']} — {bare_title(book['title'])[:44]}")
+                (ROOT / book["cover"]).unlink(missing_ok=True)
+                book["cover"] = None
+                label = f"{book['author']} — {bare_title(book['title'])}"
+                if label not in missing:
+                    missing.append(label)
+                got = max(0, got - 1)
 
-    for digest, shared in repeated.items():
-        print(f"\n  the same image landed for {len(shared)} books; treating it as a placeholder:")
-        for book in shared:
-            f = ROOT / book["cover"]
-            print(f"    - {book['author']} — {bare_title(book['title'])[:44]}")
-            f.unlink(missing_ok=True)
-            book["cover"] = None
-            label = f"{book['author']} — {bare_title(book['title'])}"
-            if label not in missing:
-                missing.append(label)
-            got = max(0, got - 1)
-
-    if repeated:
         retry = [b for b in books if not b.get("cover")]
-        print(f"\n  trying {len(retry)} again, now that those placeholders are known")
+        print(f"\n  round {round_no}: retrying {len(retry)} with {len(placeholders)} placeholders known")
         for book in retry:
             for why, fetch, min_w in fetcher.candidates(book):
                 blob = fetch()
                 ok, note = usable(blob, placeholders, min_w)
                 if not ok:
-                    print(f"    {bare_title(book['title'])[:36]:36} {why}: {note}")
                     continue
                 path = COVERS / (slug(book) + extension(blob))
                 path.write_bytes(blob)
@@ -506,7 +507,7 @@ def main():
                 if label in missing:
                     missing.remove(label)
                 got += 1
-                print(f"    {bare_title(book['title'])[:36]:36} {why} -> {path.name} ({note})")
+                print(f"    {bare_title(book['title'])[:34]:34} {why} -> {note}")
                 break
 
     (ROOT / "books.json").write_text(
