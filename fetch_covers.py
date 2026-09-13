@@ -47,7 +47,13 @@ UA = {"User-Agent": "100-books-on-korea/1.0 (personal reading list; contact via 
 
 MIN_WIDTH = 200          # a book is drawn 188px wide; anything less is upscaled
 MAX_WIDTH = 500          # ...and anything much wider is bytes nobody sees
+
+# A jacket is portrait. Measured across the covers that did come back right,
+# they sit between 0.60 and 0.75 wide-to-tall. What sat outside that were
+# publisher Open Graph cards at 1200x630 (ratio 1.91) and square logos —
+# twenty-two of them, each a real image of the wrong thing entirely.
 MIN_BYTES = 6000         # placeholders and spacers are tiny
+RATIO = (0.50, 0.85)     # wide-to-tall bounds for something shaped like a book
 OL_SPACING = 3.1         # 100 requests / 5 minutes, with room to spare
 
 
@@ -182,6 +188,10 @@ def usable(blob, placeholders, min_width=MIN_WIDTH):
     w, h = size
     if w < min_width or h < 50:
         return False, f"{w}x{h}, too small"
+    ratio = w / h
+    if not RATIO[0] <= ratio <= RATIO[1]:
+        shape = "landscape, likely an Open Graph card" if ratio > 1 else "the wrong shape"
+        return False, f"{w}x{h} ({ratio:.2f}), {shape}"
     return True, f"{w}x{h}, {len(blob) // 1024}KB"
 
 
