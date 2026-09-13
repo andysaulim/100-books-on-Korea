@@ -233,7 +233,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780812978964",
-    "cover": "assets/covers/the-korean-war.jpg",
+    "cover": "",
     "blurb": "Cumings's short revisionist account, more concerned with how the war is remembered and what it did to civilians than with battlefield chronology. Read alongside a conventional military history rather than instead of one."
   },
   {
@@ -785,7 +785,7 @@ window.BOOKS = [
     "publisher": "Hachette",
     "source": "hachettebookgroup.com",
     "isbn": "9780306802676",
-    "cover": "assets/covers/the-korean-war.jpg",
+    "cover": "assets/covers/the-korean-war-ridgway.jpg",
     "blurb": "Ridgway commanded the Eighth Army after the Chinese intervention and then all UN forces. His account is a commander's own assessment of how a collapsing front was stabilised, with the judgements of someone who had to make them."
   },
   {
@@ -1193,7 +1193,7 @@ window.BOOKS = [
     "publisher": "Yale University Press",
     "source": "yalebooks.yale.edu",
     "isbn": "9780300278705",
-    "cover": "assets/covers/korea.jpg",
+    "cover": "assets/covers/korea-a-new-history-of-south-and-north.jpg",
     "blurb": "Cha and Pacheco Pardo write the two Koreas as one story rather than two, from division to the present. The most current single-volume history covering both states together."
   },
   {

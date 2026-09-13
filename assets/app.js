@@ -268,24 +268,58 @@
     return step();
   }
 
-  function loadCover(face, b) {
-    var srcs = coverSources(b);
-    if (!srcs.length) { face.appendChild(fallbackNode(b)); b._noCover = true; return; }
-
+  function coverImg() {
     var img = document.createElement('img');
     img.alt = '';
     img.loading = 'lazy';
     img.decoding = 'async';
     /* Google's cover endpoint can refuse on referrer. */
     img.referrerPolicy = 'no-referrer';
+    return img;
+  }
+
+  /* Filtering, sorting and searching all rebuild the shelf from scratch,
+     which throws away every tile — including the covers still in flight.
+     Their load and error events never arrive, so the queue slot each one
+     holds is never given back: six abandoned books and the shelf is
+     wedged shut, every later render showing blank jackets. Outstanding
+     loads are therefore released when the shelf is rebuilt, and whatever
+     a book has already settled on is remembered so the next render draws
+     it straight away and asks the network for nothing. */
+  var loading = [];
+
+  function abandonLoads() {
+    var was = loading;
+    loading = [];
+    for (var i = 0; i < was.length; i++) was[i]();
+  }
+
+  function loadCover(face, b) {
+    if (b._src) { var known = coverImg(); known.src = b._src; face.appendChild(known); return; }
+    if (b._noCover) { face.appendChild(fallbackNode(b)); return; }
+
+    var srcs = coverSources(b);
+    if (!srcs.length) { face.appendChild(fallbackNode(b)); b._noCover = true; return; }
+
+    var img = coverImg();
 
     var i = 0;
     var searched = false;
     var cur = null;
     var release = null;
+    var live = true;
 
     function settle() {
+      var at = loading.indexOf(abandon);
+      if (at >= 0) loading.splice(at, 1);
       if (release) { var r = release; release = null; r(); }
+    }
+
+    /* The tile is gone; hand the slot back but leave the book unjudged,
+       so the render that brings it back starts its chain over. */
+    function abandon() {
+      live = false;
+      settle();
     }
 
     function giveUp() {
@@ -296,10 +330,12 @@
     }
 
     function next() {
+      if (!live) return;
       if (i < srcs.length) { cur = srcs[i++]; img.src = cur.url; return; }
       if (searched) { giveUp(); return; }
       searched = true;
       searchCovers(b).then(function (found) {
+        if (!live) return;
         if (found && found.length) { srcs = srcs.concat(found); next(); }
         else giveUp();
       });
@@ -307,12 +343,13 @@
 
     img.addEventListener('error', next);
     img.addEventListener('load', function () {
+      if (!live) return;
       /* A source with no art for an ISBN may answer 200 with a 1x1 or a
          "no cover" placeholder rather than 404, so judge it by size. The
          bar starts at the width a 188px book deserves and drops to the
          bare guard once only the small renderings are left. */
       if (img.naturalWidth < cur.min || img.naturalHeight < ANY) next();
-      else { b._noCover = false; settle(); }
+      else { b._noCover = false; b._src = cur.url; settle(); }
     });
 
     face.appendChild(img);
@@ -320,6 +357,7 @@
     /* One slot is held from the first attempt until this book settles,
        either with art or with its stand-in, so the queue measures books
        in flight rather than requests. */
+    loading.push(abandon);
     queueLoad(function (done) {
       release = done;
       next();
@@ -1023,6 +1061,8 @@
 
   function render() {
     var list = visible();
+
+    abandonLoads();
 
     var frag = document.createDocumentFragment();
     list.forEach(function (b) { frag.appendChild(tileNode(b)); });

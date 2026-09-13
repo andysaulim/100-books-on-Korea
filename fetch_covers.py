@@ -365,9 +365,35 @@ def shrink(path):
         return None
 
 
+_SLUGS = {}
+
+
+def assign_slugs(books):
+    """Work out one filename per book, before anything is downloaded.
+
+    The name comes from the title with its subtitle dropped, which reads well
+    but is not unique: Cumings's "The Korean War: A History" and Ridgway's
+    "The Korean War" both reduce to the-korean-war, so whichever was fetched
+    second overwrote the first and one book then showed the other's jacket.
+    When a name is claimed by more than one book, every one of them falls
+    back to its id instead, which is unique by construction.
+    """
+    _SLUGS.clear()
+    claimed = {}
+    for b in books:
+        base = re.sub(r"[^a-z0-9]+", "-", bare_title(b["title"]).lower()).strip("-")[:48]
+        claimed.setdefault(base, []).append(b)
+    for base, group in claimed.items():
+        for b in group:
+            _SLUGS[b["id"]] = base if base and len(group) == 1 else ident(b)
+
+
+def ident(book):
+    return re.sub(r"[^a-z0-9]+", "-", book["id"].lower()).strip("-")[:48]
+
+
 def slug(book):
-    base = re.sub(r"[^a-z0-9]+", "-", bare_title(book["title"]).lower()).strip("-")
-    return base[:48] or book["id"][:48]
+    return _SLUGS.get(book["id"]) or ident(book)
 
 
 def main():
@@ -390,6 +416,7 @@ def main():
         )
 
     books = json.loads(data.read_text(encoding="utf-8"))
+    assign_slugs(books)
     COVERS.mkdir(parents=True, exist_ok=True)
 
     print("learning Google's placeholder so it can be rejected...", flush=True)

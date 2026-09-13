@@ -89,7 +89,27 @@ def check_data_in_step():
     if from_js != from_json:
         sys.exit("build: books.js and books.json disagree — regenerate books.js "
                  f"({len(from_js)} vs {len(from_json)} books)")
+    check_covers_unshared(from_json)
     return len(from_json)
+
+
+def check_covers_unshared(books):
+    """No two books may point at the same cover file.
+
+    Cover filenames are derived from the title, and two titles that differ
+    only by subtitle produce the same name — so one download overwrites the
+    other and a book quietly shows its neighbour's jacket. Nothing else
+    catches it: the file is a real, correctly sized, unique image.
+    """
+    seen = {}
+    for b in books:
+        cover = b.get("cover") or ""
+        if not cover.startswith("assets/covers/"):
+            continue
+        if cover in seen:
+            sys.exit(f"build: {cover} is claimed by both '{seen[cover]}' and "
+                     f"'{b['title']}' — one of them is showing the wrong jacket")
+        seen[cover] = b["title"]
 
 
 def guard(js, name):
