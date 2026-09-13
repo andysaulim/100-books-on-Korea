@@ -380,7 +380,7 @@
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503629844",
-    "cover": "assets/covers/korea.jpg",
+    "cover": null,
     "blurb": "Park's accessible single-volume history from antiquity to the present, unusually attentive to daily life, ethnic minorities, LGBTQ history and the North. A good modern alternative to the older survey texts."
   },
   {
@@ -788,7 +788,7 @@
     "publisher": "Simon & Schuster",
     "source": "simonandschuster.com",
     "isbn": "9781501131905",
-    "cover": "assets/covers/the-korean-war.jpg",
+    "cover": null,
     "blurb": "Hastings's one-volume narrative history, drawing on interviews with veterans from several of the combatant nations. The conventional starting point for the military and diplomatic story."
   },
   {
