@@ -48,6 +48,10 @@ UA = {"User-Agent": "100-books-on-korea/1.0 (personal reading list; contact via 
 
 MIN_WIDTH = 200          # a book is drawn 188px wide; anything less is upscaled
 MAX_WIDTH = 500          # ...and anything much wider is bytes nobody sees
+# Late steps in the chain settle for a small jacket rather than come home
+# empty. Anything under this is worth walking the chain again for, to see
+# whether the same cover exists somewhere at full size.
+UPGRADE_BELOW = 300
 
 # A jacket is portrait. Measured across the covers that did come back right,
 # they sit between 0.60 and 0.75 wide-to-tall. What sat outside that were
@@ -329,16 +333,23 @@ class Fetcher:
             for i in [isbn, isbn10(isbn)]:
                 if i:
                     yield (f"Google, ISBN {i}, large", lambda i=i: get(google_isbn(i, 0)), MIN_WIDTH)
+
+            # Amazon's large rendering comes before Google's small one. Both
+            # are real jackets, but Google's zoom=1 is 128px and the shelf
+            # draws covers at 188, so taking it first left a fifth of the
+            # books visibly soft while a 500px jacket sat one step further on.
+            i10 = isbn10(isbn)
+            if i10:
+                yield (f"Amazon, ISBN {i10} (LZZZZZZZ)",
+                       lambda i10=i10: get(amazon_cover(i10, "LZZZZZZZ")), MIN_WIDTH)
+
             for i in [isbn, isbn10(isbn)]:
                 if i:
                     yield (f"Google, ISBN {i}", lambda i=i: get(google_isbn(i, 1)), 100)
 
-            i10 = isbn10(isbn)
             if i10:
-                for size in ("LZZZZZZZ", "MZZZZZZZ"):
-                    yield (f"Amazon, ISBN {i10} ({size})",
-                           lambda i10=i10, size=size: get(amazon_cover(i10, size)),
-                           MIN_WIDTH if size == "LZZZZZZZ" else 120)
+                yield (f"Amazon, ISBN {i10} (MZZZZZZZ)",
+                       lambda i10=i10: get(amazon_cover(i10, "MZZZZZZZ")), 120)
 
         yield from self.by_search(book)
 
@@ -576,6 +587,49 @@ def main():
                 got += 1
                 print(f"    {bare_title(book['title'])[:34]:34} {why} ({note})")
                 break
+
+    # Late steps in the chain accept a small jacket, because a real 128px
+    # cover beats no cover at all. It is still 128px, and the shelf draws
+    # covers at 188, so those books sit on the page visibly soft. Walk the
+    # chain again for them and take anything meaningfully bigger. Nothing
+    # is thrown away first: the file on disk is replaced only once a better
+    # one has arrived and passed every rule.
+    upgraded = 0
+    for book in books:
+        cover = book.get("cover") or ""
+        if not cover.startswith("assets/covers/"):
+            continue
+        f = ROOT / cover
+        if not f.is_file():
+            continue
+        size = image_size(f.read_bytes())
+        if not size or size[0] >= UPGRADE_BELOW:
+            continue
+        have = size[0]
+        for why, fetch, _min_w in fetcher.candidates(book):
+            blob = fetch()
+            ok, note = usable(blob, placeholders, UPGRADE_BELOW)
+            if not ok:
+                continue
+            bigger = image_size(blob)
+            if not bigger or bigger[0] <= have:
+                continue
+            digest = hashlib.sha256(blob).hexdigest()
+            if digest in set(blob_digest.values()):
+                continue          # another book already took this picture
+            blob_digest[book["id"]] = digest
+            f.unlink(missing_ok=True)
+            path = COVERS / (slug(book) + extension(blob))
+            path.write_bytes(blob)
+            smaller = shrink(path)
+            if smaller:
+                path = smaller[0]
+            book["cover"] = f"assets/covers/{path.name}"
+            print(f"  {bare_title(book['title'])[:34]:34} {have}px -> {bigger[0]}px ({why})")
+            upgraded += 1
+            break
+    if upgraded:
+        print(f"  {upgraded} small jackets replaced with larger ones")
 
     # Jackets already on disk from an earlier run are skipped above, so
     # they never pass through shrink(). Sweep them here.
