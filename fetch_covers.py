@@ -449,6 +449,53 @@ def main():
             missing.append(label)
             print("          nothing usable; keeping the typographic stand-in")
 
+    # A cover saved by an earlier run was judged by whatever rules existed
+    # then. When a rule is added — the Open Graph card check was — nothing
+    # re-examines what is already on disk, and the bad ones simply survive
+    # because the book is skipped as "already had". Re-judge them here.
+    rejudged = 0
+    for book in books:
+        cover = book.get("cover") or ""
+        if not cover.startswith("assets/covers/"):
+            continue
+        f = ROOT / cover
+        if not f.is_file():
+            continue
+        ok, note = usable(f.read_bytes(), placeholders, 100)
+        if ok:
+            continue
+        print(f"  dropping {f.name}: {note}")
+        f.unlink(missing_ok=True)
+        book["cover"] = None
+        label = f"{book['author']} — {bare_title(book['title'])}"
+        if label not in missing:
+            missing.append(label)
+        kept = max(0, kept - 1)
+        rejudged += 1
+    if rejudged:
+        print(f"  {rejudged} existing covers failed the current rules; refetching")
+        for book in books:
+            if book.get("cover"):
+                continue
+            for why, fetch, min_w in fetcher.candidates(book):
+                blob = fetch()
+                ok, note = usable(blob, placeholders, min_w)
+                if not ok:
+                    continue
+                blob_digest[book["id"]] = hashlib.sha256(blob).hexdigest()
+                path = COVERS / (slug(book) + extension(blob))
+                path.write_bytes(blob)
+                smaller = shrink(path)
+                if smaller:
+                    path = smaller[0]
+                book["cover"] = f"assets/covers/{path.name}"
+                label = f"{book['author']} — {bare_title(book['title'])}"
+                if label in missing:
+                    missing.remove(label)
+                got += 1
+                print(f"    {bare_title(book['title'])[:34]:34} {why} ({note})")
+                break
+
     # Jackets already on disk from an earlier run are skipped above, so
     # they never pass through shrink(). Sweep them here.
     saved = 0
