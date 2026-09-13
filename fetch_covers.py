@@ -271,7 +271,19 @@ def main():
     ap.add_argument("--only", help="only books whose author or title contains this")
     args = ap.parse_args()
 
-    books = json.loads((ROOT / "books.json").read_text(encoding="utf-8"))
+    data = ROOT / "books.json"
+    if not data.is_file():
+        sys.exit(
+            "fetch_covers.py has to live in the repo, next to books.json.\n"
+            f"It is currently in {ROOT}, and there is no books.json there.\n\n"
+            "Get the repo and run it from inside:\n"
+            "  git clone https://github.com/andysaulim/100-books-on-Korea.git\n"
+            "  cd 100-books-on-Korea\n"
+            "  git checkout claude/tender-carson-ljopjj\n"
+            "  python3 fetch_covers.py"
+        )
+
+    books = json.loads(data.read_text(encoding="utf-8"))
     COVERS.mkdir(parents=True, exist_ok=True)
 
     print("learning Google's placeholder so it can be rejected...", flush=True)
