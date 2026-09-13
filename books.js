@@ -233,7 +233,7 @@ window.BOOKS = [
     "publisher": "Penguin Random House",
     "source": "penguinrandomhouse.com",
     "isbn": "9780812978964",
-    "cover": "",
+    "cover": "assets/covers/the-korean-war-a-history.jpg",
     "blurb": "Cumings's short revisionist account, more concerned with how the war is remembered and what it did to civilians than with battlefield chronology. Read alongside a conventional military history rather than instead of one."
   },
   {
@@ -389,7 +389,7 @@ window.BOOKS = [
     "publisher": "Stanford University Press",
     "source": "sup.org",
     "isbn": "9781503629844",
-    "cover": null,
+    "cover": "assets/covers/korea-a-history.jpg",
     "blurb": "Park's accessible single-volume history from antiquity to the present, unusually attentive to daily life, ethnic minorities, LGBTQ history and the North. A good modern alternative to the older survey texts."
   },
   {
@@ -761,7 +761,7 @@ window.BOOKS = [
     "publisher": "September Publishing",
     "source": "septemberpublishing.org",
     "isbn": "9781912836802",
-    "cover": null,
+    "cover": "assets/covers/north-korea.jpg",
     "blurb": "Miller lived in Pyongyang from 2017 to 2019 on her husband's diplomatic posting and photographed what she could: a bus queue, a wedding party, a beach, the edges of ordinary life that the guided tour is designed to keep out of frame. The pictures and the diary around them make the point no analysis quite can, that this is a country where people live rather than a subject."
   },
   {
@@ -797,7 +797,7 @@ window.BOOKS = [
     "publisher": "Simon & Schuster",
     "source": "simonandschuster.com",
     "isbn": "9781501131905",
-    "cover": null,
+    "cover": "assets/covers/the-korean-war-hastings.jpg",
     "blurb": "Hastings's one-volume narrative history, drawing on interviews with veterans from several of the combatant nations. The conventional starting point for the military and diplomatic story."
   },
   {
