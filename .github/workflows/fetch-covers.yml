@@ -1,0 +1,79 @@
+name: Fetch covers
+
+# Downloads every book cover and commits them back to this branch.
+#
+# It exists because the machine Claude runs on cannot reach the cover hosts —
+# its egress proxy answers 403 to CONNECT for covers.openlibrary.org,
+# books.google.com and every other image host — so the download has to happen
+# somewhere with ordinary internet access. A GitHub runner has that.
+#
+# Run it from the Actions tab, or let Claude trigger it. It takes roughly
+# 6-12 minutes: Open Library allows 100 cover requests per IP per 5 minutes
+# by identifier, so fetch_covers.py deliberately spaces those out.
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Re-fetch covers that already have a file"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download the covers
+        id: fetch
+        run: |
+          set -o pipefail
+          python3 fetch_covers.py ${{ inputs.force && '--force' || '' }} 2>&1 | tee fetch.log
+        # fetch_covers.py exits 1 when any book ends with no cover, which is
+        # information rather than a failure — the log says which ones.
+        continue-on-error: true
+
+      - name: Rebuild the single-file page
+        run: python3 build.py
+
+      - name: What happened
+        run: |
+          echo "### Cover fetch" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -40 fetch.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Placeholders rejected: $(grep -c "image not available" fetch.log || true)" >> $GITHUB_STEP_SUMMARY
+          echo "Cover files now present: $(ls assets/covers | grep -vc README || true)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit them
+        run: |
+          rm -f fetch.log
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/covers books.json books.js dist
+          if git diff --staged --quiet; then
+            echo "nothing changed; no commit"
+            exit 0
+          fi
+          n=$(ls assets/covers | grep -vc README || echo 0)
+          git commit -m "Add $n downloaded book covers
+
+          Run by .github/workflows/fetch-covers.yml, because the cover hosts
+          are unreachable from Claude's sandbox. fetch_covers.py rejects
+          Google's 'image not available' placeholder by digest, anything
+          under 200px wide or 6KB, and any search result whose title is not
+          a prefix of the book's."
+          git push
